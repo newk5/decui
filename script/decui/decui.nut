@@ -1,0 +1,164 @@
+dofile("decui/Timers.nut");
+dofile("decui/extensions.nut");
+dofile("decui/components/Component.nut");
+dofile("decui/components/InputGroup.nut");
+dofile("decui/components/GroupRow.nut");
+dofile("decui/components/Combobox.nut");
+dofile("decui/components/Popup.nut"); 
+dofile("decui/components/Table.nut");
+dofile("decui/components/Tabview.nut");
+
+dofile("decui/UI/Fetch.nut");
+dofile("decui/UI/Events.nut");
+dofile("decui/UI/UI.nut");
+ 
+UI <- UI();  
+
+ 
+
+
+function Script::ScriptProcess(){
+    UI.events.scriptProcess();
+}
+function KeyBind::OnDown(keyBind) {
+    UI.events.onKeyDown(keyBind);
+}
+function KeyBind::OnUp(keyBind) {
+    UI.events.onKeyUp(keyBind);
+}
+function GUI::ElementClick(element, mouseX, mouseY){
+    UI.events.onClick(element,mouseX,mouseY); 
+} 
+function GUI::ElementFocus(element){
+    UI.events.onFocus(element);
+}
+function GUI::ElementBlur(element) {
+    UI.events.onBlur(element); 
+}
+function GUI::ElementHoverOver(element) {
+    UI.events.onHoverOver(element);
+}
+function GUI::ElementHoverOut(element){
+    UI.events.onHoverOut(element);
+}
+function GUI::ElementRelease(element, mouseX, mouseY){
+    UI.events.onRelease(element, mouseX, mouseY);
+}
+function GUI::ElementDrag(element, mouseX, mouseY) {
+    UI.events.onDrag(element, mouseX, mouseY);
+}
+function GUI::CheckboxToggle(checkbox, checked)  {
+    UI.events.onCheckboxToggle(checkbox, checked);
+}
+function GUI::WindowClose(window) {
+    UI.events.onWindowClose(window);
+}
+function GUI::InputReturn(editbox) {
+    UI.events.onInputReturn(editbox);
+}
+function GUI::ListboxSelect(listbox, text) {
+    UI.events.onListboxSelect(listbox,text);
+}
+function GUI::ScrollbarScroll(scrollbar, position, change) {
+    UI.events.onScrollbarScroll(scrollbar, position,change);
+}
+function GUI::GameResize(width, height) {
+    UI.events.onGameResize();
+
+}
+function GUI::WindowResize(window, width, height) {
+    UI.events.onGameResize();
+}
+
+
+UI.registerKeyBind({ 
+    name= "left",  
+    kp= KeyBind(0x01),
+    onKeyUp = function() {
+        if (UI.openContextID != null){
+            local ctx =  UI.Canvas(UI.openContextID); 
+            
+            if (ctx != null){
+                ctx.destroy();
+                UI.openContextID= null;
+            }
+            
+        } 
+        if (UI.openCombo != null ) {
+            if (UI.comboClick == 0){
+                UI.comboClick ++;
+            }else{
+                UI.openCombo.context.hidePanel();
+                 UI.comboClick = 0;
+            }
+         
+           
+        }
+    }
+});   
+
+UI.registerKeyBind({
+    name= "right",
+    kp= KeyBind(0x02), 
+    onKeyUp = function() {
+       if (UI.hoveredEl != null ){
+           local e = UI.hoveredEl;
+
+           if (e.rawin("contextMenu") && e.contextMenu != null) {
+               local cm = e.contextMenu;
+
+               if (cm.rawin("options") && cm.options != null && cm.options.len() > 0 ){
+                    local ctxID =Script.GetTicks()+"::ContextMenu";
+                    if (UI.openContextID != null && UI.openContextID != ctxID){
+                        local ctx =  UI.Canvas(UI.openContextID); 
+            
+                        if (ctx != null){
+                            ctx.destroy();
+                            UI.openContextID= null;
+                        }
+                   }
+                    UI.openContextID = ctxID;
+                    local options = [];
+                    local y = 0;
+                    local data = null;
+                  
+                    if (e.data.rawin("childOf") && e.data.childOf == "DataTable" ) {
+                        local table = UI.DataTable(e.parents[e.parents.len()-1]);
+                        data = table.getData(e.data.idx);
+                        local arr = table.dataPages[table.page-1];
+                        local rowID = table.id+"::table::row"+arr.find(data);
+                      
+                       table.selectRow(arr, UI.Canvas(rowID));
+                    }
+
+                    foreach (i,e in cm.options) {
+                        local b =  UI.Button({
+                                id = ctxID+"::option"+i ,
+                                Text = e.name, 
+                                parents = [ctxID], 
+                                Size = e.rawin("size") ? e.size : VectorScreen(50,25),
+                                Position = VectorScreen(0,y),
+                                onClick = e.onClick,
+                                data = { buttonID =  ctxID, row = data}
+                        });
+                        if (e.rawin("color")){
+                            b.Colour = e.color;
+                        }
+                        options.push(b);
+                      
+                        y+=25;
+                    }
+
+                    UI.Canvas({ 
+                        id = ctxID,
+                        Color= Colour(0,0,0,150),  
+                        Position =GUI.GetMousePos(),
+                        Size = VectorScreen(50, y),
+                        children = options,
+                        parents = [e.id]
+                    });
+               }
+           }
+       }
+    }
+});
