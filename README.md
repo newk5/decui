@@ -136,12 +136,6 @@ function Script::ScriptLoad(){
                 Position = VectorScreen(135,135)
                 Color    = Colour(0,0,0)
             })
-             UI.Label({
-                id       = "lbl2"
-                Text     = "Taaaaa"
-                Position = VectorScreen(0,135)
-                Color    = Colour(0,0,0)
-            })
         ]
     })
     
