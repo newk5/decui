@@ -42,7 +42,7 @@ The following is a canvas centered horizontally and vertically on the screen, wi
 with a label and an editbox. You can type on the editbox and click the button to change the label's text. Below is a comparison of how
 the code for this would look like when using the imperative VCMP based approach and with the declarative approach using DecUI:
 
-![Alt Text](http://i66.tinypic.com/vhvuc1.gif)
+![Alt Text](http://i63.tinypic.com/2ilbtc1.gif)
 
 ### Imperative approach
 ```javascript
@@ -51,10 +51,11 @@ btn <- null;
 input <- null;
 lbl <- null;
 
+
 function Script::ScriptLoad(){
 
      GUI.SetMouseEnabled(true);
-     
+
     ::canv = GUICanvas();
     canv.Size = VectorScreen(350,200);
     canv.Position = VectorScreen(GUI.GetScreenSize().X/2-canv.Size.X/2,GUI.GetScreenSize().Y/2 -canv.Size.Y/2);
@@ -73,12 +74,22 @@ function Script::ScriptLoad(){
     
 }
 
-
 function GUI::ElementClick(element, mouseX, mouseY){
    if (element == btn){
        lbl.Text = input.Text;
    }
 } 
+
+function GUI::ElementHoverOver(element) {
+     if (element == btn){
+       btn.Colour = Colour(0,150,0);
+   }
+}
+function GUI::ElementHoverOut(element){
+    if (element == btn){
+       btn.Colour = Colour(220,0,0)
+   }
+}
 ```
 
 
@@ -89,7 +100,7 @@ dofile("decui/decui.nut"); //import the library
 function Script::ScriptLoad(){
 
     UI.Cursor("ON"); 
-
+  
     UI.Canvas({
         id = "canv",
         Size =VectorScreen(350,200),
@@ -100,11 +111,17 @@ function Script::ScriptLoad(){
                 id ="btn",
                 align = "center",
                 Size = VectorScreen(100,30),
-                Colour = Colour(255,0,0),
+                Colour = Colour(220,0,0),
                 Text = "Change label",
                 onClick = function() {
                     UI.Label("lbl").Text = UI.Editbox("input").Text;
-                }
+                },
+                onHoverOver = function(){
+                   this.Colour = ::Colour(0,150,0);
+                },
+                onHoverOut  = function(){
+                    this.Colour =::Colour(220,0,0);
+                },
             }),
              UI.Editbox({
                 id ="input",
