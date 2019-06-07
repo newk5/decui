@@ -2,8 +2,39 @@
 DecUI (declarative UI) is a library to create VCMP GUI's in a declarative manner. It also provides many lower level abstractions and some new components and features.
 All of the existing properties and functions will still work so everything listed on the [VCMP wiki](http://wiki.vc-mp.org/wiki/Scripting/Squirrel/Client_Functions#GUI_Functions
 ) is still applicable. This library provides new functions and properties in addition to the current ones listed on the VCMP wiki aswell as
-a few new components and a declarative way of creating these components.
+a few new components and a declarative way of creating these components. 
 
+# Usage
+
++ Download the zipped file from here
++ Extract the contents of the **script** folder to your **store/script/** directory
++ Extract the contents of the **sprites** folder to your **store/sprites/** directory (if you don't have this directory, create it)
++ At the top of your **main.nut** file import the library by using:
+```javascript
+dofile("decui/decui.nut"); 
+```
++ And that's all 
+
+___
+
+
+### Important note
+
+*One important thing to note is that your main.nut file should only have one GUI event and that's Script::ScriptLoad(). You shouldn't have other GUI:: events there or else these will override DecUI's events and it won't work propertly. If you really need to have other GUI:: events on your main.nut file, you will have to manually bind them like this:* 
+
+```javascript
+function KeyBind::OnDown(keyBind) {
+    UI.events.onKeyDown(keyBind);
+}
+function GUI::ElementHoverOut(element){
+    UI.events.onHoverOut(element);
+}
+function GUI::ElementClick(element, mouseX, mouseY){
+    UI.events.onClick(element,mouseX,mouseY); 
+} 
+ //etc...
+```
+You can see a list of all the events you have to bind [here](https://github.com/newk5/decui/blob/master/script/decui/decui.nut#L20)
 
 # Comparison
 
