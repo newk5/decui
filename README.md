@@ -108,33 +108,39 @@ function Script::ScriptLoad(){
         Color = Colour(150,150,150,250)
         children = [
             UI.Button({
-                id ="btn"
-                align = "center"
-                Size = VectorScreen(100,30)
-                Colour = Colour(220,0,0)
-                Text = "Change label"
+                id      ="btn"
+                align   = "center"
+                Size    = VectorScreen(100,30)
+                Colour  = Colour(220,0,0)
+                Text    = "Change label"
                 onClick = function() {
                     UI.Label("lbl").Text = UI.Editbox("input").Text;
                 }
-                onHoverOver = function(){
+                onHoverOver = function() {
                    this.Colour = ::Colour(0,150,0);
                 }
-                onHoverOut  = function(){
+                onHoverOut  = function() {
                     this.Colour =::Colour(220,0,0);
                 }
             })
              UI.Editbox({
-                id ="input"
+                id       = "input"
                 Position = VectorScreen(125,30)
-                Size = VectorScreen(100,20)
-                Colour = Colour(255,255,255)
-                Text = "This is a label"
+                Size     = VectorScreen(100,20)
+                Colour   = Colour(255,255,255)
+                Text     = "This is a label"
             })
             UI.Label({
-                id = "lbl"
-                Text = "This is a label"
+                id       = "lbl"
+                Text     = "This is a label"
                 Position = VectorScreen(135,135)
-                Color = Colour(0,0,0)
+                Color    = Colour(0,0,0)
+            })
+             UI.Label({
+                id       = "lbl2"
+                Text     = "Taaaaa"
+                Position = VectorScreen(0,135)
+                Color    = Colour(0,0,0)
             })
         ]
     })
