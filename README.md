@@ -102,38 +102,38 @@ function Script::ScriptLoad(){
     UI.Cursor("ON"); 
   
     UI.Canvas({
-        id = "canv",
-        Size =VectorScreen(350,200),
-        align = "center",
-        Color = Colour(150,150,150,250),
+        id = "canv"
+        Size =VectorScreen(350,200)
+        align = "center"
+        Color = Colour(150,150,150,250)
         children = [
             UI.Button({
-                id ="btn",
-                align = "center",
-                Size = VectorScreen(100,30),
-                Colour = Colour(220,0,0),
-                Text = "Change label",
+                id ="btn"
+                align = "center"
+                Size = VectorScreen(100,30)
+                Colour = Colour(220,0,0)
+                Text = "Change label"
                 onClick = function() {
                     UI.Label("lbl").Text = UI.Editbox("input").Text;
-                },
+                }
                 onHoverOver = function(){
                    this.Colour = ::Colour(0,150,0);
-                },
+                }
                 onHoverOut  = function(){
                     this.Colour =::Colour(220,0,0);
-                },
-            }),
+                }
+            })
              UI.Editbox({
-                id ="input",
-                Position = VectorScreen(125,30),
-                Size = VectorScreen(100,20),
-                Colour = Colour(255,255,255),
+                id ="input"
+                Position = VectorScreen(125,30)
+                Size = VectorScreen(100,20)
+                Colour = Colour(255,255,255)
                 Text = "This is a label"
-            }),
+            })
             UI.Label({
-                id = "lbl",
-                Text = "This is a label",
-                Position = VectorScreen(135,135),
+                id = "lbl"
+                Text = "This is a label"
+                Position = VectorScreen(135,135)
                 Color = Colour(0,0,0)
             })
         ]
