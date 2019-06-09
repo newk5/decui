@@ -20,7 +20,7 @@ ___
 
 ### Important note
 
-*One important thing to note is that your main.nut file should only have one GUI event and that's Script::ScriptLoad(). You shouldn't have other GUI:: events there or else these will override DecUI's events and it won't work propertly. If you really need to have other GUI:: events on your main.nut file, you will have to manually bind them like this:* 
+*One important thing to note is that your main.nut file should only have one GUI event and that's Script::ScriptLoad(). You shouldn't have other GUI:: events or KeyBind:: events there or else these will override DecUI's events and it won't work propertly. If you really need to have other GUI:: events on your main.nut file, you will have to manually bind them like this:* 
 
 ```javascript
 function KeyBind::OnDown(keyBind) {
