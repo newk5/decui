@@ -72,7 +72,7 @@
                     data = {id = e.id}
                     move = { down = 40} //
                     onClick = function (){
-                        UI.Canvas(this.data.id).addBorders({ color = ::getroottable().Colour(255,0,0), size = 10 });
+                        UI.Canvas(this.data.id).addBorders({ color = ::getroottable().Colour(255,0,0), size = 2 });
                     }
                 })
             ]
@@ -109,7 +109,7 @@
         errorMsg += locals;
 
         Console.Print(errorMsg);
-    }   
+    }    
 }   
 
 seterrorhandler(errorHandling);

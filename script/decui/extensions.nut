@@ -18,10 +18,10 @@ elements <- [
     }
  
 attachProps([ "UI", "file","remove",
-    "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","shift","fadeOutTimer"
+    "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
-    "onGameResize", "addPreset", "removePreset", "addChild", "parents"," children", "hidden", "context", "childLists",
+    "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options", "postConstruct", "data", "metadata"
        ]);
 
@@ -233,6 +233,7 @@ foreach(i,e in elements ) {
 
     //realign()
      e.rawnewmember("realign", function() {
+        // this.Position = VectorScreen(0,0);
         this.UI.align(this);
     }, null, false);
 
@@ -262,7 +263,7 @@ foreach(i,e in elements ) {
     }, null, false); 
 
     //add(e)
-     e.rawnewmember("addChild", function(p) {
+     e.rawnewmember("add", function(p) {
         
         p.parentSize = this.Size;
         if ( p.rawin("className")){ 

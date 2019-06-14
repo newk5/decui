@@ -1,6 +1,3 @@
-
-
-
 local tv = UI.TabView({
 
        id="tabview",
@@ -23,8 +20,7 @@ local tv = UI.TabView({
                            local tv =UI.TabView("tabview");
                            tv.addTab({ title = "tab"+(tv.tabs.len()+1) });
                        },
-                       Text = "Add tab",
-                       move = {down = 40, right = 20}
+                       Text = "Add tab"
                       
                    })
                     UI.Button({
@@ -37,8 +33,9 @@ local tv = UI.TabView({
                        Text = "Delete tab",
                        move = {down = 20, right = 20}
                    })
+                   
                ]
-              
+               
            },
            { title = "tab2"  }
           

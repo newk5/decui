@@ -30,6 +30,16 @@ class Table extends Component {
         }
         if (o.rawin("style")){
             this.style = o.style;
+        }else{
+            this.style = {
+                background = Colour(51,57,	61,200),
+                headerTextColor = Colour(51,150,255),
+                cellTextColor = Colour(255,255,255),
+                headerTextSize = 20,  
+                cellTextSize = 12,
+                selectedRowColor = Colour(52,129,216,80)
+            
+            };
         }
         if (o.rawin("rowStyle")){
             this.rowStyle = o.rowStyle;
@@ -102,12 +112,16 @@ class Table extends Component {
             
         }
         return null;
-        
+         
+    }
+
+    function indexOfRow(row){
+         local arr = this.dataPages[this.page-1];
+         return arr.find(row);
     }
 
     function populatePages(){
        
-        local dataPages = [];
         local lastIdx = this.rows;
         local startIdx = 0;
         for (local i = 0; i < this.pages; i++){
@@ -122,13 +136,14 @@ class Table extends Component {
             }
             lastIdx +=this.rows;
         }
+        
     }
 
     function clear(){
         
          foreach (i, c in this.columns) { 
              local colCanvID = this.id+"::table::column::canvas"+i;
-             UI.Canvas(colCanvID).destroy();
+             UI.Canvas(colCanvID).remove();
          } 
     }
 
@@ -157,7 +172,6 @@ class Table extends Component {
     }
  
     function nextPage(){
-         
         if (this.page < this.pages){
             this.clear();
             this.page++;
@@ -191,32 +205,42 @@ class Table extends Component {
     } 
 
     function addRow(o){
-        this.clear();
-        local validPage = false; 
+       
+        local validPage = false;  
         local lastPage = this.pages-1;
-
+        this.totalRows++;
         if (this.dataPages[lastPage].len() < this.rows+1){
             
-            this.dataPages[lastPage].push(o);
+            this.dataPages[lastPage].push(o); 
           
             validPage = true;
+            if (lastPage == this.page-1){ 
+                this.clear();
+            }     
         }
-         this.data.push(o);
-        
-        if (!validPage) { //new page added
+         this.data.push(o); 
+         
+        if (!validPage) { //new page added  
 
             local newPage = this.addHeaderRows([]);
             newPage.push(o);
 
-            this.dataPages.push(newPage);
+            this.dataPages.push(newPage); 
+  
+            this.pages++; 
+            if (this.page-1 == lastPage){
+                UI.Sprite(this.id+"::table::nextBtn").Alpha = 255;
+            }
+           
+        }else{
 
-            this.page++;  
-            this.pages++;
-            UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
+            if (lastPage == this.page-1){
+                this.build(true);
+               
+            }
         }
-       
-        this.build(true); 
-       
+        
+     
         UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
     }
 
@@ -224,29 +248,34 @@ class Table extends Component {
         local found = false;
         foreach(idx, arr in this.dataPages) {
             
-            local item = arr.find(o);
-            if (item ==0){
+            local item = arr.find(o); 
+            if (item ==0){  
                 break;
-            } 
+            }  
             if (item != null){
                 this.dataPages[idx].remove(item);
                 UI.Canvas( this.id+"::table::row"+item ).data.selected = false;
                 local index = this.data.find(o);
-                this.data.remove(index);
+                this.data.remove(index); 
                 found = true;
                 
             }
-            
-        }
+           
+
+        } 
         if (found){   
-            this.dataPages.clear();
+            this.totalRows--;
+           this.dataPages.clear();
+            
             this.populatePages();
             this.totalRows = this.data.len();
             this.pages = ceil(this.totalRows.tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
             this.clear();
+           
             if (this.page > this.pages){
                 this.page--;
             } 
+            
             this.build(true);
             UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
             if (this.page == 1){
@@ -258,14 +287,18 @@ class Table extends Component {
          
             
         }
+        
     }
 
     function setPage(p){
-        if (p > 0 &&  p <= this.totalRows && this.page != p) {        
+        if (p != null && p > 0 &&  p <= this.totalRows && this.page != p) {        
             this.page = p;
             this.clear();
             this.build(true);
             UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+            if (this.page >= this.pages){
+                UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+            }
         }
     }
 
@@ -277,7 +310,7 @@ class Table extends Component {
             canv = UI.Canvas({
                 id= this.id,
                 data = {},
-                context = this,
+                context = this, 
                 Position = this.Position,
                 align = this.align,
                 move = this.move, 
@@ -289,19 +322,17 @@ class Table extends Component {
             }
         }else{
             canv = UI.Canvas(this.id);
-        }
-       
-       local lastHeaderPos = this.drawTable(canv, rebuild);        
-       
+        }  
+        
+        local lastHeaderPos = this.drawTable(canv, rebuild);   
+        canv.Size.X = lastHeaderPos.X ;
+        canv.Size.Y = lastHeaderPos.Y +35 ; 
+        tableHeight = lastHeaderPos.Y;
+        canv.shiftPos();
+        canv.realign();
+        canv.updateBorders();
+
         if (!rebuild) {
-
-            canv.Size.X = lastHeaderPos.X ;
-            canv.Size.Y = lastHeaderPos.Y +35 ;
-
-            tableHeight = lastHeaderPos.Y;
-
-            canv.shiftPos();
-            canv.realign();
 
             canv.addBorders({
                 color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
@@ -309,7 +340,7 @@ class Table extends Component {
             });
 
             pagesLabel.move = {up = 8};
-            canv.addChild(pagesLabel);
+            canv.add(pagesLabel);
             pagesLabel.realign();
             pagesLabel.shiftPos();
 
@@ -336,11 +367,11 @@ class Table extends Component {
             local nextBtn = UI.Sprite({
                 id= this.id+"::table::nextBtn",
                 file ="decui/right.png",
-                align = "bottom_center",
+                align = "bottom_center", 
                 Size = VectorScreen(21,21),
                 move = { up = 8, right = 50 },
                 context = this,
-                onHoverOver = function(){
+                onHoverOver = function(){ 
                     this.Size = VectorScreen(24,24); 
                 },
                  onHoverOut = function(){
@@ -350,18 +381,32 @@ class Table extends Component {
                     context.nextPage();
                     
                 }
-            });
+            }); 
+  
+            canv.add(prevBtn); 
+            prevBtn.realign();
+            prevBtn.shiftPos(); 
 
-            canv.addChild(prevBtn);
+            canv.add(nextBtn);
+            nextBtn.realign();
+            nextBtn.shiftPos();
+        }else{
+            pagesLabel.realign(); 
+            pagesLabel.shiftPos();
+            local nextBtn = UI.Sprite(this.id+"::table::nextBtn");
+            local prevBtn =  UI.Sprite(this.id+"::table::prevBtn");
+            nextBtn.realign();
+            nextBtn.shiftPos();
             prevBtn.realign();
             prevBtn.shiftPos();
 
-            canv.addChild(nextBtn);
-            nextBtn.realign();
-            nextBtn.shiftPos();
+        }
+       
+        
+        if (this.page >= this.pages){
+            UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
         }
         local end = Script.GetTicks();
-        Console.Print("table built in "+(end-start)+"ms");
     } 
 
     function applyLabelPreset(l, c, isHeader, row) {
@@ -440,9 +485,26 @@ class Table extends Component {
                 r.data.selected = false;
             }
         }
-         row.data.selected = true;
+         row.data.selected = true; 
         this.lastSelectedRowID = row.id;
-        this.onRowClick(arr[row.data.idx]);
+
+         local r = arr[row.data.idx];
+        if (row.data.idx > 0){
+            local idx =this.indexOfRow(r);
+            local prev  = UI.Canvas(this.id+"::table::row"+(idx-1));
+            local c = UI.Canvas(this.id+"::table::row"+idx);
+            local prevPos = prev.Position.Y + prev.Size.Y;
+            local diff = prevPos-c.Position.Y ;
+            if (diff > 0){
+                c.Size.Y -= diff;
+                c.Position.Y += diff;
+                c.updateBorders();
+            }
+        }
+       
+
+        
+        this.onRowClick(r);
     }
 
     function drawCanvasRow(cellX, idx, rowPos) {
@@ -484,7 +546,7 @@ class Table extends Component {
    
     function drawCellContent (row, rowIdx, column, columnIndex, rowY){
         local cellIsHeader = rowIdx ==0 ;
-        local labelConstructor = "flags";   
+        local labelConstructor = "empty";   
         if (row.rawin(column.field)){
             local value = row[column.field];
             if (typeof value == "string"){
@@ -493,6 +555,7 @@ class Table extends Component {
                     Text =value,
                     metadata =  { labelConstructor = labelConstructor },
                     Position = VectorScreen(0, rowY)
+                    //FontName = "Arial"
                 });
                  
                 if (cellIsHeader){  
@@ -552,23 +615,77 @@ class Table extends Component {
 
         local rowsMetadata = this.fillRowsMetadata();
  
+        local rowsToIncrease = [];
+  
         foreach (columnIdx, column in this.columns) {
            
             colCanv = this.buildColumn(cellX, columnIdx, column);
-             
+            
             local index = this.page-1;
+          
             foreach(rowIdx, row in this.dataPages[index]) {
-               
+                
                 local cellIsHeader = rowIdx ==0 ;
-               
+                local h= false;
+                local md = rowsMetadata[rowIdx];
+                  local diff = 0; 
+    
+                if (rowY  > md.ypos) {
+                   diff = rowY-md.ypos;
+                   md.ypos = rowY;
+                   h=true;
+                   
+                } else{
+                    rowY = md.ypos;
+                }
                 local content = this.drawCellContent(row,rowIdx,column,columnIdx, rowY);
                
-                rowsMetadata[rowIdx].ypos = rowIdx == 1 ? rowY-5 : rowY;
-                rowsMetadata[rowIdx].height = rowIdx == 1 ?  content.Size.Y+5 :content.Size.Y;
-
+               if (content.Size.Y > md.height){
+                     md.height = content.Size.Y+5;
+                }   
+               if (!cellIsHeader && h && columnIdx>0){
+                    for (local i = columnIdx-1; i >= 0; i-- ){
+                        local label = UI.Label(this.id+"::table::cell"+rowIdx+"-"+i);
+                        label.Position.Y = rowY;   
+                     
+                    }
+                     
+                 
+                    local hasRow = false;
+                    local ridx = -1;
+                    foreach (c, r in rowsToIncrease){
+                        if (r.index == rowIdx){
+                            hasRow = true;
+                            ridx = c;
+                            break;
+                        }
+                    }
+                   
+                    if (rowIdx >1){
+                        try { 
+                         local prevPos = rowsMetadata[rowIdx-1].ypos;
+                         local dist = md.ypos - prevPos;
+                         local pp = prevPos +  rowsMetadata[rowIdx-1].height;
+                         local d = pp - md.ypos;
+                         if (md.height < dist){
+                            
+                            if (hasRow &&  rowsToIncrease[ridx].px < diff){ 
+                                rowsToIncrease[ridx].px = (dist -md.height);
+                            }else{
+                                rowsToIncrease.push({index = rowIdx, px = (dist -md.height) });
+                            }
+                         }
+                        }catch (ex){
+                         
+                        }
+                    }
+                    
+                }
+                local add =content.Size.Y+5 ;
+                            
                 //set the Y coord to drawn the horizontal line and add it to the Y coords array
-                rowY +=  content.Size.Y + (cellIsHeader ? 5 : 1); 
-               
+                rowY += add
+              
                 //increase the column canvas height and width
                 if (colCanv.Size.Y < rowY){
                     colCanv.Size.Y = rebuild ? this.tableHeight : rowY;
@@ -577,9 +694,9 @@ class Table extends Component {
                 if (colCanv.Size.X < content.Size.X){ 
                     colCanv.Size.X =content.Size.X+5;
                 } 
-            
+               
                 //add the label to the column canvas
-                colCanv.addChild(content);
+                colCanv.add(content);
             }
 
             colCanv.addRightBorder({
@@ -589,7 +706,25 @@ class Table extends Component {
             if (column.rawin("style") && column.style.rawin("background")){
                 colCanv.Colour = column.style.background;
             }
-            canv.addChild(colCanv); 
+            canv.add(colCanv); 
+
+            //if this column canvas' height is higher than previous' column canvas, increase their heights 
+            if (columnIdx > 0){
+                for (local i = columnIdx-1; i >= 0; i-- ){
+                    
+                     local prevCanvas = UI.Canvas(this.id+"::table::column::canvas"+i);
+                    if (colCanv.Size.Y > prevCanvas.Size.Y){
+                        prevCanvas.Size.Y = colCanv.Size.Y;
+                        prevCanvas.removeBorders();
+                       
+                        prevCanvas.addRightBorder({
+                            color = this.style.rawin("borderColor") ? this.style.borderColor: Colour(0,0,0,150),
+                            size =  this.style.rawin("borderSize") ? this.style.borderSize : 1 
+                        });
+                    } 
+                }
+               
+            }
 
             cellX += colCanv.Size.X; 
             rowY = 0;
@@ -597,7 +732,7 @@ class Table extends Component {
             //center column header text
             UI.Label(this.id+"::table::cell0-"+columnIdx).realign();
             
-        } 
+        }  
 
       // draw canvas rows
         foreach (idx, rowPos in rowsMetadata) {
@@ -605,12 +740,20 @@ class Table extends Component {
 
                 local oldRow = UI.Canvas(this.id+"::table::row"+idx);
                 if (oldRow !=null){
-                    oldRow.destroy();
+                    oldRow.remove();
                 }
             }
             local arr = this.dataPages[this.page-1];
 
             if (idx < arr.len()) {
+
+                 foreach (c, r in rowsToIncrease){
+                     if (r.index == idx) {
+                         rowPos.ypos  -= r.px;
+                         rowPos.height += r.px;
+                     }
+                 } 
+                 
 
                 local row = this.drawCanvasRow(cellX, idx, rowPos);
                 
@@ -625,21 +768,44 @@ class Table extends Component {
                     color =borderStyle.borderColor,
                     size = borderStyle.borderSize
                 });
-                canv.addChild(row);
+                canv.add(row);
                
                 if (idx == this.rows){
                    this.drawHline(canv, cellX, idx, rowPos.ypos+rowPos.height);
                 }
                
+                if (idx == arr.len()-1){
+                     
+                    if (this.tableHeight >0 && this.tableHeight <= rowPos.ypos){
+                        foreach (i, c in this.columns) { 
+                           
+                            local colCanvID = this.id+"::table::column::canvas"+i;
+                            local col = UI.Canvas(colCanvID);
+                            col.Size.Y += rowPos.height; 
+                            this.tableHeight = col.Size.Y;
+                            col.removeBorders();
+                           
+                             col.addRightBorder({
+                                color = this.style.rawin("borderColor") ? this.style.borderColor: Colour(0,0,0,150),
+                                size =  this.style.rawin("borderSize") ? this.style.borderSize : 1 
+                            });
+                        } 
+                        //colCanv.Size.Y = rowPos.ypos +rowPos.height;
+                    }  
+                }
             }
-               
+           
+            
         }
+
+       
+       
         
         return VectorScreen(cellX, colCanv.Size.Y);
     }
 
     function drawHline(canvas, size, row,y) {
-        canvas.addChild(
+        canvas.add(
             UI.Canvas({
                 id =this.id+"::table::row:::line"+row,
                 Position = VectorScreen(0,y),

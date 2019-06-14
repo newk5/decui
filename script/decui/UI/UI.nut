@@ -42,7 +42,7 @@ class UI  {
     function removeBorders(e){
         foreach (idx, c in this.lists[this.names.find("canvas")]) {
             if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
-                c.destroy();
+                c.remove();
             }
             
         }
@@ -111,26 +111,24 @@ class UI  {
         }
 
        
-        e.addChild(border);
-        border.realign();
+        e.add(border);
+        border.realign(); 
         border.shiftPos();
     }
 
-    function align(e) {
+    function align(e) { 
         if (e.align != null){
             local a = e.align.tolower();
             local wrapper = null; 
-            if (e.parents.len() == 0){
+            if (e.parents.len() == 0){ 
                 wrapper = GUI.GetScreenSize(); 
             }else{ 
                 local lastID = e.parents[e.parents.len()-1];
-                if (lastID == null){
-                    printElementData(e);
-                }
+               
                 local parent = findById(lastID);
                 wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
             }
-
+            
             if (a == "top_right"){
                 e.Position.Y = 0;
                 e.Position.X = wrapper.X - e.Size.X;
@@ -187,6 +185,7 @@ class UI  {
     function shift(e){
         if (e.move != null){
             local s = e.move;
+            
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     e.Position.X =  e.Position.X - s.left;
@@ -210,13 +209,15 @@ class UI  {
         }else{ 
             GUI.SetMouseEnabled(false); 
         }
-    }   
+    }    
  
     function addToDeleteQueue(e) { 
       //  p("deleted "+this.cleanID(e.id));
-        delete idsMetadata[this.cleanID(e.id)];
-        toDelete.push(e);
-    }
+        delete idsMetadata[this.cleanID(e.id)]; 
+        
+            toDelete.push(e);
+       
+    } 
 
 
     function getChildren(parent){
@@ -504,7 +505,7 @@ class UI  {
          // print("applyElementProps --->"+ obj.id);
         if (obj != null) { 
             if (!obj.rawin("id") || obj.id == null){    
-                obj["id"] <- Script.GetTicks();
+                obj["id"] <- Script.GetTicks() + typeof element;
             }
             element.UI = ::getroottable().UI; 
             if (this.idIsValid(obj)){  
@@ -519,7 +520,7 @@ class UI  {
                             element[i] =obj[i]; 
                         }
                     } catch (e){
-                        print(e);
+                       // print(e);
                     }
                 }
                 if (element.rawin("contextMenu") || element.rawin("tooltip")) {
@@ -527,13 +528,9 @@ class UI  {
                 }
                 this.align(element);  
                 this.shift(element);
-                if (element.rawin("postConstruct")){
-                    if (element.postConstruct !=  null){
-                        element.postConstruct();
-                    }
-                }
+                
             }else{
-                print("ID NOT VALID "+ obj.id);
+                //print("ID NOT VALID "+ obj.id);
           
                 //print("canvas --> "+ this.lists[this.names.find("canvas")].len());
             }
@@ -564,7 +561,12 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list , index = this.listsNumeration.buttons };
         this.listsNumeration.buttons++;
 
-        print(b.id +" created");
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
+       // print(b.id +" created");
         return b; 
     } 
 
@@ -584,6 +586,12 @@ class UI  {
         c.metadata.index = this.listsNumeration.comboboxes; 
 
         lists[names.find("comboboxes")].push(c); 
+
+         if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
       
         this.listsNumeration.comboboxes++;
         return c;
@@ -603,6 +611,12 @@ class UI  {
         c.metadata.index = this.listsNumeration.popups;
 
         lists[names.find("popups")].push(c); 
+
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
     
          this.listsNumeration.popups++;
 
@@ -622,6 +636,12 @@ class UI  {
         c.metadata.list ="datatables";
         c.metadata.index = this.listsNumeration.datatables;
 
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
+
         this.listsNumeration.datatables++;  
         return c;
     }
@@ -640,6 +660,11 @@ class UI  {
 
         lists[names.find("tabviews")].push(c); 
         this.listsNumeration.tabviews++; 
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
 
         return c;
     }
@@ -666,6 +691,12 @@ class UI  {
          };
         this.listsNumeration.labels++;
 
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
+
         return b;
     }
      function Editbox(o){
@@ -681,6 +712,13 @@ class UI  {
             index = this.listsNumeration.editboxes
         }; 
          this.listsNumeration.editboxes++;
+
+         
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
 
         return b;
     } 
@@ -698,13 +736,13 @@ class UI  {
  
                     if (className == "GroupRow"){
                        c.index = i;
-                       b.addChild(c.build(b));
+                       b.add(c.build(b));
                     } else if (className == "Combobox"){
                         c.attachParent(b);
                     } 
 
                 }else {
-                    b.addChild(c);
+                    b.add(c);
                   
                 }
             }
@@ -725,6 +763,12 @@ class UI  {
             }
         }
         this.listsNumeration.canvas++;
+        
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
         return b;
     }
     function Checkbox(o){
@@ -754,6 +798,12 @@ class UI  {
          lists[names.find("listboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.listboxes };
         this.listsNumeration.listboxes++;
+        
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
         return b;
     }
       function Memobox(o){
@@ -776,6 +826,13 @@ class UI  {
         lists[names.find("progbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.progbars };
         this.listsNumeration.progbars++;
+
+        
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
         return b;
     }
        function Scrollbar(o){
@@ -787,6 +844,14 @@ class UI  {
          lists[names.find("scrollbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.scrollbars };
         this.listsNumeration.scrollbars++;
+        
+        
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
+
         return b; 
     }
     function Sprite(o){
@@ -802,6 +867,14 @@ class UI  {
          lists[names.find("sprites")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.sprites  };
         this.listsNumeration.sprites++;
+
+        
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
+
         return b;
     }
      function Window(o){
@@ -817,11 +890,12 @@ class UI  {
 
                     if (className == "GroupRow"){
                        c.index = i;
-                       b.addChild(c.build(b));
+                       b.add(c.build(b));
                     }
  
                 }else {
-                    b.addChild(c);
+                    b.add(c);
+                   
                 }
             }
         }
@@ -830,6 +904,21 @@ class UI  {
         lists[names.find("windows")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
          this.listsNumeration.windows++;
+
+        if (o.rawin("children")  && o.children != null){
+            foreach (i, c in o.children) {
+                 if (!c.rawin("className")) {
+                    c.realign();
+                    c.shiftPos();
+                }
+            }
+        }
+
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
         return b;
     }
    

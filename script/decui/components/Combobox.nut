@@ -176,12 +176,11 @@ class Combobox extends Component {
             },
             
         }) 
-        c.addChild(label);
-        c.addChild(sprite);
-        c.addChild(listbox);  
+        c.add(label);
+        c.add(sprite);
+        c.add(listbox);  
 
         sprite.realign();
-        //printElementData(sprite);
         return c;
 
        

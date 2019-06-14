@@ -5,7 +5,7 @@ class Component  {
         this.id = id;
         metadata = { list = "", index = null };
     }
-    function destroy() {
+    function remove() {
      
         local instanceList = UI.lists[UI.names.find(this.metadata.list)];
         local i = instanceList.find(this);

@@ -50,16 +50,16 @@ class InputGroup {
    
 
         l.parents = UI.mergeArray(parent.parents, parent.id);
-        parent.addChild(l);
+        parent.add(l);
         e.parents = UI.mergeArray(parent.parents, parent.id);
-        parent.addChild(e);
+        parent.add(e);
         
     }
 
-    function destroy(){
+    function remove(){
 
-        UI.Label(labelObj.id).destroy();
-        UI.Editbox(editboxObj.id).destroy();
+        UI.Label(labelObj.id).remove();
+        UI.Editbox(editboxObj.id).remove();
 
     }
 

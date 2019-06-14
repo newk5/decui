@@ -67,25 +67,25 @@ function GUI::GameResize(width, height) {
 
 }
 function GUI::WindowResize(window, width, height) {
-    UI.events.onGameResize();
+    UI.events.onWindowResize(window, width, height);
 }
 
 
 UI.registerKeyBind({ 
-    name= "left",  
+    name= "left"+Script.GetTicks(), 
     kp= KeyBind(0x01),
     onKeyUp = function() {
         if (UI.openContextID != null){
             local ctx =  UI.Canvas(UI.openContextID); 
             
             if (ctx != null){
-                ctx.destroy();
+                ctx.remove();
                 UI.openContextID= null;
             }
             
         } 
         if (UI.openCombo != null ) {
-            if (UI.comboClick == 0){
+            if (UI.comboClick == 0){ 
                 UI.comboClick ++;
             }else{
                 UI.openCombo.context.hidePanel();
@@ -93,14 +93,16 @@ UI.registerKeyBind({
             }
          
            
-        }
+        } 
     }
 });   
 
 UI.registerKeyBind({
-    name= "right",
+    name= "right"+Script.GetTicks(),
     kp= KeyBind(0x02), 
     onKeyUp = function() {
+      
+      
        if (UI.hoveredEl != null ){
            local e = UI.hoveredEl;
 
@@ -113,7 +115,7 @@ UI.registerKeyBind({
                         local ctx =  UI.Canvas(UI.openContextID); 
             
                         if (ctx != null){
-                            ctx.destroy();
+                            ctx.remove();
                             UI.openContextID= null;
                         }
                    }
@@ -135,6 +137,7 @@ UI.registerKeyBind({
                         local b =  UI.Button({
                                 id = ctxID+"::option"+i ,
                                 Text = e.name, 
+                                TextColour =  e.rawin("textColour") ? e.textColour : Colour(0,0,0),
                                 parents = [ctxID], 
                                 Size = e.rawin("size") ? e.size : VectorScreen(50,25),
                                 Position = VectorScreen(0,y),
