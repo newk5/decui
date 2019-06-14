@@ -143,4 +143,4 @@ function Script::ScriptLoad(){
     
 }
 ```
-The declarative approach is more readable and does not require you to create any gloabl variables or any other functions.
+The declarative approach is more readable and does not require you to create any global variables or any other functions.
