@@ -6,7 +6,7 @@ class Tabview  extends Component {
     align = null;
     move = null;
     style = null; 
-    size = null;
+    Size = null;
     onTabChangeEvent = null; 
     tabHeight = null;
     tabsSize = null;
@@ -17,7 +17,7 @@ class Tabview  extends Component {
     maxContentSize = null;
 
 
-    constructor(o) {
+    constructor(o) { 
         
         this.id = Script.GetTicks();
         this.tabs = [];
@@ -47,8 +47,8 @@ class Tabview  extends Component {
         if (o.rawin("onTabClicked")){
             this.onTabChangeEvent = o.onTabClicked;
         }
-        if (o.rawin("size")){
-            this.size = o.size;
+        if (o.rawin("Size")){
+            this.Size = o.Size;
         }
 
         if (o.rawin("move")){
@@ -164,18 +164,18 @@ class Tabview  extends Component {
             local cid = this.id+"::tab"+this.tabs[idx].data.id+"::content"; 
         
 
-           UI.Canvas(cid).remove();
+           UI.Canvas(cid).destroy();
 
             for (local i = 0; i<this.tabs.len(); i++){
                 
                 local canv = UI.Canvas(this.id+"::tab"+this.tabs[i].data.id+"::canvas");
                 if (canv != null)
-                    canv.remove();
+                    canv.destroy();
             }
              this.tabs.remove(idx);  
              local canv = UI.Canvas(this.id+"::tabsHeader::canvas");
              local canvSize = canv.Size.X;
-             canv.remove(); 
+             canv.destroy(); 
  
             local wrapper = UI.Canvas(this.id); 
               foreach (tabIdx, tabb in this.tabs) { 
@@ -197,13 +197,13 @@ class Tabview  extends Component {
             cont.show();  
         
  
-            local s = wrapper.Size.X-this.size.X; 
+            local s = wrapper.Size.X-this.Size.X; 
         
-            if (wrapper.Size.X > this.size.X){ 
+            if (wrapper.Size.X > this.Size.X){ 
                 local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
-                if (x < this.size.X) {
-                    lastWidth = this.size.X;    
-                    wrapper.Size.X =this.size.X;
+                if (x < this.Size.X) {
+                    lastWidth = this.Size.X;    
+                    wrapper.Size.X =this.Size.X;
                      wrapper.realign();
 
                 } else{
@@ -224,7 +224,7 @@ class Tabview  extends Component {
        }else{  
 
 
-            local cont = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::content").remove();
+            local cont = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::content").destroy();
             local canv = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::canvas");
     
             local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
@@ -236,10 +236,10 @@ class Tabview  extends Component {
             local width = canv.Size.X;
         
         
-            if (x < this.size.X){
-                if (wrapper.Size.X > this.size.X){ 
-                    local s = wrapper.Size.X-this.size.X;
-                    wrapper.Size.X =this.size.X;
+            if (x < this.Size.X){
+                if (wrapper.Size.X > this.Size.X){ 
+                    local s = wrapper.Size.X-this.Size.X;
+                    wrapper.Size.X =this.Size.X;
                     wrapper.updateBorders(); 
                     headerLine.Position.X -= canv.Size.X; 
                     headerLine.Size.X += canv.Size.X-s;
@@ -262,7 +262,7 @@ class Tabview  extends Component {
             });
         
         
-            canv.remove();
+            canv.destroy();
 
         
             this.tabs.remove(idx);  
@@ -308,7 +308,7 @@ class Tabview  extends Component {
 
         local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
       
-        if (x < this.size.X){  
+        if (x < this.Size.X){  
             headerLine.Position.X += o.canvas.Size.X;
             headerLine.Size.X -= o.canvas.Size.X; 
         }else{
@@ -545,7 +545,7 @@ class Tabview  extends Component {
             move = this.move,
             context = this
         });
-        wrapper.Size.X =this.size.X;
+        wrapper.Size.X =this.Size.X;
         
         if (this.align != null) {
             wrapper.align = this.align;
@@ -570,7 +570,7 @@ class Tabview  extends Component {
           
          if (wrapper.Size.X < this.maxContentSize){
                
-            this.size.X = this.maxContentSize+5;
+            this.Size.X = this.maxContentSize+5;
             x= this.maxContentSize+5;
         } 
               
@@ -583,7 +583,7 @@ class Tabview  extends Component {
         lastHeight = wrapper.Size.Y;
         lastWidth = wrapper.Size.X;
         wrapper.SendToBottom();
-        this.size.X = wrapper.Size.X;
+        this.Size.X = wrapper.Size.X;
         
 
         
@@ -592,12 +592,12 @@ class Tabview  extends Component {
     function setDimensions(wrapper){
          wrapper.Size.X = x;
 
-        if (this.size != null){
-            if (this.size.X > wrapper.Size.X){
-                wrapper.Size.X = this.size.X;
+        if (this.Size != null){
+            if (this.Size.X > wrapper.Size.X){
+                wrapper.Size.X = this.Size.X;
             }
-            if (this.size.Y > wrapper.Size.Y){
-                wrapper.Size.Y = this.size.Y;
+            if (this.Size.Y > wrapper.Size.Y){
+                wrapper.Size.Y = this.Size.Y;
             } 
            
         }

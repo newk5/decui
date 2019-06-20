@@ -15,5 +15,3 @@ function Script::ScriptLoad(){
  
 
 }
-
- 

@@ -61,7 +61,7 @@
             if (editbox.onInputReturn!=null){
                editbox.onInputReturn();  
             }
-        }
+        } 
 
         function onScrollbarScroll(scrollbar, position,change){
             if (scrollbar.onScroll != null) {
@@ -70,10 +70,11 @@
         }
 
         function onClick(el, mouseX, mouseY){
-            if(el.onClick!=null){
+            if(el.onClick!=null && el != null){
+               
                 UI.clickedEl = el;
                 el.onClick();
-            }                           
+            }                            
         }
 
         function onFocus(el){
@@ -121,11 +122,17 @@
         }
 
          function onHoverOver(el){ 
-
+          //  Console.Print(el.id);
             this.UI.hoveredEl=el;
             try {
-                if (el.tooltip.rawin("event") && el.tooltip.event == "hover"){
-                    el.showTooltip();
+                if (el.tooltip != null){
+                    local isString = (typeof el.tooltip ) == "string";
+                    local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
+                    local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
+                    
+                    if (isString || doesNotSpecifyEvent || eventIsNotFocus) {
+                        el.showTooltip();
+                    }
                 }   
             } catch(e){
 
@@ -143,18 +150,25 @@
         }
 
         function onHoverOut(el){
+           
             try {  
-                if (el.tooltip.rawin("event") && el.tooltip.event == "hover"){
-                    el.clearTooltip();
+                 this.UI.hoveredEl=null;
+                if (el.tooltip != null){
+                    local isString = (typeof el.tooltip ) == "string";
+                    local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
+                    local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
+                    if (isString || doesNotSpecifyEvent || eventIsNotFocus) {
+                        el.clearTooltip();
+                    }
                 }   
             } catch(e){
-            
+                Console.Print(e);
             }   
 
             if(el.onHoverOut!=null){
                 el.onHoverOut();
             }                            
-        }
+        }  
 
         function scriptProcess(){
 
@@ -164,6 +178,6 @@
                     e = null;
                     return false;
                 }); 
-        }
+            }
     }     
 }   

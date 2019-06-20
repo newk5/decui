@@ -71,15 +71,15 @@ function GUI::WindowResize(window, width, height) {
 }
 
 
-UI.registerKeyBind({ 
+UI.registerKeyBind({  
     name= "left"+Script.GetTicks(), 
-    kp= KeyBind(0x01),
+    kp= KeyBind(0x01), 
     onKeyUp = function() {
         if (UI.openContextID != null){
             local ctx =  UI.Canvas(UI.openContextID); 
             
             if (ctx != null){
-                ctx.remove();
+                ctx.destroy();
                 UI.openContextID= null;
             }
             
@@ -99,27 +99,27 @@ UI.registerKeyBind({
 
 UI.registerKeyBind({
     name= "right"+Script.GetTicks(),
-    kp= KeyBind(0x02), 
+    kp= KeyBind(0x02),  
     onKeyUp = function() {
       
       
        if (UI.hoveredEl != null ){
-           local e = UI.hoveredEl;
+           local e = UI.hoveredEl; 
 
            if (e.rawin("contextMenu") && e.contextMenu != null) {
                local cm = e.contextMenu;
 
                if (cm.rawin("options") && cm.options != null && cm.options.len() > 0 ){
-                    local ctxID =Script.GetTicks()+"::ContextMenu";
+                    local ctxID =e.id+ "::"+ Script.GetTicks()+"::ContextMenu";
                     if (UI.openContextID != null && UI.openContextID != ctxID){
                         local ctx =  UI.Canvas(UI.openContextID); 
             
                         if (ctx != null){
-                            ctx.remove();
+                            ctx.destroy();
                             UI.openContextID= null;
                         }
                    }
-                    UI.openContextID = ctxID;
+                    UI.openContextID = ctxID; 
                     local options = [];
                     local y = 0;
                     local data = null;

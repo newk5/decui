@@ -2,7 +2,7 @@ local tv = UI.TabView({
 
        id="tabview",
        align = "center",
-       size = VectorScreen(400,300), 
+       Size = VectorScreen(400,300), 
        onTabClicked = function(t){
           Console.Print(t +" tab clicked");
        }, 

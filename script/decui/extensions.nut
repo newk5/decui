@@ -10,6 +10,8 @@ elements <- [
                      e[prop] <- { };
                 } else if (prop == "parents" || prop == "childLists") {
                      e[prop] <- [];
+                }  else if (prop == "autoResize") {
+                     e[prop] <- false;
                 } else {
                     e[prop] <- null;
                 }
@@ -17,7 +19,7 @@ elements <- [
         }
     }
  
-attachProps([ "UI", "file","remove",
+attachProps([ "UI", "file","remove","autoResize"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
@@ -147,11 +149,7 @@ foreach(i,e in elements ) {
         this.UI.Delete(this);
     }, null, false);
 
-     //remove()
-    e.rawnewmember("remove", function() {
-        this.UI.Delete(this);
-    }, null, false);
-
+     
       //showTooltip()
     e.rawnewmember("showTooltip", function() {
      
@@ -245,6 +243,22 @@ foreach(i,e in elements ) {
         }
     }, null, false);
 
+     //getFirstParent()
+     e.rawnewmember("getFirstParent", function() {
+       if (this.parents.len() >0){
+           return this.parents[this.parents.len()-1];
+       }
+       return null;
+    }, null, false);
+
+      //getFirstParent()
+     e.rawnewmember("getLastParent", function() {
+       if (this.parents.len() >0){
+           return this.parents[0];
+       }
+       return null;
+    }, null, false);
+
     //addPreset(preset)
      e.rawnewmember("addPreset", function(p) {
         if (!p.rawin("id") ||  p.id == null  && p.rawin("name") ){
@@ -268,7 +282,7 @@ foreach(i,e in elements ) {
         p.parentSize = this.Size;
         if ( p.rawin("className")){ 
             
-            if (p.className == "InputGroup"){
+            if (p.className == "InputGroup"){ 
                 p.attachParent(this,0);
             } else if (p.className == "GroupRow"){   
                p.parentID = this.id;
@@ -281,6 +295,13 @@ foreach(i,e in elements ) {
                     this.childLists.push(p.metadata.list);
                 }
 
+               
+
+                if (p.metadata == null){
+                   p.metadata <- { parentPos = this.Position };
+                }else{
+                     p.metadata["parentPos"] <- this.Position;
+                }
                 p.parents = list;
                 this.AddChild(p);
             }
@@ -338,6 +359,12 @@ foreach(i,e in elements ) {
             this =  this.UI.applyElementProps(this,p);
         }
     }, null, false);
+
+     //hasParents()
+     e.rawnewmember("hasParents", function() {
+       return this.parents.len() > 0;
+    }, null, false);
+
     //hasPreset(name)
      e.rawnewmember("hasPreset", function(name) {
        if (this.presets ==  null) {

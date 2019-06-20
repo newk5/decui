@@ -143,7 +143,7 @@ class Table extends Component {
         
          foreach (i, c in this.columns) { 
              local colCanvID = this.id+"::table::column::canvas"+i;
-             UI.Canvas(colCanvID).remove();
+             UI.Canvas(colCanvID).destroy();
          } 
     }
 
@@ -181,14 +181,14 @@ class Table extends Component {
                 UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
             }else{
                   UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
-            }
+            } 
             UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
         }        
         
     }
 
-    function prevPage(){
-        if (this.page > 1){
+    function prevPage(){  
+        if (this.page > 1){ 
            
             this.clear();
             this.page--;
@@ -406,6 +406,7 @@ class Table extends Component {
         if (this.page >= this.pages){
             UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
         }
+       // canv.realign();
         local end = Script.GetTicks();
     } 
 
@@ -451,14 +452,26 @@ class Table extends Component {
 
     function applyRowBorder(idx, row,rowData) {
         local borderStyle = null;
+        local hasValidRowStyle = this.rowStyle != null && this.rowStyle.rawin("style") && this.rowStyle.rawin("condition") && this.rowStyle.condition != null;
          //apply border styles, check for the conditional row styling object values first
-        if ( idx > 0 && this.rowStyle != null && this.rowStyle.rawin("style") && this.rowStyle.rawin("condition")  && this.rowStyle.condition != null && this.rowStyle.condition(rowData)){
+        if ( idx > 0 && hasValidRowStyle   && this.rowStyle.condition(rowData)){
             borderStyle = {};
-            if (this.rowStyle.style.rawin("borderColor")){
-                borderStyle["borderColor"] <- this.rowStyle.style.borderColor;
-            }
+            local hasNoBorder = true;
+            
             if (this.rowStyle.style.rawin("borderSize")){
                 borderStyle["borderSize"] <- this.rowStyle.style.borderSize;
+                hasNoBorder = false;
+
+                if (this.rowStyle.style.rawin("borderColor")){
+                    borderStyle["borderColor"] <- this.rowStyle.style.borderColor;
+                    hasNoBorder = false;
+                }
+            }
+            if (hasNoBorder){
+                borderStyle = {
+                    borderColor = this.style.rawin("borderColor") ? this.style.borderColor: Colour(0,0,0,100),
+                    borderSize = this.style.rawin("borderSize") ? this.style.borderSize: 1
+                };
             }
         } else {
             borderStyle = {
@@ -503,8 +516,10 @@ class Table extends Component {
         }
        
 
-        
-        this.onRowClick(r);
+        if (this.onRowClick != null){
+             this.onRowClick(r);
+        }
+       
     }
 
     function drawCanvasRow(cellX, idx, rowPos) {
@@ -518,9 +533,8 @@ class Table extends Component {
             onClick  = function(){
                 local arr = context.dataPages[context.page-1];
                 if (this.data.idx < arr.len()){
-                    if (context.onRowClick != null) { 
-                        context.selectRow(arr,this);
-                    } 
+                    context.selectRow(arr,this);
+                     
                 } 
             }
             Size = VectorScreen(cellX,  rowPos.height),   
@@ -540,13 +554,13 @@ class Table extends Component {
                 }  
             },
             contextMenu = this.contextMenu                    
-        });
+        }); 
         return row;
     } 
    
     function drawCellContent (row, rowIdx, column, columnIndex, rowY){
         local cellIsHeader = rowIdx ==0 ;
-        local labelConstructor = "empty";   
+        local labelConstructor = "flags";   
         if (row.rawin(column.field)){
             local value = row[column.field];
             if (typeof value == "string"){
@@ -740,7 +754,7 @@ class Table extends Component {
 
                 local oldRow = UI.Canvas(this.id+"::table::row"+idx);
                 if (oldRow !=null){
-                    oldRow.remove();
+                    oldRow.destroy();
                 }
             }
             local arr = this.dataPages[this.page-1];
@@ -764,7 +778,7 @@ class Table extends Component {
                 }
                 borderStyle = this.applyRowBorder(idx, row,rowData);  
 
-                row.addBottomBorder({
+                row.addBorders({
                     color =borderStyle.borderColor,
                     size = borderStyle.borderSize
                 });
