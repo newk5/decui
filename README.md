@@ -6,7 +6,7 @@ a few new components and a declarative way of creating these components.
 
 # Usage
 
-+ Download the zipped file from here
++ Download the zipped file from [here](https://github.com/newk5/decui/releases)
 + Extract the contents of the **script** folder to your **store/script/** directory
 + Extract the contents of the **sprites** folder to your **store/sprites/** directory (if you don't have this directory, create it)
 + At the top of your **main.nut** file import the library by using:
@@ -143,4 +143,4 @@ function Script::ScriptLoad(){
     
 }
 ```
-The declarative approach is more readable and does not require you to create any gloabl variables or any other functions.
+The declarative approach is more readable and does not require you to create any global variables or any other functions.
