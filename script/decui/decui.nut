@@ -158,7 +158,7 @@ UI.registerKeyBind({
 
                     UI.Canvas({ 
                         id = ctxID,
-                        Color= Colour(150,0,0,150),  
+                        Color= Colour(0,0,0,150),  
                         Position =GUI.GetMousePos(),
                         Size = VectorScreen(50, y),
                         children = options,
