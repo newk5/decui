@@ -1,4 +1,6 @@
 
+UI.Cursor("ON"); 
+
 local t = UI.DataTable({
     id="tbl", 
     contextMenu = {
@@ -67,7 +69,11 @@ local t = UI.DataTable({
           { col1 = "val7", col2 = "val2", col3 = "val3", col4 = "val4", col5 = "asds"  },
          { col1 = "val9", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
           { col1 = "val10", col2 = "val2", col3 = "val3", col4 = "val4", col5 = "asds"  },
-         { col1 = "val11", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
+          { col1 = "val11", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
+          { col1 = "val12", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
+          { col1 = "val11", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
+          { col1 = "val12", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
+          { col1 = "val11", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
           { col1 = "val12", col2 = "1a4124124", col3 = "val3", col4 = "val4", col5 = "val5"},
          
     ] 

@@ -7,7 +7,6 @@ class UI  {
     res = null;
    
     hoveredEl=null;
-    clickedEl=null;
     
     openContextID = null;
     debug = true;
@@ -28,8 +27,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews" ];
+        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [] ];
+        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -386,9 +385,9 @@ class UI  {
                  local initialPos = VectorScreen(x,y);
 
                 if (el.hasParents()){
-                    ::Console.Print(el.Position.X);
+                   
                       local parent = UI.Canvas(el.getFirstParent());
-                      ::Console.Print(el.IsChildOf(parent));
+                   
                     el.Detach(); 
                     x = el.Position.X;
                     y = el.Position.Y;
@@ -396,7 +395,7 @@ class UI  {
                     if (parent == null){
                         parent = UI.Window(el.getFirstParent());
                     }
-                    ::Console.Print(el.Position.X);
+                   
                    
                      parent.AddChild(el);
                       el.Position = initialPos;
@@ -657,6 +656,32 @@ class UI  {
 
         return c;
     }
+      function Circle(o){   
+        if (typeof o == "string") {
+            local p = this.fetch.canvas(o);
+            if (p != null) {
+                return p.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = CanvasCircle(o);
+        c.metadata.list ="circles";
+        c.metadata.index = this.listsNumeration.circles;
+
+        lists[names.find("circles")].push(c); 
+
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
+    
+         this.listsNumeration.circles++;
+
+
+        return c;
+    }
      function DataTable(o){   
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
@@ -707,7 +732,7 @@ class UI  {
     function Label(o){ 
         if (typeof o == "string") { 
             return this.fetch.label(o); 
-        }
+        } 
 
         if (!o.rawin("metadata")){
             o["metadata"] <-  { labelConstructor = "flags" } ;
@@ -763,6 +788,11 @@ class UI  {
         
         local b = this.applyElementProps(GUICanvas(), o);
         b.metadata = { list = "canvas", index = this.listsNumeration.canvas   };
+         lists[names.find("canvas")].push(b);
+        idsMetadata[this.cleanID(o.id)] <- { 
+            list = b.metadata.list,
+            index = this.listsNumeration.canvas
+        };
         if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
@@ -781,46 +811,8 @@ class UI  {
                 }
             }
         }
+      
        
-         lists[names.find("canvas")].push(b);
-        idsMetadata[this.cleanID(o.id)] <- { 
-            list = b.metadata.list,
-            index = this.listsNumeration.canvas
-         };
-        local maxY = 0;
-        local maxX = 0;
-         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                 if (!c.rawin("className")) {
-                    if (b.autoResize){
-                        local x = c.Position.X + c.Size.X;
-                        local y = c.Position.Y + c.Size.Y;
-
-                        if (maxX < x){
-                            maxX = x;
-                        }
-                        if (maxY < y){
-                            maxY = y;
-                        }
-
-                        if (b.Size.Y < maxY){
-                            b.Size.Y = maxY;
-                        }
-                        if (b.Size.X < maxX){
-                            b.Size.X = maxX;
-                        }
-
-                    }
-                    
-                    c.realign();
-                    c.shiftPos();
-                }
-            }
-        }
-        if (b.autoResize){
-             b.realign();
-             b.shiftPos();
-        }
         this.listsNumeration.canvas++;
         
         if (b.rawin("postConstruct")){
@@ -945,6 +937,9 @@ class UI  {
         } 
         local b = this.applyElementProps(GUIWindow(), o);
         b.metadata = { list = "windows" , index = this.listsNumeration.windows   };
+         lists[names.find("windows")].push(b);
+        idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
+         this.listsNumeration.windows++;
         if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
@@ -961,42 +956,8 @@ class UI  {
                 }
             }
         }
-      
        
-        lists[names.find("windows")].push(b);
-        idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
-         this.listsNumeration.windows++;
 
-        local maxY = 0;
-        local maxX = 0;
-
-        if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                 if (!c.rawin("className")) {
-                    if (b.autoResize){
-                        local x = c.Position.X + c.Size.X;
-                        local y = c.Position.Y + c.Size.Y;
-
-                        if (maxX < x){
-                            maxX = x;
-                        }
-                        if (maxY < y){
-                            maxY = y;
-                        }
-
-                        if (b.Size.Y < maxY){
-                            b.Size.Y = maxY;
-                        }
-                        if (b.Size.X < maxX){
-                            b.Size.X = maxX;
-                        }
-
-                    }
-                    c.realign();
-                    c.shiftPos();
-                }
-            }
-        }
         if (b.autoResize){
              b.realign();
              b.shiftPos();

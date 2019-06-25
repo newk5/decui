@@ -56,7 +56,7 @@ class InputGroup {
         
     }
 
-    function remove(){
+    function destroy(){
 
         UI.Label(labelObj.id).destroy();
         UI.Editbox(editboxObj.id).destroy();

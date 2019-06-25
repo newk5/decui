@@ -1,5 +1,6 @@
 class Table extends Component {
 
+    className = "DataTable";
     data = null;
     rows = null;
     totalRows = null;
@@ -21,6 +22,8 @@ class Table extends Component {
     renderRow = null;
     rowStyle = null;
     contextMenu = null;
+    parentSize = null;
+    tableWidth = 0;
 
 
     constructor(o) {
@@ -305,6 +308,7 @@ class Table extends Component {
     function build(rebuild){
         local start = Script.GetTicks();
 
+        tableWidth = 0;
         local canv = null;
         if (!rebuild) {
             canv = UI.Canvas({
@@ -407,6 +411,7 @@ class Table extends Component {
             UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
         }
        // canv.realign();
+        UI.Canvas(this.id).Size.X = tableWidth;
         local end = Script.GetTicks();
     } 
 
@@ -708,7 +713,8 @@ class Table extends Component {
                 if (colCanv.Size.X < content.Size.X){ 
                     colCanv.Size.X =content.Size.X+5;
                 } 
-               
+              // tableWidth += colCanv.Size.X;
+               //Console.Print("added "+colCanv.Size.X);
                 //add the label to the column canvas
                 colCanv.add(content);
             }
@@ -742,7 +748,9 @@ class Table extends Component {
 
             cellX += colCanv.Size.X; 
             rowY = 0;
-
+            //Console.Print(cellX);
+            tableWidth = cellX;
+           
             //center column header text
             UI.Label(this.id+"::table::cell0-"+columnIdx).realign();
             

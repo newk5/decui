@@ -5,7 +5,7 @@ class Component  {
         this.id = id;
         metadata = { list = "", index = null };
     }
-    function remove() {
+    function destroy() {
      
         local instanceList = UI.lists[UI.names.find(this.metadata.list)];
         local i = instanceList.find(this);
@@ -18,6 +18,12 @@ class Component  {
     }
     function hide() {
         UI.Canvas(this.id).hide();
+    }
+     function fadeIn() {
+        UI.Canvas(this.id).fadeIn();
+    }
+    function fadeOut() {
+        UI.Canvas(this.id).fadeOut();
     }
     function realign() {
         UI.Canvas(this.id).realign();

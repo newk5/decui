@@ -7,6 +7,7 @@ dofile("decui/components/Combobox.nut");
 dofile("decui/components/Popup.nut"); 
 dofile("decui/components/Table.nut");
 dofile("decui/components/Tabview.nut");
+dofile("decui/components/Circle.nut");
 
 dofile("decui/UI/Fetch.nut");
 dofile("decui/UI/Events.nut");
@@ -81,6 +82,7 @@ UI.registerKeyBind({
             if (ctx != null){
                 ctx.destroy();
                 UI.openContextID= null;
+                UI.hoveredEl=null;
             }
             
         } 
@@ -101,10 +103,10 @@ UI.registerKeyBind({
     name= "right"+Script.GetTicks(),
     kp= KeyBind(0x02),  
     onKeyUp = function() {
-      
+        
       
        if (UI.hoveredEl != null ){
-           local e = UI.hoveredEl; 
+           local e = UI.hoveredEl;  
 
            if (e.rawin("contextMenu") && e.contextMenu != null) {
                local cm = e.contextMenu;
@@ -117,6 +119,8 @@ UI.registerKeyBind({
                         if (ctx != null){
                             ctx.destroy();
                             UI.openContextID= null;
+                            UI.hoveredEl=null;
+                           
                         }
                    }
                     UI.openContextID = ctxID; 
@@ -154,12 +158,13 @@ UI.registerKeyBind({
 
                     UI.Canvas({ 
                         id = ctxID,
-                        Color= Colour(0,0,0,150),  
+                        Color= Colour(150,0,0,150),  
                         Position =GUI.GetMousePos(),
                         Size = VectorScreen(50, y),
                         children = options,
                         parents = [e.id]
                     });
+                    
                }
            }
        }

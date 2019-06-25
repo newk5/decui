@@ -144,6 +144,51 @@ foreach(i,e in elements ) {
        
     }, null, false);
 
+      //resize()
+    e.rawnewmember("resize", function() {
+        local t = typeof this;
+        local ui = this.UI;  
+      
+        if (t == "GUICanvas" || t == "GUIWindow"){
+            
+                 local maxY = 0;
+                local maxX = 0;
+                foreach (i, c in this.getChildren()) {
+                    if (!c.rawin("className")) {
+                        if (this.autoResize){
+                            local x = c.Position.X + c.Size.X;
+                            local y = c.Position.Y + c.Size.Y;
+
+                            if (maxX < x){
+                                maxX = x;
+                            }
+                            if (maxY < y){
+                                maxY = y;
+                            }
+
+                            if (this.Size.Y < maxY){
+                                this.Size.Y = maxY;
+                            }
+                            if (this.Size.X < maxX){
+                                this.Size.X = maxX;
+                            }
+
+                        }
+                        
+                        c.realign();
+                        c.shiftPos();
+                    }
+                }
+            
+            if (this.autoResize){
+                this.realign();
+                this.shiftPos();
+            }
+          
+        }
+       
+    }, null, false);
+
     //destroy()
     e.rawnewmember("destroy", function() {
         this.UI.Delete(this);
@@ -231,11 +276,11 @@ foreach(i,e in elements ) {
 
     //realign()
      e.rawnewmember("realign", function() {
-        // this.Position = VectorScreen(0,0);
         this.UI.align(this);
     }, null, false);
 
- 
+
+   
     //click()
      e.rawnewmember("click", function() {
         if (this.onClick != null){
@@ -276,9 +321,69 @@ foreach(i,e in elements ) {
         }
     }, null, false); 
 
+     //attachChild(p)
+     e.rawnewmember("attachChild", function(p) {
+        local t = typeof this;
+        local ct = typeof p;
+
+         if (this.id != null && p.id != this.id ) {
+                
+                
+            local list =  this.UI.mergeArray(this.parents, this.id); 
+            if (this.childLists.find(p.metadata.list) == null) {
+                this.childLists.push(p.metadata.list); 
+            }
+            if (p.metadata == null){ 
+                p.metadata <- { parentPos = this.Position };
+            }else{ 
+                p.metadata["parentPos"] <- this.Position;
+            }
+            p.parents = list;
+             this.AddChild(p);
+            if (p.rawin("align") && p.align != null){
+                p.realign();
+            }
+            if ( this.autoResize   ){ 
+                local adjusted = false;
+                if (this.Size.X < p.Size.X){
+                    this.Size.X = p.Size.X;
+                    adjusted = true;
+                }
+                if (this.Size.Y < p.Size.Y){
+                    this.Size.Y = p.Size.Y; 
+                    adjusted = true;
+                }
+                if (adjusted){
+                    this.realign(); 
+                    this.shiftPos(); 
+                }
+                if (p.rawin("align") && p.align != null){
+                    p.realign();
+                }
+
+                if ( p.Position.X+p.Size.X > this.Size.X){
+                   this.Size.X = p.Position.X+p.Size.X;
+                }
+                if ( p.Position.Y+p.Size.Y > this.Size.Y){
+                   this.Size.Y = p.Position.Y+p.Size.Y;
+                } 
+                this.realign();
+                this.shiftPos();
+                 if (p.rawin("align") && p.align != null){
+                    p.realign();
+                }
+            }
+          
+          
+           
+        }
+    }, null, false);
+ 
+
     //add(e)
      e.rawnewmember("add", function(p) {
-        
+    
+         
         p.parentSize = this.Size;
         if ( p.rawin("className")){ 
             
@@ -286,25 +391,15 @@ foreach(i,e in elements ) {
                 p.attachParent(this,0);
             } else if (p.className == "GroupRow"){   
                p.parentID = this.id;
-               p.calculatePositions();
-            } 
-        }else{ 
-            if (this.id != null && p.id != this.id ) {
-                local list =  this.UI.mergeArray(this.parents, this.id);
-                if (this.childLists.find(p.metadata.list) == null) {
-                    this.childLists.push(p.metadata.list);
-                }
-
-               
-
-                if (p.metadata == null){
-                   p.metadata <- { parentPos = this.Position };
-                }else{
-                     p.metadata["parentPos"] <- this.Position;
-                }
-                p.parents = list;
-                this.AddChild(p);
+               p.calculatePositions(); 
+            } else {
+                 p = ::UI.Canvas(p.id);
+                this.attachChild(p);
             }
+           
+
+        }else{ 
+           this.attachChild(p);
         }
         
     }, null, false);

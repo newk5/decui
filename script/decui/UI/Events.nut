@@ -72,7 +72,7 @@
         function onClick(el, mouseX, mouseY){
             if(el.onClick!=null && el != null){
                
-                UI.clickedEl = el;
+                //UI.clickedEl = el;
                 el.onClick();
             }                            
         }
@@ -122,7 +122,7 @@
         }
 
          function onHoverOver(el){ 
-          //  Console.Print(el.id);
+
             this.UI.hoveredEl=el;
             try {
                 if (el.tooltip != null){
@@ -162,7 +162,7 @@
                     }
                 }   
             } catch(e){
-                Console.Print(e);
+                //Console.Print(e);
             }   
 
             if(el.onHoverOut!=null){
@@ -171,7 +171,7 @@
         }  
 
         function scriptProcess(){
-
+           
             Timer.Process();
             if (this.UI.toDelete != null && this.UI.toDelete.len() > 0 ) {
                 this.UI.toDelete= this.UI.toDelete.filter(function(idx,e) {
