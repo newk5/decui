@@ -803,7 +803,10 @@ class UI  {
                        b.add(c.build(b));
                     } else if (className == "Combobox"){
                         c.attachParent(b);
-                    } 
+                    } else{ 
+                        local t= typeof c;
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                    }
 
                 }else {
                     b.add(c);
@@ -811,6 +814,21 @@ class UI  {
                 }
             }
         }
+       
+         if (o.rawin("children")  && o.children != null){
+            foreach (i, c in o.children) {
+                 if (!c.rawin("className")) {
+                    c.realign();
+                    c.shiftPos();
+                }
+            }
+        }
+       
+       if (b.autoResize){
+             b.realign();
+             b.shiftPos();
+        }
+
       
        
         this.listsNumeration.canvas++;
@@ -956,7 +974,14 @@ class UI  {
                 }
             }
         }
-       
+         if (o.rawin("children")  && o.children != null){
+            foreach (i, c in o.children) {
+                 if (!c.rawin("className")) {
+                    c.realign();
+                    c.shiftPos();
+                }
+            }
+        }
 
         if (b.autoResize){
              b.realign();

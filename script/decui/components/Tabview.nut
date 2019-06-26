@@ -11,6 +11,7 @@ class Tabview  extends Component {
     tabHeight = null;
     tabsSize = null;
     x = null;
+    y = null;
     currentTabIdx = null; 
     lastHeight = null;
     lastWidth = null;
@@ -26,7 +27,7 @@ class Tabview  extends Component {
         this.tabsSize = 0;
         this.x = 0; 
         this.currentTabIdx = -1; 
-        this.maxContentSize =  0;
+        this.maxContentSize =  VectorScreen(0,0);
        
         this.style = {
             titleColor = Colour(51,150,255),
@@ -268,8 +269,11 @@ class Tabview  extends Component {
             this.tabs.remove(idx);  
             wrapper.realign();
             if (idx == this.currentTabIdx){
-                this.changeTab(0); 
-                this.resizeTabContentCanvas(wrapper,0);   
+                if (idx > 0){
+                    this.changeTab(0); 
+                    this.resizeTabContentCanvas(wrapper,0);   
+                }
+               
             }  
   
        }
@@ -392,6 +396,7 @@ class Tabview  extends Component {
             local contentID = tab.data.id; 
 
             local tabContent = rebuild ? UI.Canvas(this.id+"::tab"+contentID+"::content") : UI.Canvas({ id = this.id+"::tab"+contentID+"::content"  }) ;
+            tabContent.Size = this.Size;
 
              local color = null;
              if (tab.rawin("style") && tab.style.tabColor != null ){
@@ -511,9 +516,9 @@ class Tabview  extends Component {
             tabCanvas.add(label);
             wrapper.add(tabContent);
             
-            if (tab.rawin("content")){ 
+            if (tab.rawin("content")){  
                  foreach (i, child in tab.content){
-                    if ( child.rawin("className")){ 
+                    if ( child.rawin("className")){  
             
                         if (child.className == "InputGroup"){
                             child.attachParent(tabContent,0);
@@ -522,16 +527,22 @@ class Tabview  extends Component {
                             child.calculatePositions();
                         }
                     }else{
-                         
                         tabContent.add(child); 
-                         if (child.Position.X + child.Size.X > this.maxContentSize){
-                            this.maxContentSize = child.Position.X + child.Size.X;
+                        
+                         if (child.Position.X + child.Size.X > this.maxContentSize.X){
+                            this.maxContentSize.X = child.Position.X + child.Size.X;
+                        }
+                         if (child.Position.Y + child.Size.Y > this.maxContentSize.Y){
+                            this.maxContentSize.Y = child.Position.Y + child.Size.Y;
                         }
                        
                     }
                 }
             }
-
+            if (!rebuild){
+                wrapper.Size.Y = this.Size.Y;
+                wrapper.Size.X = this.Size.X;
+            }
             return { tabHeight = tabHeight,tabsSize = tabsSize, wrapper = wrapper, x = x, canvas = tabCanvas, tabContent = tabContent };
     }
 
@@ -546,13 +557,14 @@ class Tabview  extends Component {
             context = this
         });
         wrapper.Size.X =this.Size.X;
+        wrapper.Size.Y = this.Size.Y;
         
         if (this.align != null) {
             wrapper.align = this.align;
         }
         this.x = 0;
-        
-        
+        this.y = 0;
+         
         foreach (idx, tab in this.tabs) {
 
             if (tab.rawin("data")) {
@@ -568,10 +580,16 @@ class Tabview  extends Component {
              wrapper = o.wrapper; 
         } 
           
-         if (wrapper.Size.X < this.maxContentSize){
-               
-            this.Size.X = this.maxContentSize+5;
-            x= this.maxContentSize+5;
+         if (wrapper.Size.X < this.maxContentSize.X){
+                
+            this.Size.X = this.maxContentSize.X+5;
+            x= this.maxContentSize.X+5;
+        } 
+
+         if (wrapper.Size.Y - this.tabHeight < this.maxContentSize.Y){
+                
+            this.Size.Y = this.maxContentSize.Y+5;
+            y = this.maxContentSize.Y+5;
         } 
               
 
@@ -584,6 +602,7 @@ class Tabview  extends Component {
         lastWidth = wrapper.Size.X;
         wrapper.SendToBottom();
         this.Size.X = wrapper.Size.X;
+        this.Size.Y = wrapper.Size.Y;
         
 
         
@@ -591,13 +610,14 @@ class Tabview  extends Component {
 
     function setDimensions(wrapper){
          wrapper.Size.X = x;
+         wrapper.Size.X = y;
 
         if (this.Size != null){
             if (this.Size.X > wrapper.Size.X){
                 wrapper.Size.X = this.Size.X;
             }
             if (this.Size.Y > wrapper.Size.Y){
-                wrapper.Size.Y = this.Size.Y;
+                wrapper.Size.Y = this.Size.Y+tabHeight;
             } 
            
         }

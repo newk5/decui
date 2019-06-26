@@ -337,7 +337,8 @@ foreach(i,e in elements ) {
                 p.metadata <- { parentPos = this.Position };
             }else{ 
                 p.metadata["parentPos"] <- this.Position;
-            }
+            } 
+          
             p.parents = list;
              this.AddChild(p);
             if (p.rawin("align") && p.align != null){
@@ -383,7 +384,7 @@ foreach(i,e in elements ) {
     //add(e)
      e.rawnewmember("add", function(p) {
     
-         
+        
         p.parentSize = this.Size;
         if ( p.rawin("className")){ 
             

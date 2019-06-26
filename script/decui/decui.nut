@@ -104,7 +104,6 @@ UI.registerKeyBind({
     kp= KeyBind(0x02),  
     onKeyUp = function() {
         
-      
        if (UI.hoveredEl != null ){
            local e = UI.hoveredEl;  
 

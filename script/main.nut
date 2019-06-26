@@ -7,11 +7,11 @@ function Script::ScriptLoad(){
     UI.Cursor("ON"); 
 
     //dofile("TableDemo.nut");   
-    //dofile("TabviewDemo.nut");  
+   // dofile("TabviewDemo.nut");  
     //dofile("PopupDemo.nut");        
     //dofile("ListboxDemo.nut");  
-    //dofile("ComboboxDemo.nut");  
+    //dofile("ComboboxDemo.nut");   
+    
 
- 
 
 }

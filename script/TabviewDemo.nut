@@ -23,12 +23,15 @@ local tv = UI.TabView({
                        Text = "Add tab"
                       
                    })
-                    UI.Button({
+                    UI.Button({ 
                        id="btnrm",
                        Size = VectorScreen(60, 20),
                        onClick= function(){
                            local tv = UI.TabView("tabview");
-                           tv.removeTab(tv.tabs.len()-1);
+                           if (tv.tabs.len() > 0) {
+                                tv.removeTab(tv.tabs.len()-1);
+                           }
+                          
                        },
                        Text = "Delete tab",
                        move = {down = 20, right = 20}
