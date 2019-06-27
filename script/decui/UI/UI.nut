@@ -187,16 +187,40 @@ class UI  {
             
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
-                    e.Position.X =  e.Position.X - s.left;
+                    local isString = typeof s.left == "string";
+                    if (isString){
+                        local percent = this.removePercent(s.left).tofloat();
+                        e.Position.X -= ( e.Position.X * percent / 100 ).tofloat();
+                    }else{
+                        e.Position.X =  e.Position.X - s.left;
+                    }
                 }
                 if (s.rawin("right")){
-                    e.Position.X =  e.Position.X + s.right;
+                    local isString = typeof s.right == "string";
+                     if (isString){
+                        local percent = this.removePercent(s.right).tofloat();
+                        e.Position.X += ( e.Position.X * percent / 100 ).tofloat();
+                    } else {
+                        e.Position.X =  e.Position.X + s.right;
+                    }
                 }
                 if (s.rawin("up")){
-                    e.Position.Y =  e.Position.Y - s.up;
+                    local isString = typeof s.up == "string";
+                    if (isString){
+                        local percent = this.removePercent(s.up).tofloat();
+                        e.Position.Y -= ( e.Position.Y * percent / 100 ).tofloat();
+                    } else {
+                        e.Position.Y =  e.Position.Y - s.up;
+                    }
                 }
                 if (s.rawin("down")){
-                    e.Position.Y =  e.Position.Y + s.down;
+                    local isString = typeof s.down == "string";
+                     if (isString){
+                        local percent = this.removePercent(s.down).tofloat();
+                        e.Position.Y += ( e.Position.Y * percent / 100 ).tofloat();
+                    } else {
+                        e.Position.Y =  e.Position.Y + s.down;
+                    }
                 }
             }
         }
@@ -482,6 +506,13 @@ class UI  {
         return newid;
     }
  
+    function removePercent(p){
+        if (p.find("%") != null){
+            return split(p, "%")[0];
+        }
+        return p;
+    }
+
 
     function DeleteByID(id){
        local e = this.findById(id); 
@@ -542,17 +573,22 @@ class UI  {
             }
             element.UI = ::getroottable().UI; 
             if (this.idIsValid(obj)){  
+                //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
+               if (obj.rawin("flags")){
+                    element.AddFlags(obj.flags); 
+                }
                 foreach(i,e in obj ) {
                     try {  
-                        if (i == "flags"){
-                            element.AddFlags(obj[i]);
+                        if (i != "flags" && i != "Flags"){
+                            if (i == "fontFlags"){
+                                element.FontFlags = obj[i];
+                            } else {
+                                element[i] =obj[i]; 
+                            }
                            
-                        } else if (i == "fontFlags"){
-                            element.FontFlags = obj[i];
-                        } else {
-                            element[i] =obj[i]; 
-                        }
+                        }  
                     } catch (e){
+                          Console.Print("ex "+e);
                        // print(e);
                     }
                 }

@@ -8,10 +8,8 @@ function Script::ScriptLoad(){
 
     //dofile("TableDemo.nut");   
    // dofile("TabviewDemo.nut");  
-    //dofile("PopupDemo.nut");        
+   // dofile("PopupDemo.nut");        
     //dofile("ListboxDemo.nut");  
     //dofile("ComboboxDemo.nut");   
-    
-
-
+   
 }
