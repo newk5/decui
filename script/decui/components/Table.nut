@@ -336,10 +336,12 @@ class Table extends Component {
 
     function nextPage(){
         if (this.page < this.pages && !this.awatingResponse){
-  
+    
             if (this.lazy){ 
+             
               this.lazyNextPage();
             }  else{
+                
                 this.clear();
                 this.page++;
                 this.build(true);
@@ -347,8 +349,9 @@ class Table extends Component {
                     UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
                     UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
                 }else{
-                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 255; 
                 } 
+              
                 UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
                
                  //re-apply table borders because the table size may change
@@ -1272,15 +1275,17 @@ class Table extends Component {
     }
 
     function drawHline(canvas, size, row,y) {
-        
-        canvas.add(
-            UI.Canvas({
-                id =this.id+"::table::row:::line"+row,
-                Position = VectorScreen(0,y),
-                Size = VectorScreen(size,1),
-                Colour = Colour(0,0,0,150)
-            })
-        );
+        if (!UI.idExists(this.id+"::table::row:::line"+row)) {
+            canvas.add(
+                UI.Canvas({
+                    id =this.id+"::table::row:::line"+row,
+                    Position = VectorScreen(0,y),
+                    Size = VectorScreen(size,1),
+                    Colour = Colour(0,0,0,150)
+                })
+            );
+        }
+       
        
     }
 
