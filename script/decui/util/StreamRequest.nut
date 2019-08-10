@@ -1,7 +1,7 @@
 class StreamRequest {
 
     identifier = null; //something to identify the stream (usually an int)
-    body = null; // array with the stream body (which data types the stream contains and the order in which they need to be read)
+    body = null; // array with the stream body
     onComplete = null;
     
     expectsResponse = null;

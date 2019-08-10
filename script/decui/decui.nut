@@ -80,7 +80,7 @@ UI.registerKeyBind({
     name= "left"+Script.GetTicks(), 
     kp= KeyBind(0x01), 
     onKeyUp = function() {
-        Console.Print(GUI.GetMousePos().X+", "+GUI.GetMousePos().Y);
+       
         if (UI.openContextID != null){
             local ctx =  UI.Canvas(UI.openContextID); 
             

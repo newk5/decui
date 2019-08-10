@@ -101,7 +101,7 @@ function Script::ScriptLoad(){
         ]
            
     });
-    //leftPanel.addBorders({})
+    leftPanel.addBorders({})
  //   Console.Print(UI.Label("newLabelID").metadata.ORIGINAL_POS.X);
     local l5 =  UI.Label({
                 id = "newLabelID5"  
@@ -152,7 +152,7 @@ rightPanel.add(l7);
 rightPanel.add(l8);
 
     
-  //  rightPanel.addBorders({}); 
+    rightPanel.addBorders({}); 
    
     
   // Server.ServerData(); 
