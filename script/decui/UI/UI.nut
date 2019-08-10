@@ -18,7 +18,8 @@ class UI  {
     listsNumeration = null;
     fetch = null;
     events = null;
- 
+    streamControllers = [];
+    lastClickedEl = null;
     
     constructor() {
 
@@ -32,10 +33,32 @@ class UI  {
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
+      
         this.fetch = Fetch(this);
         this.events = Events(this);
     }
  
+    function processStream(streamIdentifier, stream){
+        foreach(i, sc in this.streamControllers) {
+          
+            if (streamIdentifier == sc.identifier) {
+                
+                sc.readResponse(stream);
+                break;
+            }
+        }
+    }
+
+    function removeStream(streamIdentifier){
+         foreach(i, sc in this.streamControllers) {
+          
+            if (streamIdentifier == sc.identifier) {
+                
+                streamControllers.remove(i);
+               
+            }
+        }
+    } 
     
 
     function removeBorders(e){
@@ -43,19 +66,20 @@ class UI  {
             if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
                 c.destroy();
             }
-            
+             
         }
     }
 
      function updateBorders(e){
         foreach (idx, c in this.lists[this.names.find("canvas")]) {
             if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
-                if (c.Size.X > e.Size.X){
+               
+                if (c.id.find("top_center") != null || c.id.find("bottom_left") != null) {
                     c.Size.X = e.Size.X;
-                }
-                if (c.Size.Y > e.Size.Y){
+                }else{
                      c.Size.Y = e.Size.Y;
                 }
+             
                 c.realign();
             }
             
@@ -115,6 +139,27 @@ class UI  {
         border.shiftPos();
     }
 
+    function applyRelativeSize(e) {
+        local w = (this.removePercent(e.RelativeSize[0]).tofloat() / 100).tofloat();
+        local h = (this.removePercent(e.RelativeSize[1]).tofloat() / 100).tofloat();
+      
+        local wrapper = null; 
+        if (e.parents.len() == 0){ 
+            wrapper = GUI.GetScreenSize(); 
+        }else{ 
+            local lastID = e.parents[e.parents.len()-1];
+           
+            local parent = findById(lastID);
+            wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
+        }
+      
+        
+        e.Size.X = (w*wrapper.X);
+        e.Size.Y = (h*wrapper.Y);
+      
+
+    }
+
     function align(e) { 
         if (e.align != null){
             local a = e.align.tolower();
@@ -131,6 +176,8 @@ class UI  {
             if (a == "top_right"){
                 e.Position.Y = 0;
                 e.Position.X = wrapper.X - e.Size.X;
+              
+                
             } else if (a == "top_left"){
                 e.Position.Y = 0;
                 e.Position.X = 0;
@@ -189,8 +236,9 @@ class UI  {
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
                     if (isString){
+                        local wrapper =  e.getWrapper();
                         local percent = this.removePercent(s.left).tofloat();
-                        e.Position.X -= ( e.Position.X * percent / 100 ).tofloat();
+                        e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
                     }else{
                         e.Position.X =  e.Position.X - s.left;
                     }
@@ -198,8 +246,10 @@ class UI  {
                 if (s.rawin("right")){
                     local isString = typeof s.right == "string";
                      if (isString){
+                        local wrapper =  e.getWrapper();
                         local percent = this.removePercent(s.right).tofloat();
-                        e.Position.X += ( e.Position.X * percent / 100 ).tofloat();
+                       
+                        e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
                     } else {
                         e.Position.X =  e.Position.X + s.right;
                     }
@@ -207,17 +257,22 @@ class UI  {
                 if (s.rawin("up")){
                     local isString = typeof s.up == "string";
                     if (isString){
+                         local wrapper = e.getWrapper();
+                        
                         local percent = this.removePercent(s.up).tofloat();
-                        e.Position.Y -= ( e.Position.Y * percent / 100 ).tofloat();
+                        e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
                     } else {
                         e.Position.Y =  e.Position.Y - s.up;
                     }
                 }
                 if (s.rawin("down")){
                     local isString = typeof s.down == "string";
+                   
                      if (isString){
-                        local percent = this.removePercent(s.down).tofloat();
-                        e.Position.Y += ( e.Position.Y * percent / 100 ).tofloat();
+                        local wrapper =  e.getWrapper();
+                                                
+                        local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
+                         e.Position.Y += ( wrapper.Y * percent ).tofloat();
                     } else {
                         e.Position.Y =  e.Position.Y + s.down;
                     }
@@ -236,8 +291,8 @@ class UI  {
  
     function addToDeleteQueue(e) { 
         delete idsMetadata[this.cleanID(e.id)]; 
-        toDelete.push(e);
-       
+        toDelete.push(e); 
+        
     } 
 
 
@@ -462,7 +517,7 @@ class UI  {
                         }
                     }  
                       pos =  VectorScreen(x, y);   
-                    // Console.Print("1 "+pos.X+",  "+pos.Y);
+                  
                     local c = UI.Canvas({ 
                         id = el.id+"::tooltip",
                         Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
@@ -555,22 +610,30 @@ class UI  {
             if (obj.id == null){  
                 return false; 
             }
-            return !this.idsMetadata.rawin(this.cleanID(obj.id));
+            return !idExists(obj.id);
            
         }
         return false;
     }
  
-    function idExists(id){
-        return this.idsMetadata.rawin(this.cleanID(id));
+    function idExists(id){ 
+        try {
+            return this.idsMetadata.rawin(this.cleanID(id));
+        } catch (e){
+           
+        }
+        
     }
 
     function applyElementProps(element, obj){   
          // print("applyElementProps --->"+ obj.id);
+                 
+
         if (obj != null) { 
             if (!obj.rawin("id") || obj.id == null){    
                 obj["id"] <- Script.GetTicks() + typeof element;
-            }
+            } 
+
             element.UI = ::getroottable().UI; 
             if (this.idIsValid(obj)){  
                 //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
@@ -588,14 +651,23 @@ class UI  {
                            
                         }  
                     } catch (e){
-                          Console.Print("ex "+e);
+                      //Console.Print(e);
                        // print(e);
                     }
                 }
                 if (element.rawin("contextMenu") || element.rawin("tooltip")) {
                     element.AddFlags(GUI_FLAG_MOUSECTRL);
                 }
-                this.align(element);  
+                 if (obj.rawin("RelativeSize")){ 
+                    this.applyRelativeSize(element); 
+                }
+                  element.metadata = { 
+                    ORIGINAL_POS = VectorScreen(element.Position.X, element.Position.Y)
+                    list = ""
+                    index = null
+                }; 
+                this.align(element); 
+              
                 this.shift(element);
                 
             }else{
@@ -621,7 +693,9 @@ class UI  {
         }        
        
         local b = this.applyElementProps(GUIButton(), o);
-        b.metadata = { list = "buttons" , index = this.listsNumeration.buttons  };
+        b.metadata.list = "buttons";
+        b.metadata.index = this.listsNumeration.buttons;
+
         if ( !o.rawin("Size") ){ 
             b.Size = VectorScreen(50,25);
         }
@@ -766,6 +840,7 @@ class UI  {
 
 
     function Label(o){ 
+       
         if (typeof o == "string") { 
             return this.fetch.label(o); 
         } 
@@ -777,9 +852,12 @@ class UI  {
         }           
         local l = o.metadata.labelConstructor == "flags" ? GUILabel(VectorScreen(0,0), Colour(0,0,0), "", 0): GUILabel();
         local b = this.applyElementProps(l,o );
-         b.metadata = { list = "labels", index = this.listsNumeration.labels   };
+        b.metadata.list = "labels";
 
-         lists[names.find("labels")].push(b);
+        b.metadata.index = this.listsNumeration.labels;
+
+        lists[names.find("labels")].push(b); 
+ 
         idsMetadata[this.cleanID(o.id)] <- { 
             list = b.metadata.list,
             index = this.listsNumeration.labels
@@ -799,7 +877,8 @@ class UI  {
             return this.fetch.editbox(o);
         }           
         local b = this.applyElementProps(GUIEditbox(VectorScreen(0,0), VectorScreen(0,0), Colour(255,255,255)), o);
-        b.metadata = { list = "editboxes", index = this.listsNumeration.editboxes   };
+        b.metadata.list = "editboxes";
+        b.metadata.index = this.listsNumeration.editboxes;
 
         lists[names.find("editboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { 
@@ -821,14 +900,17 @@ class UI  {
         if (typeof o == "string") {
             return this.fetch.canvas(o);
         }
-        
+       
         local b = this.applyElementProps(GUICanvas(), o);
-        b.metadata = { list = "canvas", index = this.listsNumeration.canvas   };
+        
+        b.metadata.list = "canvas";
+        b.metadata.index = this.listsNumeration.canvas;
          lists[names.find("canvas")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { 
             list = b.metadata.list,
             index = this.listsNumeration.canvas
         };
+        
         if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
@@ -850,6 +932,7 @@ class UI  {
                 }
             }
         }
+      
        
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
@@ -859,6 +942,7 @@ class UI  {
                 }
             }
         }
+       
        
        if (b.autoResize){
              b.realign();
@@ -884,7 +968,8 @@ class UI  {
             return this.fetch.checkbox(o);
         }          
         local b = this.applyElementProps(GUICheckbox(), o);
-        b.metadata = { list = "checkboxes" , index = this.listsNumeration.checkboxes  };
+        b.metadata.list = "checkboxes";
+        b.metadata.index = this.listsNumeration.checkboxes;
         lists[names.find("checkboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.checkboxes };
         this.listsNumeration.checkboxes++;
@@ -895,7 +980,8 @@ class UI  {
             return this.fetch.listbox(o);
         }           
         local b = this.applyElementProps(GUIListbox(), o);
-        b.metadata = { list = "listboxes" , index = this.listsNumeration.listboxes    };
+        b.metadata.list = "listboxes";
+        b.metadata.index = this.listsNumeration.listboxes;
 
         if (o.rawin("options") && o.options != null) {
             foreach (i,item in o.options) {
@@ -919,7 +1005,8 @@ class UI  {
             return this.fetch.memobox(o);
         }          
         local b = this.applyElementProps(GUIMemobox(), o);
-        b.metadata = { list = "memoboxes" , index = this.listsNumeration.memoboxes  };
+        b.metadata.list = "memoboxes";
+        b.metadata.index = this.listsNumeration.memoboxes;
         lists[names.find("memoboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.memoboxes };
         this.listsNumeration.memoboxes++;
@@ -930,7 +1017,10 @@ class UI  {
             return this.fetch.progressBar(o);
         }           
         local b = this.applyElementProps(GUIProgressBar(), o);
-         b.metadata = { list = "progbars" , index = this.listsNumeration.progbars   };
+          b.metadata.list = "progbars";
+        b.metadata.index = this.listsNumeration.progbars;
+       
+       
         lists[names.find("progbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.progbars };
         this.listsNumeration.progbars++;
@@ -948,7 +1038,9 @@ class UI  {
             return this.fetch.scrollbar(o);
         } 
         local b = this.applyElementProps(GUIScrollbar(), o);
-        b.metadata = { list = "scrollbars", index = this.listsNumeration.scrollbars   };
+         b.metadata.list = "scrollbars";
+        b.metadata.index = this.listsNumeration.scrollbars;
+
          lists[names.find("scrollbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.scrollbars };
         this.listsNumeration.scrollbars++;
@@ -967,7 +1059,9 @@ class UI  {
             return this.fetch.sprite(o);
         }
         local b = this.applyElementProps(GUISprite(), o);
-        b.metadata = { list = "sprites", index = this.listsNumeration.sprites   };
+
+           b.metadata.list = "sprites";
+        b.metadata.index = this.listsNumeration.sprites;
         if (o.rawin("file")){  
             b.SetTexture(o.file);
         }
@@ -990,8 +1084,11 @@ class UI  {
             return this.fetch.window(o); 
         } 
         local b = this.applyElementProps(GUIWindow(), o);
-        b.metadata = { list = "windows" , index = this.listsNumeration.windows   };
-         lists[names.find("windows")].push(b);
+       
+           b.metadata.list = "windows";
+        b.metadata.index = this.listsNumeration.windows;
+
+        lists[names.find("windows")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
          this.listsNumeration.windows++;
         if (o.rawin("children")  && o.children != null){
@@ -1028,6 +1125,12 @@ class UI  {
             if (b.postConstruct !=  null){
                 b.postConstruct();
             }
+        }
+         if (o.rawin("Transform3D")){
+            local pos = o.Transform3D.rawin("Position3D") ? o.Transform3D.Position3D : Vector(0,0,0);
+            local rot = o.Transform3D.rawin("Rotation3D") ? o.Transform3D.Rotation3D : Vector(-1.6, 0.0, 0);
+            local size = o.Transform3D.rawin("Size3D") ? o.Transform3D.Size3D : Vector(2, 2, 0.0);
+            b.Set3DTransform(pos, rot, size);
         }
         return b;
     }

@@ -13,10 +13,11 @@ class Combobox extends Component {
     canvasSize = null;
     calcHeigh = null; // size height calculated from the total options in the combobox
     Position = null;
+    isOpen = null;
 
     constructor(o) {
         this.className = "Combobox"; 
-       
+        this.isOpen = false;
         this.id = o.id; 
         this.options = o.options; 
         this.onOptionSelect = o.onOptionSelect;
@@ -85,16 +86,19 @@ class Combobox extends Component {
     }
 
     function showPanel(){
-
+      
         ::getroottable().UI.Listbox(this.listboxID).show();
         ::getroottable().UI.Canvas(this.id).Size.Y = this.calculateListHeight();
-        ::getroottable().UI.openCombo = ::getroottable().UI.Canvas(this.id);  
+        ::getroottable().UI.openCombo =  { id =this.id, list = "canvas" };
+          this.isOpen=true;
     }
 
     function hidePanel(){
+      
         ::getroottable().UI.Listbox(this.listboxID).hide();
         ::getroottable().UI.Canvas(this.id).Size.Y = 20;
         ::getroottable().UI.openCombo = null;  
+          this.isOpen=false;
     }
  
     function build(parent, optionSelect){
@@ -120,7 +124,16 @@ class Combobox extends Component {
                 Text = this.value,
                 parents = childParents,  
                 onClick = function(){ 
-                   context.showPanel();
+                    if (context.isOpen){
+                            context.hidePanel();
+                           
+                    }else{
+                         local listbox = UI.Listbox(context.listboxID);
+                        listbox.Size.Y =90;
+                        local c = UI.Canvas(context.id);
+                        c.Size.Y = 90;
+                        context.showPanel();
+                    }
                 }         
         });
 
@@ -133,16 +146,28 @@ class Combobox extends Component {
                     parents = childParents,
                     move = {down = 1, left = 2 },
                     onClick = function(){
-                        context.showPanel();
+                       
+                        if (context.isOpen){
+                            context.hidePanel();
+                           
+                        }else{
+                             local listbox = UI.Listbox(context.listboxID);
+                            listbox.Size.Y =90;
+                            local c = UI.Canvas(context.id);
+                            c.Size.Y = 90;
+                            context.showPanel();
+                        }
+                       
                     }
         });
 
         local listbox =  UI.Listbox({
                     id=this.listboxID,
                     context = this,
-                    Alpha = 255, 
+                    Alpha = 150, 
                     parents = childParents, 
                     Position = VectorScreen(0, 19),
+                    Colour = Colour(255,255,255)
                     Size = VectorScreen(90,42), 
                     options = this.options,
                     onOptionSelect = function(option){
@@ -152,6 +177,7 @@ class Combobox extends Component {
                         label.Text = option;
                         context.value = option;
                         if (optionSelect != null){
+                             context.isOpen = false;
                             optionSelect(option);
                         }
                     },
@@ -167,15 +193,27 @@ class Combobox extends Component {
             context = this,
             Size = this.canvasSize ,
             Color= Colour(255,255,255,255),   
-            Position = this.Position,
+            Position = this.Position, 
             flags = GUI_FLAG_MOUSECTRL,
             parentSize = this.parentSize, 
             parents =parentsList,
             onClick = function(){
-                 context.showPanel();
+                if (context.isOpen){
+                    context.hidePanel();
+                           
+                }else{
+                     local listbox = UI.Listbox(context.listboxID);
+                    listbox.Size.Y =90;
+                    local c = UI.Canvas(context.id);
+                    c.Size.Y = 90;
+                    context.showPanel();
+                }
             },
             
         }) 
+      
+
+     
         c.add(label);
         c.add(sprite);
         c.add(listbox);  

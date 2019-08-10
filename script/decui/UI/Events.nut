@@ -9,16 +9,52 @@
             } 
     
         function onGameResize(){
-        
+
             foreach(i,list in this.UI.lists ) { 
                foreach(c,e in list ) { 
-                  e.realign(); 
-                  if (e.rawin("shiftPos")){
-                    e.shiftPos(); 
-                  }
-                  if (e.rawin("onGameResize") && e.onGameResize != null){
-                      e.onGameResize();
-                  }
+                   if (e.parents.len() == 0){
+
+                 
+                        if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
+
+                            ::UI.applyRelativeSize(e); 
+                            e.resetPosition();
+                            e.realign();
+                            if (e.rawin("shiftPos") && e.shiftPos != null){
+                                e.shiftPos(); 
+                            } 
+                            e.updateBorders();
+                           
+                        }else{
+
+                            e.resetPosition();
+                            e.realign();  
+                            if (e.rawin("shiftPos") && e.shiftPos != null){
+                                e.shiftPos(); 
+                            }
+                                
+                                
+                        }
+
+                        foreach (idx, child in e.getChildren() ){
+                            child.resetPosition();
+                            child.realign();  
+                            if (child.rawin("shiftPos") && child.shiftPos != null){
+                                child.shiftPos(); 
+                            }
+                            if (child.rawin("onGameResize") && child.onGameResize != null){
+                                child.onGameResize();
+                            }
+                        }
+                        if (e.rawin("onGameResize") && e.onGameResize != null){
+                            e.onGameResize();
+                        }
+                    }
+                 
+                  
+                  
+                 
+                 
                 }
             }
         } 
@@ -71,8 +107,14 @@
 
         function onClick(el, mouseX, mouseY){
             if(el.onClick!=null && el != null){
-               
-                //UI.clickedEl = el;
+               UI.lastClickedEl = { id = el.id, list = el.metadata.list };
+                if ( (!el.rawin("context") || el.context == null) &&  UI.openCombo != null){
+                   
+                    local c = UI.Canvas(UI.openCombo.id);
+                    if (c !=null) {
+                        c.context.hidePanel();
+                    }
+                }
                 el.onClick();
             }                            
         }
@@ -123,7 +165,7 @@
 
          function onHoverOver(el){ 
 
-            this.UI.hoveredEl=el;
+            this.UI.hoveredEl= { id =el.id, list = el.metadata.list };
             try {
                 if (el.tooltip != null){
                     local isString = (typeof el.tooltip ) == "string";

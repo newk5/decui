@@ -12,11 +12,15 @@ dofile("decui/components/Circle.nut");
 dofile("decui/UI/Fetch.nut");
 dofile("decui/UI/Events.nut");
 dofile("decui/UI/UI.nut");
+
+dofile("decui/util/StreamRequest.nut");
+
+
  
 UI <- UI();  
 
  
-
+ 
 
 function Script::ScriptProcess(){
     UI.events.scriptProcess();
@@ -76,6 +80,7 @@ UI.registerKeyBind({
     name= "left"+Script.GetTicks(), 
     kp= KeyBind(0x01), 
     onKeyUp = function() {
+        Console.Print(GUI.GetMousePos().X+", "+GUI.GetMousePos().Y);
         if (UI.openContextID != null){
             local ctx =  UI.Canvas(UI.openContextID); 
             
@@ -86,27 +91,18 @@ UI.registerKeyBind({
             }
             
         } 
-        if (UI.openCombo != null ) {
-            if (UI.comboClick == 0){ 
-                UI.comboClick ++;
-            }else{
-                UI.openCombo.context.hidePanel();
-                 UI.comboClick = 0;
-            }
-         
-           
-        } 
-    }
+       
+    } 
 });   
-
+ 
 UI.registerKeyBind({
     name= "right"+Script.GetTicks(),
     kp= KeyBind(0x02),  
     onKeyUp = function() {
         
        if (UI.hoveredEl != null ){
-           local e = UI.hoveredEl;  
-
+           local e = UI.findById(UI.hoveredEl.id);  
+           
            if (e.rawin("contextMenu") && e.contextMenu != null) {
                local cm = e.contextMenu;
 
@@ -136,23 +132,87 @@ UI.registerKeyBind({
                        table.selectRow(arr, UI.Canvas(rowID));
                     }
 
-                    foreach (i,e in cm.options) {
-                        local b =  UI.Button({
-                                id = ctxID+"::option"+i ,
-                                Text = e.name, 
-                                TextColour =  e.rawin("textColour") ? e.textColour : Colour(0,0,0),
-                                parents = [ctxID], 
-                                Size = e.rawin("size") ? e.size : VectorScreen(50,25),
-                                Position = VectorScreen(0,y),
-                                onClick = e.onClick,
-                                data = { buttonID =  ctxID, row = data}
-                        });
-                        if (e.rawin("color")){
-                            b.Colour = e.color;
+                    if ( cm.rawin("type") && cm.type == "canvas") {
+                        local DEFAULT_TEXT_COLOR = Colour(0,0,0);
+                        local DEFAULT_BG_COLOR = Colour(255,255,255,255);
+
+
+                        foreach (i,e in cm.options) {
+
+                            local b =  UI.Canvas({
+                                    id = ctxID+"::option"+i ,
+                                   
+                                    parents = [ctxID], 
+                                    Size = e.rawin("size") ? e.size : VectorScreen(50,25),
+                                    Position = VectorScreen(0,y),
+                                    onClick = e.onClick,
+                                    data = { buttonID =  ctxID, row = data },
+                                    onHoverOver = function(){
+                                        this.Colour.A = 205;
+                                    },
+                                    onHoverOut = function(){
+                                        this.Colour.A = this.data.defaultAlpha;
+                                    }
+                                    children = [
+                                        UI.Label({
+                                            id = ctxID+"::option"+i+":label"  
+                                            Text = e.name 
+                                            TextColour =  e.rawin("textColour") ? e.textColour : DEFAULT_TEXT_COLOR,
+                                            onClick = e.onClick
+                                            align = "center"
+                                            data = { buttonID =  ctxID, row = data },
+                                             onHoverOver = function(){
+                                                local cb = ::UI.Canvas(this.parents[1]);
+                                                if (cb != null){
+                                                    cb.Colour.A = 205;
+                                                }
+                                                
+                                            },
+                                            onHoverOut = function(){
+                                                local cb = ::UI.Canvas(this.parents[1]);
+                                                if (cb != null) {
+                                                    cb.Colour.A = cb.data.defaultAlpha;
+                                                }
+                                                
+                                               
+                                            }
+                                        })
+                                    ]
+                            });
+                            b.addBorders({
+                                size = 1 
+                                color = ::Colour(0,0,0,240)
+                            });
+                            if (e.rawin("color")){
+                                b.Colour = e.color;
+                            }else{
+                                 b.Colour = DEFAULT_BG_COLOR;
+                            }
+                            b.data.defaultAlpha <- b.Colour.A;
+                            options.push(b);
+                        
+                            y+=25;
                         }
-                        options.push(b);
-                      
-                        y+=25;
+                    } else {
+                        
+                        foreach (i,e in cm.options) {
+                            local b =  UI.Button({
+                                    id = ctxID+"::option"+i ,
+                                    Text = e.name, 
+                                    TextColour =  e.rawin("textColour") ? e.textColour : Colour(0,0,0),
+                                    parents = [ctxID], 
+                                    Size = e.rawin("size") ? e.size : VectorScreen(50,25),
+                                    Position = VectorScreen(0,y),
+                                    onClick = e.onClick,
+                                    data = { buttonID =  ctxID, row = data}
+                            });
+                            if (e.rawin("color")){
+                                b.Colour = e.color;
+                            }
+                            options.push(b);
+                        
+                            y+=25;
+                        }
                     }
 
                     UI.Canvas({ 
@@ -163,6 +223,7 @@ UI.registerKeyBind({
                         children = options,
                         parents = [e.id]
                     });
+                   
                     
                }
            }

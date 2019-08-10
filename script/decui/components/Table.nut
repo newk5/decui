@@ -24,12 +24,40 @@ class Table extends Component {
     contextMenu = null;
     parentSize = null;
     tableWidth = 0;
+    isEmpty = false;
+    noDataText = "";
+    realRows = null;
+    lazy = null;
+    streamID = null;
+    dataSize = null;
+    rowModel = null;
 
+    awatingResponse = null;
 
     constructor(o) {
+        this.dataSize = 0;
         this.dataPages = [];
+        this.data = [];
+        this.awatingResponse = false;
+        this.lazy = false;
         if (o.rawin("id")){
             this.id = o.id;
+        }
+        if (o.rawin("rowModel")){
+            this.rowModel = o.rowModel;
+        }
+         base.constructor(this.id);
+        if (o.rawin("streamID")){
+            this.streamID = o.streamID;
+        }
+         if (o.rawin("dataSize")){
+            this.dataSize = o.dataSize;
+            this.totalRows = this.dataSize;
+        }else{
+             this.totalRows = 0;
+        }
+        if (o.rawin("noDataText")){
+            this.noDataText = o.noDataText;
         }
         if (o.rawin("style")){
             this.style = o.style;
@@ -70,22 +98,7 @@ class Table extends Component {
          if (o.rawin("columns")){
             this.columns = o.columns; 
         }
-        if (o.rawin("data")){ 
-            this.data = [];
-           // this.addHeaderRows(this.data);
-           foreach (i, d in o.data ) {
-                local render = this.renderRow == null ? true : this.renderRow(d);
-                if (render){
-                    this.data.push(d);
-                }
-           }
-            //this.data.extend(o.data);
-            this.totalRows = this.data.len();
 
-            this.pages = ceil(this.totalRows.tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
-            this.populatePages()
-           
-        }
         if (o.rawin("Position") && o.Position != null){
             this.Position = o.Position;
         }else{
@@ -93,16 +106,378 @@ class Table extends Component {
         }
         page = 1;
 
-         pagesLabel = UI.Label({
-            id =this.id+"::table::pagesLabel",
-            Text = "Page 1 of "+this.pages,
-            align = "bottom_center",
-            TextColour = Colour(255,255,255)
+        if (o.rawin("lazy") && o.lazy){ 
+            this.lazy = o.lazy;
+            this.awatingResponse = true;
 
-        })
-         base.constructor(this.id);
-        this.build(false);
+            StreamRequest({
+                context = this
+                id = this.streamID
+                body = [ 0 , this.rows ]
+                expectsResponse = true  
+                arraySize = this.rows
+                isArray = true
+                responseObject = this.getRowModel()
+                onComplete = function (arr) {
+
+                    local firstPageData = { data = arr, total = this.context.dataSize };
+
+                    context.isEmpty = firstPageData.data.len() == 0;  
+                    if (context.isEmpty){ 
+                        firstPageData.data.push(context.getEmptyRow());
+                    }
+                    foreach (i, d in firstPageData.data ) {
+                        context.data.push(d);
+                    }  
+                    
+                    context.totalRows = firstPageData.total;
+                    local tempData = []; 
+                  
+                  
+                    if (context.data.len() < context.totalRows) { 
+                        for (local i = 0;  i < (context.totalRows-context.data.len()); i++){ 
+                            tempData.push(context.getEmptyRow());
+                        }   
+                    }
+                    context.data.extend(tempData);
+                
+                    context.pages = ceil(context.totalRows.tofloat() / (context.rows == null ? 10 : context.rows ).tofloat());
+                    context.populatePages()
+
+                    context.pagesLabel = UI.Label({
+                        id =context.id+"::table::pagesLabel",
+                        Text = "Page 1 of "+context.pages,
+                        align = "bottom_center",
+                        TextColour = Colour(255,255,255)
+                    })
+                  
+                    context.build(false);
+                    context.awatingResponse = false;
+                  
+                }
+            }) 
+
+            
+        } else {
+
+            if (o.rawin("data")){
+
+                this.isEmpty = o.data.len() == 0;   
+                if (isEmpty){ 
+                    o.data.push(this.getEmptyRow());
+                }
+            
+                foreach (i, d in o.data ) {
+                    local render = this.renderRow == null ? true : this.renderRow(d);
+                    if (render){
+                        this.data.push(d);
+                    }
+                }
+                this.totalRows = this.data.len();
+
+                this.pages = ceil(this.totalRows.tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
+                this.populatePages()
+            
+            }
+        }
+      
+        if (!this.lazy){
+            pagesLabel = UI.Label({
+                id =this.id+"::table::pagesLabel",
+                Text = "Page 1 of "+this.pages,
+                align = "bottom_center",
+                TextColour = Colour(255,255,255)
+            })
+           
+            this.build(false);
+        }
+      
+       
+       
+    } 
+
+    function lazySetPage(p){
         
+
+        this.page = p;
+           
+        this.awatingResponse = true;
+        StreamRequest({
+            context = this
+            id = this.streamID
+            body = [ this.rows* (this.page-1) , this.rows ]
+            expectsResponse = true  
+            arraySize = this.rows
+            isArray = true
+            responseObject = this.getRowModel()
+            onComplete = function (arr) {
+
+                local pageData =  { data = arr, total = context.dataSize };
+
+                foreach (i, d in pageData.data ) {
+                    local index = ( (context.page-1)+""+i).tointeger();
+                    if (context.data.len()-1 >= index) {
+                        context.data[index] = d;
+                    } else {
+                        context.data.push(d);
+                    }
+                }
+                context.totalRows = pageData.total;
+                context.pages = ceil(context.totalRows.tofloat() / (context.rows == null ? 10 : context.rows ).tofloat());
+                context.lazyPopulatePages(context.page-1, pageData.data, context.rows* (context.page-1));                
+                context.clear();
+                context.build(true);
+                ::UI.Label(context.id+"::table::pagesLabel").Text = "Page "+context.page+" of "+context.pages;
+                if (context.page >= context.pages){
+                    ::UI.Sprite(context.id+"::table::prevBtn").Alpha = 255;
+                }
+                //re-apply table borders because the table size may change
+                local wrapper = ::UI.Canvas(context.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                });
+                local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
+                if (lastLine != null){
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+                
+                context.awatingResponse = false;
+            }
+        })
+            
+                
+    }
+    
+    function setPage(p){ 
+        if (p != null && p > 0 &&  p <= this.pages && this.page != p && !this.awatingResponse) {     
+
+           
+            if (this.lazy) {
+               this.lazySetPage(p);
+            } else {
+                this.page = p;
+                this.clear();
+                this.build(true);
+                UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+                if (this.page >= this.pages){
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+                }
+                  //re-apply table borders because the table size may change
+                local wrapper = UI.Canvas(this.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                });
+                local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
+                if (lastLine != null) {
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+            }
+            
+        }
+    }
+
+
+    function lazyNextPage() {
+        this.awatingResponse = true;
+        StreamRequest({
+            context = this
+            id = this.streamID
+            body = [ this.rows* (this.page) , this.rows]
+            expectsResponse = true  
+            arraySize = this.rows
+            isArray = true
+            responseObject = this.getRowModel()
+            onComplete = function (arr) {
+                 local pageData =  { data = arr, total = context.dataSize };
+          
+                 foreach (i, d in pageData.data ) {
+                    local index = (context.page+""+i).tointeger();
+                    try { 
+                        context.data[index] = d; 
+                    } catch(ex) {
+                    }
+                }
+            
+                context.pages = ceil(context.totalRows.tofloat() / (context.rows == null ? 10 : context.rows ).tofloat());
+                context.lazyPopulatePages(context.page, pageData.data, context.rows* (context.page));
+        
+                context.clear();
+                context.page++;
+                context.build(true);
+                if (context.page == context.pages){
+                    ::UI.Sprite(context.id+"::table::nextBtn").Alpha = 100;
+                    ::UI.Sprite(context.id+"::table::prevBtn").Alpha = 255;
+                }else{
+                    ::UI.Sprite(context.id+"::table::prevBtn").Alpha = 255;
+                } 
+                ::UI.Label(context.id+"::table::pagesLabel").Text = "Page "+context.page+" of "+context.pages;
+                
+               //re-apply table borders because the table size may change
+                local wrapper = ::UI.Canvas(context.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                });
+                local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
+                if (lastLine != null){
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+                
+                context.awatingResponse = false;
+            }
+        })
+                        
+    }
+
+    function nextPage(){
+        if (this.page < this.pages && !this.awatingResponse){
+  
+            if (this.lazy){ 
+              this.lazyNextPage();
+            }  else{
+                this.clear();
+                this.page++;
+                this.build(true);
+                if (this.page == this.pages){
+                    UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+                }else{
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+                } 
+                UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+               
+                 //re-apply table borders because the table size may change
+                local wrapper = UI.Canvas(this.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                });
+                local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
+                if (lastLine != null) {
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+            }
+           
+            
+        }        
+        
+    } 
+
+    function lazyPrevPage() {
+        
+            local startIdx =  (this.rows* (this.page-1))- this.rows;
+          this.awatingResponse = true;
+          StreamRequest({
+            context = this
+            id = this.streamID
+            body = [ startIdx , this.rows]
+            expectsResponse = true  
+            arraySize = this.rows
+            isArray = true
+            responseObject = this.getRowModel()
+            onComplete = function (arr) {
+
+                local pageData =  { data = arr, total = context.dataSize };
+
+                foreach (i, d in pageData.data ) {
+                 
+                    local index = (context.page-2+""+i).tointeger();
+                    try {
+                        context.data[index] = d;
+                    }catch (ex) {
+                        break;
+                    } 
+                    
+                } 
+                        // this.totalRows = pageData.total;
+                context.pages = ceil(context.totalRows.tofloat() / (context.rows == null ? 10 : context.rows ).tofloat());
+                context.lazyPopulatePages(context.page-2, pageData.data, startIdx );
+                        
+                context.clear();
+                context.page--;
+                context.build(true); 
+                if (context.page == 1){
+                    ::UI.Sprite(context.id+"::table::prevBtn").Alpha = 100;
+                    ::UI.Sprite(context.id+"::table::nextBtn").Alpha = 255; 
+                }else{
+                    ::UI.Sprite(context.id+"::table::nextBtn").Alpha = 255;
+                }
+                ::UI.Label(context.id+"::table::pagesLabel").Text = "Page "+context.page+" of "+context.pages;
+
+                //re-apply table borders because the table size may change
+                local wrapper = ::UI.Canvas(context.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                });
+                local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
+                if (lastLine != null){
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+                context.awatingResponse = false;
+            }
+        })
+
+                
+    }
+
+    function prevPage(){
+        if (this.page > 1 && !this.awatingResponse){ 
+            if (this.lazy){  
+                
+                this.lazyPrevPage();
+              
+            }else{
+
+                this.clear();
+                this.page--;
+                this.build(true); 
+
+                if (this.page == 1){
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 100;
+                    UI.Sprite(this.id+"::table::nextBtn").Alpha = 255; 
+                }else{
+                    UI.Sprite(this.id+"::table::nextBtn").Alpha = 255;
+                }
+                UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+
+                //re-apply table borders because the table size may change
+                local wrapper = UI.Canvas(this.id);
+                wrapper.removeBorders();
+                wrapper.addBorders({
+                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                });
+                local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
+                if (lastLine != null) {
+                    lastLine.Size.X = wrapper.Size.X;
+                }
+                
+            }
+          
+        }
+        
+    } 
+
+  
+
+    function getEmptyRow() {
+        local obj = {};
+        foreach (i, c in this.columns ) {
+            obj[c.field] <- noDataText; 
+        }
+        return obj; 
+    }
+
+      function getRowModel() {
+        return this.rowModel; 
     }
 
     function getData(idx){
@@ -114,13 +489,26 @@ class Table extends Component {
             }
             
         }
-        return null;
+        return null; 
          
     }
 
     function indexOfRow(row){
          local arr = this.dataPages[this.page-1];
-         return arr.find(row);
+         return arr.find(row); 
+    } 
+
+    function lazyPopulatePages(page, data, skip){
+         local startIdx = skip;
+         local lastIdx = startIdx+this.rows;
+     
+        local arr = [];
+        arr = this.addHeaderRows(arr);   
+        arr = this.getDataRange(startIdx, lastIdx, arr); 
+
+        this.dataPages[page] = arr; 
+        
+       
     }
 
     function populatePages(){
@@ -150,10 +538,10 @@ class Table extends Component {
          } 
     }
 
-    function getDataRange(s, e, arr){
+    function getDataRange(s, e, arr){ 
          
         try {
-           
+
             for (local i = s; i < e; i++){
                 arr.push(this.data[i]);
             }
@@ -174,41 +562,19 @@ class Table extends Component {
         return list;
     }
  
-    function nextPage(){
-        if (this.page < this.pages){
-            this.clear();
-            this.page++;
-            this.build(true);
-            if (this.page == this.pages){
-                UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
-                UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
-            }else{
-                  UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
-            } 
-            UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
-        }        
-        
-    }
 
-    function prevPage(){  
-        if (this.page > 1){ 
-           
-            this.clear();
-            this.page--;
-            this.build(true);
-            if (this.page == 1){
-                UI.Sprite(this.id+"::table::prevBtn").Alpha = 100;
-                UI.Sprite(this.id+"::table::nextBtn").Alpha = 255; 
-            }else{
-                  UI.Sprite(this.id+"::table::nextBtn").Alpha = 255;
-            }
-            UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+
+    function addRow(o){ 
+        if (this.awatingResponse){
+            return;
         }
-        
-    } 
+        if (this.isEmpty){
+            this.data.remove(0);
+            this.dataPages[0].remove(1);
+            // ::printTable(this.dataPages[0][0]);
+        }
 
-    function addRow(o){
-       
+        this.isEmpty= false; 
         local validPage = false;  
         local lastPage = this.pages-1;
         this.totalRows++;
@@ -236,7 +602,7 @@ class Table extends Component {
             }
            
         }else{
-
+ 
             if (lastPage == this.page-1){
                 this.build(true);
                
@@ -247,70 +613,149 @@ class Table extends Component {
         UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
     }
 
-    function removeRow(o){
-        local found = false;
-        foreach(idx, arr in this.dataPages) {
-            
-            local item = arr.find(o); 
-            if (item ==0){  
-                break;
-            }  
-            if (item != null){
-                this.dataPages[idx].remove(item);
-                UI.Canvas( this.id+"::table::row"+item ).data.selected = false;
-                local index = this.data.find(o);
-                this.data.remove(index); 
-                found = true;
-                
-            }
-           
+    function lazyRemoveRow(o){
 
+        local actualPage =this.page;
+        this.pages = ceil((this.totalRows-1).tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
+    
+        if (this.page > this.pages){
+            actualPage--;  
         } 
-        if (found){   
-            this.totalRows--;
-           this.dataPages.clear();
+    
+        this.awatingResponse = true;    
+        StreamRequest({
+            context = this
+            id = this.streamID
+            body = [ this.rows* actualPage , this.rows]
+            expectsResponse = true  
+            arraySize = this.rows
+            isArray = true
+            responseObject = this.getRowModel()
+            onComplete = function (arr) {
+
+                 local pageData =  { data = arr, total = context.dataSize };
+
+                context.dataPages[idx].remove(item);
+                context.data.remove(context.data.find(o));
+                foreach (i, d in pageData.data ) {
+                    
+                    local index = (actualPage+""+i).tointeger
+                    try { 
+                        context.data[index] = d;  
+                    } catch(ex) {}
+                     
+                }
+                context.totalRows--;
+
+                context.dataPages.clear();
+                
+                context.populatePages();
+                context.totalRows = context.data.len();
+                context.pages = ceil(context.totalRows.tofloat() / (context.rows == null ? 10 : context.rows ).tofloat());
+                context.clear();
             
-            this.populatePages();
-            this.totalRows = this.data.len();
-            this.pages = ceil(this.totalRows.tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
-            this.clear();
-           
-            if (this.page > this.pages){
-                this.page--;
-            } 
-            
-            this.build(true);
-            UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
-            if (this.page == 1){
-                UI.Sprite(this.id+"::table::prevBtn").Alpha = 100;
+                
+                if (context.page > context.pages){
+                    context.page--;
+                 
+                } 
+                context.build(true);
+                UI.Label(context.id+"::table::pagesLabel").Text = "Page "+context.page+" of "+context.pages;
+                if (context.page == 1){
+                    UI.Sprite(thicontexts.id+"::table::prevBtn").Alpha = 100; 
+                }
+                if (context.pages == 1){
+                    UI.Sprite(context.id+"::table::nextBtn").Alpha = 100;
+                }
+                context.awatingResponse = false;
             }
-            if (this.pages == 1){
-                UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
-            }
-         
-            
-        }
+        })
+
         
     }
 
-    function setPage(p){
-        if (p != null && p > 0 &&  p <= this.totalRows && this.page != p) {        
-            this.page = p;
-            this.clear();
-            this.build(true);
-            UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
-            if (this.page >= this.pages){
-                UI.Sprite(this.id+"::table::prevBtn").Alpha = 255;
+    function removeRow(o){
+        if (!this.isEmpty && !this.awatingResponse) { 
+            local isLastRow = this.totalRows == 1;
+            if (isLastRow){
+                this.isEmpty= true;
+                this.dataPages[0][1] = this.getEmptyRow();  
+                this.data[0] =this.getEmptyRow();  
+                for (local i = 0; i< this.columns.len(); i++){
+                    
+                    UI.Label(this.id+"::table::cell1"+"-"+i).Text = noDataText;
+                }
+                return; 
+            }
+
+            local found = false;
+        
+            foreach(idx, arr in this.dataPages) {  
+                
+                local item = arr.find(o);   
+                if (item ==0){   
+                    break; 
+                }  
+                if (item != null){ 
+
+                    found = true; 
+
+                    if (this.lazy ){  
+                        this.lazyRemoveRow(o);
+
+                    }else {
+                        this.dataPages[idx].remove(item);
+                        UI.Canvas( this.id+"::table::row"+item ).data.selected = false;
+                        local index = this.data.find(o);
+                       
+                        this.data.remove(index); 
+                        
+                    }
+                  
+                     
+                }
+            
+
+            } 
+            if (found && !this.lazy){
+                this.totalRows--;
+
+                this.dataPages.clear();
+                
+                this.populatePages();
+                this.totalRows = this.data.len();
+                this.pages = ceil(this.totalRows.tofloat() / (this.rows == null ? 10 : this.rows ).tofloat());
+                this.clear();
+            
+                
+                if (this.page > this.pages){
+                    this.page--;
+                 
+                } 
+                this.build(true);
+                UI.Label(this.id+"::table::pagesLabel").Text = "Page "+this.page+" of "+this.pages;
+                if (this.page == 1){
+                    UI.Sprite(this.id+"::table::prevBtn").Alpha = 100; 
+                }
+                if (this.pages == 1){
+                    UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
+                }
+
+                
             }
         }
+        
+        
     }
+
+  
 
     function build(rebuild){
         local start = Script.GetTicks();
 
         tableWidth = 0;
         local canv = null;
-        if (!rebuild) {
+        if (!rebuild) { 
             canv = UI.Canvas({
                 id= this.id,
                 data = {},
@@ -628,11 +1073,13 @@ class Table extends Component {
 
     function drawTable(canv, rebuild){
     
+       
         local rowY = 0;
         local cellX = 0;
         local colCanv  = null;
 
         local rowsMetadata = this.fillRowsMetadata();
+       
  
         local rowsToIncrease = [];
   
@@ -641,7 +1088,7 @@ class Table extends Component {
             colCanv = this.buildColumn(cellX, columnIdx, column);
             
             local index = this.page-1;
-          
+            
             foreach(rowIdx, row in this.dataPages[index]) {
                 
                 local cellIsHeader = rowIdx ==0 ;
@@ -702,7 +1149,7 @@ class Table extends Component {
                 }
                 local add =content.Size.Y+5 ;
                             
-                //set the Y coord to drawn the horizontal line and add it to the Y coords array
+               
                 rowY += add
               
                 //increase the column canvas height and width
@@ -713,9 +1160,7 @@ class Table extends Component {
                 if (colCanv.Size.X < content.Size.X){ 
                     colCanv.Size.X =content.Size.X+5;
                 } 
-              // tableWidth += colCanv.Size.X;
-               //Console.Print("added "+colCanv.Size.X);
-                //add the label to the column canvas
+            
                 colCanv.add(content);
             }
 
@@ -827,6 +1272,7 @@ class Table extends Component {
     }
 
     function drawHline(canvas, size, row,y) {
+        
         canvas.add(
             UI.Canvas({
                 id =this.id+"::table::row:::line"+row,

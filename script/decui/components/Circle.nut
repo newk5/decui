@@ -7,6 +7,8 @@ class CanvasCircle extends Component {
     color = null;
     radius = null;
     lines = null;
+    crossPoints = null;
+    plusPoints = null;
     Position = null;
     align = null;
     move = null;
@@ -14,16 +16,20 @@ class CanvasCircle extends Component {
     adjustedPos = null;
     mouseTimer = null;
 
+    plusDrawnFlag = null;
+    crossDrawnFlag = null;
 
     constructor(o) {
         this.points =  [];
         this.lines = [];
+        this.crossPoints = [];
 
-        local radius = 100;  
-        this.xcenter = radius;
-        this.ycenter = radius;
-        this.radius = radius;
+        this.xcenter = 100;
+        this.ycenter = 100;
+        this.radius = 100;
         
+        plusDrawnFlag = false;
+        crossDrawnFlag = false;
         
         this.border = 2;
         this.color = ::Colour(255,0,0);
@@ -51,7 +57,15 @@ class CanvasCircle extends Component {
             Position =VectorScreen(xcenter-radius,ycenter-radius),
             context = this
         });
-
+        if (o.rawin("flags")) {
+            c.AddFlags(o.flags);
+        }
+        if (o.rawin("Transform3D")){
+            local pos = o.Transform3D.rawin("Position3D") ? o.Transform3D.Position3D : Vector(0,0,0);
+            local rot = o.Transform3D.rawin("Rotation3D") ? o.Transform3D.Rotation3D : Vector(-1.6, 0.0, 0);
+            local size = o.Transform3D.rawin("Size3D") ? o.Transform3D.Size3D : Vector(2, 2, 0.0);
+            c.Set3DTransform(pos, rot, size);
+        }
         adjustedPos = false;
         if (o.rawin("align")){
             this.align = o.align;
@@ -68,24 +82,78 @@ class CanvasCircle extends Component {
         }else{
             move = {};
         }
-        if (adjustedPos){
-            this.xcenter = c.Size.X /2;
-            this.ycenter =  c.Size.Y/2;
-        }else{
-            this.xcenter = c.Size.X /2;
-            this.ycenter =  c.Size.Y/2;
-        }
         
+        this.xcenter = c.Size.X /2;
+         this.ycenter =  c.Size.Y/2;
+       
         
         base.constructor(this.id);
-        this.drawCircle(radius,radius, radius,c);
+        this.drawCircle(radius,radius, this.radius,c);
       
         
     
     }
 
+    function cross(o){
+        if (!crossDrawnFlag){
+            crossDrawnFlag=true;
+            local x1  = xcenter - (this.radius/1.45);
+            local x2 = xcenter+(this.radius/1.45);
+
+            local y1 = ycenter - (this.radius/1.45);
+            local y2 = ycenter +(this.radius/1.45);
+       
+            bresenham(x1, x2, y2, y1,o); 
+            bresenham2(x1, x2, y1, y2,o);  
+        }
+        
+    } 
+
+    function bresenham(x1, x2, y1, y2,o)  {  
+     
+        local m_new = 2 * (y2 + y1); 
+        local slope_error_new = m_new + (x2 + x1); 
+        local c = UI.Canvas( this.id);
+        for (local x = x1, y = y1; x <= x2; x++) 
+        { 
+            
+            setPixelCross(x, y, c,o);
+            // Add slope to increment angle formed 
+            slope_error_new -= m_new; 
+  
+            // Slope error reached limit, time to 
+            // increment y and update slope error. 
+            if (slope_error_new <= 0) 
+            { 
+                y--; 
+                slope_error_new += 2 * (x2 + x1); 
+            } 
+        } 
+    } 
+    function bresenham2(x1, x2, y1, y2,o)  { 
+        
+        local m_new = 2 * (y2 - y1); 
+        local slope_error_new = m_new - (x2 - x1); 
+        local c = UI.Canvas( this.id);
+        for (local x = x1, y = y1; x <= x2; x++) 
+        { 
+           
+            setPixelCross(x, y, c,o);
+            // Add slope to increment angle formed 
+            slope_error_new += m_new; 
+  
+            // Slope error reached limit, time to 
+            // increment y and update slope error. 
+            if (slope_error_new >= 0) 
+            { 
+                y++; 
+                slope_error_new -= 2 * (x2 - x1); 
+            } 
+        } 
+    }    
+
     function drawCircle(xcenter, ycenter, radius,c){
-      
+       
         local x=0;
         local y=radius;
         local d= 3 - 2*radius;
@@ -122,6 +190,17 @@ class CanvasCircle extends Component {
         point.Position = VectorScreen(x,y);
 
         this.points.push(point);
+        
+        c.AddChild(point);
+    }
+
+     function setPixelCross(x, y,c, o) {
+        local point = GUICanvas();
+        point.Colour = o.rawin("color") ? o.color : this.color;
+        point.Size = VectorScreen(o.rawin("size") ? o.size : this.border,o.rawin("size") ? o.size : this.border);
+        point.Position = VectorScreen(x,y);
+
+        this.crossPoints.push(point);
         
         c.AddChild(point);
     }
@@ -186,35 +265,52 @@ class CanvasCircle extends Component {
         }
 
     }
-    function cross(o){
-        local color =  o.rawin("color") ? o.color : Colour(255,0,0);
-        local size = o.rawin("size") ? o.size : 2;
-        local c = UI.Canvas(this.id);
+ 
+    function plus(o){
+        if (!plusDrawnFlag) {
+            plusDrawnFlag = true;
+            local color =  o.rawin("color") ? o.color : Colour(255,0,0);
+            local size = o.rawin("size") ? o.size : 2;
+            local c = UI.Canvas(this.id);
 
 
-        local h = UI.Canvas({
-            id = this.id+"_cross_h"
-            Size = VectorScreen(c.Size.X, size)  
-            Colour = color
-            align ="mid_left"    
-        })
-     
-        c.add(h);
-        h.realign();
-
-         local v = UI.Canvas({
-            id = this.id+"_cross_v"
-            Size = VectorScreen(size, c.Size.Y)  
-            Colour = color 
-            align ="top_center"    
-        })
-         c.add(v);
-         v.realign();
+            local h = UI.Canvas({
+                id = this.id+"_cross_h"
+                Size = VectorScreen(c.Size.X, size)  
+                Colour = color
+                align ="mid_left"    
+            })
         
+            c.add(h);
+            h.realign();
+
+            local v = UI.Canvas({
+                id = this.id+"_cross_v"
+                Size = VectorScreen(size, c.Size.Y)  
+                Colour = color 
+                align ="top_center"    
+            })
+            c.add(v);
+            v.realign();
+        }
 
     }
     function removeFill(){
         this.lines = [];
+    }
+    function removeCross(){
+        this.crossPoints = [];
+    }
+    function removePlus(){
+        local h = UI.Canvas(this.id+"_cross_h");
+        if (h!=null) {
+            h.destroy();
+        }
+        local v = UI.Canvas(this.id+"_cross_v");
+        if (v!=null) {
+            v.destroy();
+        }
+
     }
 }
 

@@ -19,7 +19,7 @@ elements <- [
         }
     }
  
-attachProps([ "UI", "file","remove","autoResize"
+attachProps([ "UI", "file","remove","autoResize", "RelativeSize"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
@@ -34,7 +34,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("removeBorders", function() {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.removeBorders(this);
         }
        
@@ -44,7 +44,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("updateBorders", function() {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.updateBorders(this);
         }
        
@@ -65,7 +65,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addLeftBorder", function(b) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.addBorder(this, b, "top_left");
         }
        
@@ -75,7 +75,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("setBorderColor", function(border, colour) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
             if (this.rawin("data") && this.data != null){
                 
                 if (this.data.rawin("borderIDs") && this.data.borderIDs != null){ 
@@ -97,7 +97,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("setBorderSize", function(border, size) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
             if (this.rawin("data") && this.data != null){
                 if (this.data.rawin("borderIDs") && this.data.borderIDs != null){
                     foreach (idx, borderPos in this.data.borderIDs) {
@@ -117,7 +117,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addRightBorder", function(b) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.addBorder(this, b, "top_right");
         }
        
@@ -127,7 +127,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addTopBorder", function(b) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.addBorder(this, b, "top_center");
         }
        
@@ -138,7 +138,7 @@ foreach(i,e in elements ) {
         local t = typeof this;
         local ui = this.UI;
       
-        if (t == "GUICanvas"){
+        if (t == "GUICanvas" || t == "GUISprite"){
            ui.addBorder(this, b, "bottom_left");
         }
        
@@ -320,6 +320,34 @@ foreach(i,e in elements ) {
             }
         }
     }, null, false); 
+       
+
+        //resetPosition()
+       e.rawnewmember("resetPosition", function() {
+           if (this.metadata.ORIGINAL_POS != null){
+               this.Position.X = this.metadata.ORIGINAL_POS.X;
+               this.Position.Y = this.metadata.ORIGINAL_POS.X;
+           }
+       })
+
+       //getWrapper()
+       e.rawnewmember("getWrapper", function() {
+            local wrapper = null; 
+            if (this.parents.len() == 0){ 
+                wrapper = ::GUI.GetScreenSize(); 
+            }else{ 
+                local lastID = this.parents[this.parents.len()-1];
+            
+                local parent = ::UI.findById(lastID);
+                wrapper =  parent == null ? ::GUI.GetScreenSize() : parent.Size;
+            }
+            return wrapper;
+       })
+
+      //applyRelativeSize()
+       e.rawnewmember("applyRelativeSize", function() {
+           ::UI.applyRelativeSize(this);
+       });
 
      //attachChild(p)
      e.rawnewmember("attachChild", function(p) {
@@ -340,7 +368,10 @@ foreach(i,e in elements ) {
             } 
           
             p.parents = list;
-             this.AddChild(p);
+            this.AddChild(p);
+            if (p.rawin("RelativeSize") && p.RelativeSize != null) {
+                 ::UI.applyRelativeSize(p); 
+            }
             if (p.rawin("align") && p.align != null){
                 p.realign();
             }
@@ -374,8 +405,9 @@ foreach(i,e in elements ) {
                     p.realign();
                 }
             }
-          
-          
+           if (p.rawin("shiftPos") && p.shiftPos != null){
+                 p.shiftPos(); 
+            }
            
         }
     }, null, false);
