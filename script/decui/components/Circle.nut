@@ -19,6 +19,7 @@ class CanvasCircle extends Component {
     plusDrawnFlag = null;
     crossDrawnFlag = null;
 
+
     constructor(o) {
         this.points =  [];
         this.lines = [];
@@ -40,6 +41,7 @@ class CanvasCircle extends Component {
              this.Position = o.Position;
         }
 
+        
         if (o.rawin("radius")){
             this.radius = o.radius;
         }
@@ -89,7 +91,9 @@ class CanvasCircle extends Component {
         
         base.constructor(this.id);
         this.drawCircle(radius,radius, this.radius,c);
-      
+        if (o.rawin("crossed") && o.crossed){
+            this.cross(c);
+        }
         
     
     }

@@ -67,7 +67,6 @@ Timer <- {
 				{
 					tm.CallCount++;
 					tm.LastCall = CurrTime;
-
 					tm.Listener.pacall(tm.Args);
 
 					if (tm.Repeat != 0 && tm.CallCount >= tm.Repeat)

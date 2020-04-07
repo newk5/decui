@@ -13,6 +13,7 @@ class StreamRequest {
     list = null;
     context = null;
     
+    onArrayFilter = null;
 
 
     constructor(o) {
@@ -29,6 +30,9 @@ class StreamRequest {
         }
          if (o.rawin("context")) {
             this.context = o.context;
+        }
+        if (o.rawin("onArrayFilter")) {
+            this.onArrayFilter = o.onArrayFilter;
         }
          if (o.rawin("arraySize")) {
             this.arraySize = o.arraySize;
@@ -65,7 +69,7 @@ class StreamRequest {
 
         foreach (idx, field in this.responseObject.fields){
             local v = this.responseObject.types[idx];
-
+            
             if (v == "string"){
                 obj[field] <-  stream.ReadString();
                 
@@ -76,6 +80,10 @@ class StreamRequest {
             } else if (v == "byte"){
                 obj[field] <-  stream.ReadByte();
             }
+           
+        }
+         if (this.onArrayFilter !=  null){
+                this.onArrayFilter(obj);
         }
         if (this.isArray){
             if (this.list.len()+1 > this.arraySize){
@@ -83,7 +91,7 @@ class StreamRequest {
             }
             this.list.push(obj);
             
-            if (this.list.len() == this.arraySize){
+            if (this.list.len() == this.arraySize && this.onComplete != null){
                 this.onComplete(this.list);
                 ::UI.removeStream(this.identifier);
             }

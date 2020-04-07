@@ -4,14 +4,13 @@ UI.Cursor("ON");
 local t = UI.DataTable({
     id="tbl", 
     contextMenu = {
-        type = "canvas"
          options = [
              { 
                  name = "Delete",
                  color = Colour(255,0,0),
                  onClick = function() {
                      local row = this.data.row; //clicked row
-                    // ::removeData(row);
+
                      UI.DataTable("tbl").removeRow(row);
                  }
                   

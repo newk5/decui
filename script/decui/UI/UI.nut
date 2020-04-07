@@ -20,6 +20,8 @@ class UI  {
     events = null;
     streamControllers = [];
     lastClickedEl = null;
+    openNots = 0;
+    notsHeight = 0;
     
     constructor() {
 
@@ -28,8 +30,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles" ];
+        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [], [], [] ];
+        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -163,6 +165,10 @@ class UI  {
     function align(e) { 
         if (e.align != null){
             local a = e.align.tolower();
+            local t = typeof this;
+            local isLabel = t == "GUILabel";
+            local sizeX = isLabel ? e.TextSize.X : e.Size.X;
+            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y;
             local wrapper = null; 
             if (e.parents.len() == 0){ 
                 wrapper = GUI.GetScreenSize(); 
@@ -175,33 +181,31 @@ class UI  {
             
             if (a == "top_right"){
                 e.Position.Y = 0;
-                e.Position.X = wrapper.X - e.Size.X;
-              
-                
+                e.Position.X = wrapper.X - sizeX;
             } else if (a == "top_left"){
                 e.Position.Y = 0;
                 e.Position.X = 0;
             } else if (a == "top_center"){
                 e.Position.Y = 0;
-                e.Position.X = wrapper.X / 2 - e.Size.X /2;
+                e.Position.X = wrapper.X / 2 - sizeX /2;
             } else if (a == "bottom_right"){
-                e.Position.Y = wrapper.Y - e.Size.Y;
-                e.Position.X = wrapper.X - e.Size.X;
+                e.Position.Y = wrapper.Y - sizeY;
+                e.Position.X = wrapper.X - sizeX;
             } else if (a == "bottom_left"){
-                e.Position.Y =  wrapper.Y - e.Size.Y;
+                e.Position.Y =  wrapper.Y - sizeY;
                 e.Position.X = 0;
             } else if (a == "bottom_center" || a == "bottom"){
-                e.Position.Y = wrapper.Y - e.Size.Y;
-                e.Position.X = wrapper.X / 2 - e.Size.X /2;
+                e.Position.Y = wrapper.Y - sizeY;
+                e.Position.X = wrapper.X / 2 - sizeX /2;
             } else if (a == "mid_center" || a == "center"){
-                e.Position.Y = wrapper.Y / 2 - e.Size.Y /2;
-                e.Position.X = wrapper.X / 2 - e.Size.X /2;
+                e.Position.Y = wrapper.Y / 2 - sizeY /2;
+                e.Position.X = wrapper.X / 2 - sizeX /2;
            } else if (a == "mid_left"){
-                e.Position.Y = wrapper.Y / 2 - e.Size.Y /2;
+                e.Position.Y = wrapper.Y / 2 - sizeY /2;
                 e.Position.X = 0;
             } else if (a == "mid_right"){
-                e.Position.Y = wrapper.Y / 2 - e.Size.Y /2;
-                e.Position.X = wrapper.X - e.Size.X;
+                e.Position.Y = wrapper.Y / 2 - sizeY /2;
+                e.Position.X = wrapper.X - sizeX;
             } else if (a == "radar_right"){
                 e.Position.Y =  wrapper.Y -(wrapper.Y / 3.9);
                 e.Position.X =  (wrapper.X /4.5);
@@ -287,15 +291,16 @@ class UI  {
         }else{ 
             GUI.SetMouseEnabled(false); 
         }
-    }    
+    }      
  
     function addToDeleteQueue(e) { 
         delete idsMetadata[this.cleanID(e.id)]; 
-        toDelete.push(e); 
+        //e = null;                  
+        toDelete.push(e);   
         
     } 
 
-
+ 
     function getChildren(parent){
         if (parent.id != null && parent.id != ""){ 
           
@@ -306,7 +311,7 @@ class UI  {
                 foreach (el in list) {
                     if (el.parents.find(parent.id) !=null){
                           
-                        arr.push(el); 
+                        arr.push(el);  
                     }
                 }
             }
@@ -382,17 +387,23 @@ class UI  {
    
     function findById(id) { 
         local newid = this.cleanID(id);
-       
-        local listName =this.idsMetadata[newid].list; 
-        local list = this.lists[names.find(listName)];
 
-        local idx = this.bSearch(list, idsMetadata[newid].index, 0, list.len()-1);
-        if (idx == null){
+        try {
+            local listName =this.idsMetadata[newid].list; 
+            
+            
+            local list = this.lists[names.find(listName)];
+
+            local idx = this.bSearch(list, idsMetadata[newid].index, 0, list.len()-1);
+            if (idx == null){
+                return null;
+            }
+            local e =  list[idx];
+            
+            return e;
+        }catch (ex){
             return null;
         }
-        local e =  list[idx];
-        
-        return e;
     }
 
    
@@ -486,9 +497,10 @@ class UI  {
               
                
               
-                if (mousePos != null) {  
+                if (mousePos != null) {
+
                     local l = null ; 
-                      local pos =null; 
+                    local pos =null; 
                     if (typeof el.tooltip == "string"){
                         col = Colour(0,0,0,150);
                         l = UI.Label({id = el.id+"::tooltip::label", align="center" Alpha = 200,  Text = el.tooltip, TextColour  = Colour(255,255,255,0) });
@@ -498,21 +510,23 @@ class UI  {
                         
                     }else{
                          col = el.tooltip.rawin("canvasColor") ? el.tooltip.canvasColor : Colour(0,0,0,150);
-                        l = UI.Label(el.tooltip.label);
-                        if (el.tooltip.rawin("direction")) {
-                            local dir = el.tooltip.direction;
-                            if (dir == "up"){
-                                y -= el.Size.Y+10;
-                            
-                            } else if (dir == "down"){
-                                 y +=el.Size.Y+10;
-                            
-                            }  else if (dir == "right"){
-                                 x += el.Size.X+10;
-                             
-                            } else if (dir == "left"){
-                                x -= el.Size.X-10;
-                            
+                        if (el.tooltip.rawin("label")){
+                            l = UI.Label(el.tooltip.label);
+                            if (el.tooltip.rawin("direction")) {
+                                local dir = el.tooltip.direction;
+                                if (dir == "up"){
+                                    y -= el.Size.Y+10;
+                                
+                                } else if (dir == "down"){
+                                    y +=el.Size.Y+10;
+                                
+                                }  else if (dir == "right"){
+                                    x += el.Size.X+10;
+                                
+                                } else if (dir == "left"){
+                                    x -= el.Size.X-10;
+                                
+                                }
                             }
                         }
                     }  
@@ -522,11 +536,24 @@ class UI  {
                         id = el.id+"::tooltip",
                         Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
                         Color= col  
-                        Position = pos,
-                       children = [l]
-                       
-                    });
-                    
+                        Position = pos
+                        autoResize = true
+                    }); 
+                    if (l != null){ 
+                        c.add(l);
+                    }
+                    if (el.tooltip.rawin("extraLabels")){
+                        foreach(i,ce in el.tooltip.extraLabels ) {
+                            local cid = Script.GetTicks()+""+i;
+                            ce["id"] <- cid;
+                            c.add(UI.Label(ce));  
+                        }
+                    }
+                    if (el.tooltip.rawin("border")){
+                        c.addBorders(el.tooltip.border);
+                    }
+
+
                     el.tooltipVisible = true;
                 }
             } 
@@ -697,6 +724,7 @@ class UI  {
         b.metadata.index = this.listsNumeration.buttons;
 
         if ( !o.rawin("Size") ){ 
+            
             b.Size = VectorScreen(50,25);
         }
        
@@ -766,6 +794,34 @@ class UI  {
 
         return c;
     }
+
+    function Notification(o){   
+        if (typeof o == "string") {
+            local p = this.fetch.canvas(o);
+            if (p != null) {
+                return p.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = UINotification(o);
+        c.metadata.list ="notifications";
+        c.metadata.index = this.listsNumeration.popups;
+
+        lists[names.find("notifications")].push(c); 
+
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
+    
+         this.listsNumeration.notifications++;
+
+
+        return c;
+    }
+
       function Circle(o){   
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
@@ -813,7 +869,33 @@ class UI  {
 
         this.listsNumeration.datatables++;  
         return c;
+    } 
+
+     function Grid(o){   
+        if (typeof o == "string") { 
+               
+            local p = this.fetch.canvas(o);
+
+            if (p != null) {
+                return p.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = UIGrid(o);
+        c.metadata.list ="grids";
+        c.metadata.index = this.listsNumeration.grids;
+
+        if (c.rawin("postConstruct")){
+            if (c.postConstruct !=  null){
+                c.postConstruct();
+            }
+        }
+
+        this.listsNumeration.grids++;  
+        return c;
     }
+
     function TabView(o){   
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
@@ -932,8 +1014,8 @@ class UI  {
                 }
             }
         }
-      
-       
+
+              
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
@@ -942,14 +1024,12 @@ class UI  {
                 }
             }
         }
-       
-       
-       if (b.autoResize){
+
+         if (b.autoResize){
              b.realign();
              b.shiftPos();
         }
-
-      
+       
        
         this.listsNumeration.canvas++;
         

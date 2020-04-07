@@ -29,7 +29,8 @@ class Tabview  extends Component {
         this.currentTabIdx = -1; 
         this.maxContentSize =  VectorScreen(0,0);
        
-        this.style = {
+        this.style = { };
+        local defaultStyle = {
             titleColor = Colour(51,150,255),
             titleSize = 17,
             tabColor = Colour(51,57,61,200),
@@ -40,7 +41,9 @@ class Tabview  extends Component {
             borderSize = 2,
             headerBorderColor = Colour(255,255,255),
             headerBorderSize = 2
+            headerInactiveBorderColor = Colour(255,255,255)
         };
+        
 
         if (o.rawin("tabs")){
             this.tabs = o.tabs;
@@ -56,40 +59,69 @@ class Tabview  extends Component {
             this.move = o.move;
         }
          if (o.rawin("style")){
+             
              this.style = o.style;
              if (style.rawin("titleSize")) {
                 this.style.titleSize = o.style.titleSize;
+            }else {
+               this.style.titleSize <- defaultStyle.titleSize;
             }
             if (style.rawin("titleColor")){
                 this.style.titleColor = o.style.titleColor; 
-            }  
+            } else{
+                this.style.titleColor <- defaultStyle.titleColor; 
+            } 
             if (style.rawin("tabColor")) {
                 this.style.tabColor = o.style.tabColor;
-            }    
+            }else{
+                this.style.tabColor <- defaultStyle.tabColor; 
+            }     
             if (style.rawin("onHoverTabColor")) {
                 this.style.onHoverTabColor = o.style.onHoverTabColor;
-            }
+            }else{
+                this.style.onHoverTabColor <- defaultStyle.onHoverTabColor; 
+            } 
              if (style.rawin("activeTabColor")) {
                 this.style.activeTabColor = o.style.activeTabColor;
-            }
+            }else{
+                this.style.activeTabColor <- defaultStyle.activeTabColor; 
+            } 
              if (style.rawin("background")) {
                 this.style.background = o.style.background;
-            }
+            }else{
+                this.style.background <- defaultStyle.background; 
+            } 
               if (style.rawin("borderColor")) {
                 this.style.borderColor = o.style.borderColor;
-            }
+            } else{
+                this.style.borderColor <- defaultStyle.borderColor; 
+            } 
              if (style.rawin("borderSize")) {
                 this.style.borderSize = o.style.borderSize;
-            }
+            }else{
+                this.style.borderSize <- defaultStyle.borderSize; 
+            } 
              if (style.rawin("headerBorderColor")) {
                 this.style.headerBorderColor = o.style.headerBorderColor;
-            }
+            } else{
+                this.style.headerBorderColor <- defaultStyle.headerBorderColor; 
+            } 
              if (style.rawin("headerBorderSize")) {
                 this.style.headerBorderSize = o.style.headerBorderSize;
-            }
+            } else{
+                this.style.headerBorderSize <- defaultStyle.headerBorderSize; 
+            } 
+            
+             if (style.rawin("headerInactiveBorderColor")) {
+                this.style.headerInactiveBorderColor = o.style.headerInactiveBorderColor;
+            } else{
+                this.style.headerInactiveBorderColor <- defaultStyle.headerInactiveBorderColor; 
+            } 
 
             //
             
+        }else{
+            this.style = defaultStyle;
         }
         
         if (o.rawin("id")){
@@ -133,7 +165,7 @@ class Tabview  extends Component {
             c.Colour = this.style.activeTabColor;
             c.data.active = true;
               local wrapper = UI.Canvas(this.id);
-            c.setBorderColor("bottom",  this.style.titleColor );
+            c.setBorderColor("bottom", c.data.tc );
             c.SendToBottom();
             this.resizeTabContentCanvas(wrapper, tabIdx );
             if (this.onTabChangeEvent != null && !firstDraw) {
@@ -359,7 +391,7 @@ class Tabview  extends Component {
             if (c !=null){
                 c.Color = this.style.tabColor;
                 c.data.active = false;
-                c.setBorderColor("bottom", Colour(255,255,255));
+                c.setBorderColor("bottom", this.style.headerInactiveBorderColor);
             }
             
             if (content != null){
@@ -399,29 +431,95 @@ class Tabview  extends Component {
             tabContent.Size = this.Size;
 
              local color = null;
-             if (tab.rawin("style") && tab.style.tabColor != null ){
+            local ac = null;
+            local tc = null;
+            
+             if (tab.rawin("style") && tab.style != null && tab.style.rawin("tabColor") && tab.style.tabColor != null ){
                color =  tab.style.tabColor;
             } else{
-               color  =  this.style.tabColor;
+                if (this.style.rawin("tabColor") && this.style.tabColor != null){
+                    color  =  this.style.tabColor;
+                }
+               
             }  
 
-            local label = UI.Label({
+            if (tab.rawin("style") && tab.style != null && tab.style.rawin("activeTabColor") && tab.style.activeTabColor != null ){
+                ac =  tab.style.activeTabColor;
+            } else{
+
+                  if (this.style.rawin("activeTabColor") && this.style.activeTabColor != null){
+                    ac  =  this.style.activeTabColor;
+                  }
+            } 
+            if (tab.rawin("style") && tab.style != null && tab.style.rawin("titleColor") && tab.style.titleColor != null ){
+                tc =  tab.style.titleColor;
+            } else{
+                if (this.style.rawin("titleColor") && this.style.titleColor != null){
+                    tc  =  this.style.titleColor; 
+                }
+            } 
+            
+            local label =UI.Label({
+                id = this.id+"::tab"+contentID+"::label"
+                Text = tab.title 
+            });
+            
+            if (this.style.rawin("titleSize") && this.style.titleSize != null) {
+                label.FontSize = this.style.titleSize; 
+            }
+            local tabCanvas =UI.Canvas({ 
+                id = this.id+"::tab"+contentID+"::canvas",
+                Size = VectorScreen(label.Size.X+5, label.Size.Y+5),
+                Position = VectorScreen(x, 0),
+                data = { defaultColor = color, active = false, idx = idx, tab = tab.title, wrapper = wrapper, content = contentID, ac = ac, tc = tc, tabColor= color},
+                Colour = color,
+                context = this,
+                 metadata = { contentID = contentID},
+                onHoverOver = function(){ 
+                    this.Colour = context.style.onHoverTabColor;
+                }, 
+                 onHoverOut = function(){
+                    
+                    if (!this.data.active) {
+                        this.Colour = this.data.tabColor;
+                    }
+                }, 
+                onClick = function(){ 
+                    context.clearActiveTabs();
+                    this.Colour = context.style.activeTabColor;
+                    this.data.active = true;
+                    this.setBorderColor("bottom",  this.data.tc );
+                    this.SendToBottom(); 
+
+                     local cid = context.id+"::tab"+this.data.content+"::content";
+                    local content = this.UI.Canvas(cid);
+                    content.show();
+                    if (context.onTabChangeEvent != null){ 
+                        context.onTabChangeEvent(this.data.tab);
+                    }
+                    context.resizeTabContentCanvas(wrapper, this.data.idx );
+                    
+                }
+            });   
+
+            label.destroy();
+             label = UI.Label({
                 id = this.id+"::tab"+contentID+"::label",
                 Text = tab.title,
                 context = this, 
-                data = { idx = idx, tab = tab.title, wrapper = wrapper ,content = contentID},
+                data = { idx = idx, tab = tab.title, wrapper = wrapper ,content = contentID, ac = ac, tc = tc, tabColor= color},
                 onHoverOver = function(){
-                   this.TextColour = context.style.titleColor;
+                   this.TextColour = this.data.tc;
                     local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
                     c.Colour = context.style.onHoverTabColor;
                 },
                  onHoverOut = function(){      
-                     
-                   this.TextColour = context.style.titleColor; 
+                      
+                   this.TextColour = this.data.tc; 
 
                     local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
                     if (c != null && !c.data.active) {
-                         c.Colour = context.style.tabColor; 
+                         c.Colour = this.data.tabColor; 
                     } 
                   
                 },
@@ -431,7 +529,7 @@ class Tabview  extends Component {
                     local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
                     c.Colour = context.style.activeTabColor;
                     c.data.active = true;
-                    c.setBorderColor("bottom",  context.style.titleColor ); 
+                    c.setBorderColor("bottom",  this.data.tc ); 
                     c.SendToBottom();
                    
                     local cid = context.id+"::tab"+this.data.content+"::content";
@@ -445,56 +543,21 @@ class Tabview  extends Component {
                      context.resizeTabContentCanvas(wrapper, this.data.idx );
                    
                 }
-            });
-
-            if (this.style.titleSize != null) {
-                label.FontSize = this.style.titleSize; 
-            }
-            if (tab.rawin("style") ){
-                label.TextColour = tab.style.titleColor;
-            }else{
-                label.TextColour = this.style.titleColor;
-            }
-
-            local tabCanvas =UI.Canvas({
-                id = this.id+"::tab"+contentID+"::canvas",
-                Size = VectorScreen(label.Size.X+5, label.Size.Y+5),
-                Position = VectorScreen(x, 0),
-                data = { defaultColor = color, active = false, idx = idx, tab = tab.title, wrapper = wrapper, content = contentID},
-                Colour = color,
-                context = this,
-                 metadata = { contentID = contentID},
-                onHoverOver = function(){ 
-                    this.Colour = context.style.onHoverTabColor;
-                }, 
-                 onHoverOut = function(){
-                    
-                    if (!this.data.active) {
-                        this.Colour = context.style.tabColor;
-                    }
-                }, 
-                onClick = function(){
-                    context.clearActiveTabs();
-                    this.Colour = context.style.activeTabColor;
-                    this.data.active = true;
-                    this.setBorderColor("bottom",  context.style.titleColor );
-                    this.SendToBottom(); 
-
-                     local cid = context.id+"::tab"+this.data.content+"::content";
-                    local content = this.UI.Canvas(cid);
-                    content.show();
-                    if (context.onTabChangeEvent != null){ 
-                        context.onTabChangeEvent(this.data.tab);
-                    }
-                    context.resizeTabContentCanvas(wrapper, this.data.idx );
+                postConstruct = function () {
                     
                 }
-            });    
-           
+            });
 
+            if (this.style.rawin("titleSize") && this.style.titleSize != null) {
+                label.FontSize = this.style.titleSize; 
+            }
+            
+            label.TextColour = tc; 
+           
+            
             tabHeight = tabCanvas.Size.Y;
             tabsSize += tabCanvas.Size.X;
-          
+           
             wrapper.Size.Y = tabCanvas.Size.Y;
                 
       
@@ -503,28 +566,29 @@ class Tabview  extends Component {
           //  if (!rebuild){ 
                 tabContent.Position.Y = tabCanvas.Size.Y;
           //  }
-            if (idx == 0){
-                tabCanvas.Colour = this.style.activeTabColor;
+            if (idx == 0){ 
+                tabCanvas.Colour = ac;
                 tabCanvas.data.active = true;
-                tabCanvas.setBorderColor("bottom",  this.style.titleColor );
+                tabCanvas.setBorderColor("bottom",  tc );
                 tabCanvas.SendToBottom();
             }
            
-           
             wrapper.add(tabCanvas);  
-            tabCanvas.addBottomBorder({  });
+            tabCanvas.addBottomBorder({ color = this.style.headerInactiveBorderColor });
             tabCanvas.add(label);
             wrapper.add(tabContent);
             
             if (tab.rawin("content")){  
                  foreach (i, child in tab.content){
                     if ( child.rawin("className")){  
-            
+             
                         if (child.className == "InputGroup"){
                             child.attachParent(tabContent,0);
                         } else if (child.className == "GroupRow"){  
                             child.parentID = tabContent.id;
                             child.calculatePositions();
+                        } else {
+                            tabContent.add(UI.Canvas(child.id)); 
                         }
                     }else{
                         tabContent.add(child); 
@@ -646,6 +710,14 @@ class Tabview  extends Component {
                 if (tab.rawin("content")){
                     foreach (i, child in tab.content){
                        child.realign();
+                       if (child.rawin("move")){
+                           if (typeof child == "instance"){
+                               local el = UI.Canvas(child.id);
+                             
+                               el.shiftPos();
+                           }
+                           
+                       }
                     }
                 }
             }
@@ -664,7 +736,7 @@ class Tabview  extends Component {
                    c.Size.X= wrapper.Size.X;
                   
                   child.realign();
-                  if (child.rawin("move") && child.move != null && child.rawin("align") && child.align != null){
+                  if (child.rawin("move") && child.move != null ){
                     child.shiftPos(); 
                   }
                }

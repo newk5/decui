@@ -52,7 +52,7 @@ class Combobox extends Component {
  
    function calculateListHeight() {
         calcHeigh =  (21 * this.options.len()) +20 ; 
-        return calcHeigh;
+        return calcHeigh; 
     }
 
     function attachParent(parent){

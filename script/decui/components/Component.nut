@@ -28,4 +28,19 @@ class Component  {
     function realign() {
         UI.Canvas(this.id).realign();
     }
+     function shiftPos() {
+        UI.Canvas(this.id).shiftPos();
+    }
+     function SendToTop() {
+        UI.Canvas(this.id).SendToTop();
+    }
+    function SendToBottom() {
+        UI.Canvas(this.id).SendToBottom();
+    }
+    function MoveForward() {
+        UI.Canvas(this.id).MoveForward();
+    }
+      function MoveBackward() {
+        UI.Canvas(this.id).MoveBackward();
+    }
 }

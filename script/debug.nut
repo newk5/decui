@@ -84,7 +84,7 @@
     }
 
 
-    function errorHandling(err) {
+function errorHandling(err) {
     local stackInfos = getstackinfos(2);
 
     if (stackInfos) {

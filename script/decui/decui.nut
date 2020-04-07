@@ -8,19 +8,17 @@ dofile("decui/components/Popup.nut");
 dofile("decui/components/Table.nut");
 dofile("decui/components/Tabview.nut");
 dofile("decui/components/Circle.nut");
+dofile("decui/components/Notification.nut");
+dofile("decui/components/Grid.nut");
+
 
 dofile("decui/UI/Fetch.nut");
 dofile("decui/UI/Events.nut");
 dofile("decui/UI/UI.nut");
-
+ 
 dofile("decui/util/StreamRequest.nut");
-
-
  
 UI <- UI();  
-
- 
- 
 
 function Script::ScriptProcess(){
     UI.events.scriptProcess();
@@ -68,7 +66,7 @@ function GUI::ScrollbarScroll(scrollbar, position, change) {
     UI.events.onScrollbarScroll(scrollbar, position,change);
 }
 function GUI::GameResize(width, height) {
-    UI.events.onGameResize();
+   UI.events.onGameResize();
 
 }
 function GUI::WindowResize(window, width, height) {
@@ -76,15 +74,17 @@ function GUI::WindowResize(window, width, height) {
 }
 
 
-UI.registerKeyBind({  
+UI.registerKeyBind({   
     name= "left"+Script.GetTicks(), 
-    kp= KeyBind(0x01), 
+    kp= KeyBind(0x01),  
     onKeyUp = function() {
-       
+          
         if (UI.openContextID != null){
             local ctx =  UI.Canvas(UI.openContextID); 
-            
             if (ctx != null){
+                if (ctx.rawin("onHide") && ctx.onHide != null){
+                    ctx.onHide();
+                } 
                 ctx.destroy();
                 UI.openContextID= null;
                 UI.hoveredEl=null;
@@ -102,7 +102,9 @@ UI.registerKeyBind({
         
        if (UI.hoveredEl != null ){
            local e = UI.findById(UI.hoveredEl.id);  
-           
+           if (e == null) {
+               return;
+           }
            if (e.rawin("contextMenu") && e.contextMenu != null) {
                local cm = e.contextMenu;
 
@@ -113,6 +115,9 @@ UI.registerKeyBind({
             
                         if (ctx != null){
                             ctx.destroy();
+                            if (cm.rawin("onHide")){
+                                cm.onHide();
+                            }
                             UI.openContextID= null;
                             UI.hoveredEl=null;
                            
@@ -143,7 +148,7 @@ UI.registerKeyBind({
                                     id = ctxID+"::option"+i ,
                                    
                                     parents = [ctxID], 
-                                    Size = e.rawin("size") ? e.size : VectorScreen(50,25),
+                                    Size = e.rawin("Size") ? e.Size : VectorScreen(50,25),
                                     Position = VectorScreen(0,y),
                                     onClick = e.onClick,
                                     data = { buttonID =  ctxID, row = data },
@@ -191,7 +196,7 @@ UI.registerKeyBind({
                             b.data.defaultAlpha <- b.Colour.A;
                             options.push(b);
                         
-                            y+=25;
+                            y+=b.Size.Y
                         }
                     } else {
                         
@@ -201,7 +206,7 @@ UI.registerKeyBind({
                                     Text = e.name, 
                                     TextColour =  e.rawin("textColour") ? e.textColour : Colour(0,0,0),
                                     parents = [ctxID], 
-                                    Size = e.rawin("size") ? e.size : VectorScreen(50,25),
+                                    Size = e.rawin("Size") ? e.Size : VectorScreen(50,25),
                                     Position = VectorScreen(0,y),
                                     onClick = e.onClick,
                                     data = { buttonID =  ctxID, row = data}
@@ -211,7 +216,7 @@ UI.registerKeyBind({
                             }
                             options.push(b);
                         
-                            y+=25;
+                            y+=b.Size.Y;
                         }
                     }
 

@@ -296,7 +296,7 @@ foreach(i,e in elements ) {
        return null;
     }, null, false);
 
-      //getFirstParent()
+      //getLastParent()
      e.rawnewmember("getLastParent", function() {
        if (this.parents.len() >0){
            return this.parents[0];
@@ -355,7 +355,7 @@ foreach(i,e in elements ) {
         local ct = typeof p;
 
          if (this.id != null && p.id != this.id ) {
-                
+                 
                 
             local list =  this.UI.mergeArray(this.parents, this.id); 
             if (this.childLists.find(p.metadata.list) == null) {
@@ -376,6 +376,7 @@ foreach(i,e in elements ) {
                 p.realign();
             }
             if ( this.autoResize   ){ 
+                
                 local adjusted = false;
                 if (this.Size.X < p.Size.X){
                     this.Size.X = p.Size.X;
@@ -404,6 +405,14 @@ foreach(i,e in elements ) {
                  if (p.rawin("align") && p.align != null){
                     p.realign();
                 }
+                foreach (i, c in this.getChildren()) {
+                    if (!c.rawin("className")) {
+                        c.resetPosition();
+                        c.realign();
+                        c.shiftPos();
+                    }
+                }
+                
             }
            if (p.rawin("shiftPos") && p.shiftPos != null){
                  p.shiftPos(); 
@@ -415,23 +424,23 @@ foreach(i,e in elements ) {
 
     //add(e)
      e.rawnewmember("add", function(p) {
-    
         
-        p.parentSize = this.Size;
         if ( p.rawin("className")){ 
-            
             if (p.className == "InputGroup"){ 
                 p.attachParent(this,0);
             } else if (p.className == "GroupRow"){   
                p.parentID = this.id;
                p.calculatePositions(); 
-            } else {
-                 p = ::UI.Canvas(p.id);
+            } else { 
+               
+                 p = ::UI.Canvas(p.id); 
                 this.attachChild(p);
             }
            
 
         }else{ 
+           
+           p.parentSize = this.Size;
            this.attachChild(p);
         }
         

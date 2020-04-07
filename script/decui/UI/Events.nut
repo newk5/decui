@@ -9,11 +9,10 @@
             } 
     
         function onGameResize(){
-
-            foreach(i,list in this.UI.lists ) { 
+            
+            foreach(i,list in this.UI.lists ) {  
                foreach(c,e in list ) { 
-                   if (e.parents.len() == 0){
-
+                   if (e.rawin("parents") && e.parents.len() == 0){
                  
                         if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
 
@@ -25,6 +24,7 @@
                             } 
                             e.updateBorders();
                            
+                           
                         }else{
 
                             e.resetPosition();
@@ -32,7 +32,6 @@
                             if (e.rawin("shiftPos") && e.shiftPos != null){
                                 e.shiftPos(); 
                             }
-                                
                                 
                         }
 
@@ -45,16 +44,25 @@
                             if (child.rawin("onGameResize") && child.onGameResize != null){
                                 child.onGameResize();
                             }
+                            if (child.hidden){
+                                child.hide();
+                            }
+                             if (child.hidden){
+                                child.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
+                                child.hide(); 
+                            }
                         }
                         if (e.rawin("onGameResize") && e.onGameResize != null){
                             e.onGameResize();
                         }
+
+                        if (e.hidden){
+                            e.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
+                            e.hide(); 
+                        }
+                        
                     }
-                 
-                  
-                  
-                 
-                 
+         
                 }
             }
         } 
@@ -164,23 +172,26 @@
         }
 
          function onHoverOver(el){ 
+            if (el.rawin("metadata") && el.metadata != null){
 
-            this.UI.hoveredEl= { id =el.id, list = el.metadata.list };
-            try {
-                if (el.tooltip != null){
-                    local isString = (typeof el.tooltip ) == "string";
-                    local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
-                    local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
-                    
-                    if (isString || doesNotSpecifyEvent || eventIsNotFocus) {
-                        el.showTooltip();
-                    }
+           
+                this.UI.hoveredEl= { id =el.id, list = el.metadata.list };
+                try {
+                    if (el.tooltip != null){
+                        local isString = (typeof el.tooltip ) == "string";
+                        local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
+                        local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
+                        
+                        if (isString || doesNotSpecifyEvent || eventIsNotFocus) {
+                            el.showTooltip();
+                        }
+                    }   
+                } catch(e){
+
                 }   
-            } catch(e){
-
-            }   
-            if(el.onHoverOver!=null){
-                el.onHoverOver();
+                if(el.onHoverOver!=null){
+                    el.onHoverOver();
+                }
             }
 
         }
