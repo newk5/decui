@@ -862,6 +862,8 @@ class UI  {
         c.metadata.list ="datatables";
         c.metadata.index = this.listsNumeration.datatables;
 
+        lists[names.find("datatables")].push(c); 
+
         if (c.rawin("postConstruct")){
             if (c.postConstruct !=  null){
                 c.postConstruct();
@@ -886,6 +888,7 @@ class UI  {
         local c = UIGrid(o);
         c.metadata.list ="grids";
         c.metadata.index = this.listsNumeration.grids;
+         lists[names.find("grids")].push(c);
 
         if (c.rawin("postConstruct")){
             if (c.postConstruct !=  null){
