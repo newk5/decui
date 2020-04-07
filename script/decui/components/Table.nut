@@ -1196,7 +1196,7 @@ class Table extends Component {
 
             cellX += colCanv.Size.X; 
             rowY = 0;
-            //Console.Print(cellX);
+          
             tableWidth = cellX;
            
             //center column header text
