@@ -41,7 +41,7 @@ You can see a list of all the events you have to bind [here](https://github.com/
 The following is a canvas centered horizontally and vertically on the screen, with a button also centered inside the canvas 
 with a label and an editbox. You can type on the editbox and click the button to change the label's text. 
 
-![Alt Text](http://i63.tinypic.com/2ilbtc1.gif)
+![Alt Text](https://i.imgur.com/5l3gbAs.gif)
 
 Below is a comparison of how
 the code for this would look like when using the imperative VCMP based approach and with the declarative approach using DecUI:
