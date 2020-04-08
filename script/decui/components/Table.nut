@@ -537,7 +537,9 @@ class Table extends Component {
         
          foreach (i, c in this.columns) { 
              local colCanvID = this.id+"::table::column::canvas"+i;
-             UI.Canvas(colCanvID).destroy();
+             local column = UI.Canvas(colCanvID);
+             column.removeBorders();
+             column.destroy();
          } 
     }
 
@@ -677,6 +679,15 @@ class Table extends Component {
         
     }
 
+    function removeRowBorders() {
+        for(local i =0; i<= this.rows; i++) {  
+            local row = UI.Canvas( this.id+"::table::row"+i );
+            if (row != null){
+                row.removeBorders();
+            }
+        }
+    }
+
     function removeRow(o){
         if (!this.isEmpty && !this.awatingResponse) { 
             local isLastRow = this.totalRows == 1;
@@ -697,7 +708,7 @@ class Table extends Component {
                 
                 local item = arr.find(o);   
                 if (item ==0){   
-                    break; 
+                    break;  
                 }  
                 if (item != null){ 
 

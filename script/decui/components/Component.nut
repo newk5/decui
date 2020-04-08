@@ -11,6 +11,10 @@ class Component  {
         local i = instanceList.find(this);
         instanceList[i] = null;
         instanceList.remove(i);
+        if (metadata.list == "datatables"){
+            this.clear(); 
+            this.removeRowBorders();
+        } 
         UI.DeleteByID(this.id);
     }
     function show() {

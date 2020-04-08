@@ -28,6 +28,25 @@
             Console.Print(s +" --> "+UI.lists[i].len());
         } 
     }
+
+    function showCreatedElements(){
+       Console.Print("-----------------------------------------------------------------")
+
+         foreach (i, s in UI.names) {
+            if (UI.lists[i].len()>0)
+                Console.Print(s +" --> "+UI.lists[i].len());
+        } 
+    }
+
+    function printList(l){
+       Console.Print("-----------------------------------------------------------------")
+
+         foreach (i, s in UI.lists[UI.names.find(l)] ) {
+            
+            Console.Print(s.id);
+        } 
+    }
+    
     
     
 
