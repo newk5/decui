@@ -133,7 +133,7 @@ class Tabview  extends Component {
         if (o.rawin("align")){
             this.align = o.align; 
         }
-        base.constructor(this.id);
+      
 
         foreach (idx, tab in this.tabs){
             if (tab.rawin("content") && tab.content !=null){
@@ -146,7 +146,8 @@ class Tabview  extends Component {
             }
 
         }
-
+        base.constructor(this.id,o);
+        this.metadata.list ="tabviews";
         this.build();  
  
     }   

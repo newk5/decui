@@ -10,7 +10,7 @@ class PopUp extends Component {
     onClose = null;
     yesText =  null;
     noText = null;
-    metadata = {list = "canvas"};
+  
 
     constructor(o) {
        
@@ -50,7 +50,8 @@ class PopUp extends Component {
         }else{
             this.Position = VectorScreen(0,0);
         }
-         base.constructor(this.id);
+         base.constructor(this.id,o);
+         this.metadata.list = "popups";
         this.build();
         
     } 

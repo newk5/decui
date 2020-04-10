@@ -24,7 +24,7 @@ attachProps([ "UI", "file","remove","autoResize", "RelativeSize"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
-    "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options", "postConstruct", "data", "metadata"
+    "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
        ]);
 
 //attach new functions
@@ -191,6 +191,11 @@ foreach(i,e in elements ) {
 
     //destroy()
     e.rawnewmember("destroy", function() {
+        if (typeof this != "instance"){
+            if (this.rawin("preDestroy") && this.preDestroy != null){
+                this.preDestroy();
+            }
+        }
         this.UI.Delete(this);
     }, null, false);
 

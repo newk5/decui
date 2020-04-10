@@ -32,7 +32,8 @@ class UINotification extends Component {
 
         this.border = o.rawin("border") ? o.border : { color = ::Colour(255,255,255), size =1 };
  
-        base.constructor(this.id);
+        base.constructor(this.id,o);
+        this.metadata.list = "notifications";
         this.build();
         
     }

@@ -44,7 +44,8 @@ class Combobox extends Component {
         this.labelID = this.id+"::ComboBox::label";
         this.canvasSize = VectorScreen(this.size == null ? 90: this.size, 20);
 
-         base.constructor(this.id);
+        base.constructor(this.id,o);
+        this.metadata.list = "comboboxes";
         this.build(null,  this.onOptionSelect);
         
     } 

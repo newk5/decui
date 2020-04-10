@@ -1,12 +1,18 @@
 class Component  {
     id = null;
     metadata = null;
-    constructor(id) {
+    preDestroy = null;
+    constructor(id, o) {
         this.id = id;
-        metadata = { list = "", index = null };
+        this.metadata = { list = "", index = null };
+        if (o.rawin("preDestroy") && o.preDestroy != null){
+            this.preDestroy = o.preDestroy;
+        }
     }
     function destroy() {
-     
+        if (this.preDestroy != null){
+            this.preDestroy();
+        }
         local instanceList = UI.lists[UI.names.find(this.metadata.list)];
         local i = instanceList.find(this);
         instanceList[i] = null;

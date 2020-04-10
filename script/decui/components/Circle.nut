@@ -89,7 +89,8 @@ class CanvasCircle extends Component {
          this.ycenter =  c.Size.Y/2;
        
         
-        base.constructor(this.id);
+        base.constructor(this.id,o);
+        this.metadata.list ="circles";
         this.drawCircle(radius,radius, this.radius,c);
         if (o.rawin("crossed") && o.crossed){
             this.cross(c);

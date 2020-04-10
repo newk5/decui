@@ -2,7 +2,6 @@ class UIGrid extends Component {
    
     className =  "Grid"; 
    
-    metadata = {list = "canvas"};
     columns = null;
     rows = null;
     cellWidth = null;
@@ -94,7 +93,8 @@ class UIGrid extends Component {
         this.totalSlots = this.rows*this.columns;
         this.filledSlots = this.data.len();
 
-        base.constructor(this.id);
+        base.constructor(this.id,o);
+        this.metadata.list = "grids";
         this.build();
         
     } 

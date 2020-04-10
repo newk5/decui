@@ -493,10 +493,7 @@ class UI  {
                     el.realign();
                     el.shiftPos();
                 }
- 
-              
-               
-              
+
                 if (mousePos != null) {
 
                     local l = null ; 
@@ -654,8 +651,7 @@ class UI  {
     }
 
     function applyElementProps(element, obj){   
-         // print("applyElementProps --->"+ obj.id);
-                 
+        
 
         if (obj != null) { 
             if (!obj.rawin("id") || obj.id == null){    
@@ -701,7 +697,7 @@ class UI  {
             }else{
                 //print("ID NOT VALID "+ obj.id);
           
-                //print("canvas --> "+ this.lists[this.names.find("canvas")].len());
+                
             }
         }
 
@@ -714,6 +710,14 @@ class UI  {
         this.DeleteByID(e.id);
       
     } 
+
+    function postConstruct(b){
+        if (b.rawin("postConstruct")){
+            if (b.postConstruct !=  null){
+                b.postConstruct();
+            }
+        }
+    }
      
     function Button(o){ 
         if (typeof o == "string") {
@@ -733,12 +737,8 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list , index = this.listsNumeration.buttons };
         this.listsNumeration.buttons++;
 
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
-       // print(b.id +" created");
+        this.postConstruct(b);
+
         return b; 
     } 
 
@@ -754,18 +754,8 @@ class UI  {
             }
         }         
         local c = Combobox(o);
-        c.metadata.list ="comboboxes";
-        c.metadata.index = this.listsNumeration.comboboxes; 
-
-        lists[names.find("comboboxes")].push(c); 
-
-         if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-      
-        this.listsNumeration.comboboxes++;
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
         return c;
     }
 
@@ -779,20 +769,8 @@ class UI  {
             }
         }         
         local c = PopUp(o);
-        c.metadata.list ="popups";
-        c.metadata.index = this.listsNumeration.popups;
-
-        lists[names.find("popups")].push(c); 
-
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-    
-         this.listsNumeration.popups++;
-
-
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
         return c;
     }
 
@@ -806,19 +784,8 @@ class UI  {
             }
         }         
         local c = UINotification(o);
-        c.metadata.list ="notifications";
-        c.metadata.index = this.listsNumeration.popups;
-
-        lists[names.find("notifications")].push(c); 
-
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-    
-         this.listsNumeration.notifications++;
-
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
 
         return c;
     }
@@ -833,19 +800,8 @@ class UI  {
             }
         }         
         local c = CanvasCircle(o);
-        c.metadata.list ="circles";
-        c.metadata.index = this.listsNumeration.circles;
-
-        lists[names.find("circles")].push(c); 
-
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-    
-         this.listsNumeration.circles++;
-
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
 
         return c;
     }
@@ -859,18 +815,9 @@ class UI  {
             }
         }         
         local c = Table(o);
-        c.metadata.list ="datatables";
-        c.metadata.index = this.listsNumeration.datatables;
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
 
-        lists[names.find("datatables")].push(c); 
-
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-
-        this.listsNumeration.datatables++;  
         return c;
     } 
 
@@ -886,18 +833,18 @@ class UI  {
             }
         }         
         local c = UIGrid(o);
-        c.metadata.list ="grids";
-        c.metadata.index = this.listsNumeration.grids;
-         lists[names.find("grids")].push(c);
-
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
-
-        this.listsNumeration.grids++;  
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
         return c;
+    }
+
+    function addToListAndIncNumeration(c){
+        
+        local list = c.metadata.list;
+        c.metadata.index = this.listsNumeration[list];
+        lists[names.find(list)].push(c);
+
+        this.listsNumeration[list]++;  
     }
 
     function TabView(o){   
@@ -910,16 +857,8 @@ class UI  {
             }
         }         
         local c = Tabview(o);
-        c.metadata.list ="tabviews";
-        c.metadata.index = this.listsNumeration.tabviews;
-
-        lists[names.find("tabviews")].push(c); 
-        this.listsNumeration.tabviews++; 
-        if (c.rawin("postConstruct")){
-            if (c.postConstruct !=  null){
-                c.postConstruct();
-            }
-        }
+        this.addToListAndIncNumeration(c);
+        this.postConstruct(o);
 
         return c;
     }
@@ -950,11 +889,7 @@ class UI  {
          };
         this.listsNumeration.labels++;
 
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+        this.postConstruct(b);
 
         return b;
     }
@@ -974,12 +909,7 @@ class UI  {
          this.listsNumeration.editboxes++;
 
          
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
-
+        this.postConstruct(b);
         return b;
     } 
      function Canvas(o){
@@ -1037,13 +967,7 @@ class UI  {
        
         this.listsNumeration.canvas++;
         
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
-
-        
+        this.postConstruct(b);
 
         return b;
     }
@@ -1057,6 +981,9 @@ class UI  {
         lists[names.find("checkboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.checkboxes };
         this.listsNumeration.checkboxes++;
+        
+         this.postConstruct(b);
+        
         return b; 
     }
       function Listbox(o){
@@ -1077,11 +1004,8 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.listboxes };
         this.listsNumeration.listboxes++;
         
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+        this.postConstruct(b);
+
         return b;
     }
       function Memobox(o){
@@ -1094,6 +1018,9 @@ class UI  {
         lists[names.find("memoboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.memoboxes };
         this.listsNumeration.memoboxes++;
+
+         this.postConstruct(b);
+
         return b;
     }
        function ProgressBar(o){ 
@@ -1110,11 +1037,8 @@ class UI  {
         this.listsNumeration.progbars++;
 
         
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+         this.postConstruct(b);
+
         return b;
     }
        function Scrollbar(o){
@@ -1129,12 +1053,7 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.scrollbars };
         this.listsNumeration.scrollbars++;
         
-        
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+        this.postConstruct(b);
 
         return b; 
     }
@@ -1155,11 +1074,7 @@ class UI  {
         this.listsNumeration.sprites++;
 
         
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+        this.postConstruct(b);
 
         return b;
     }
@@ -1183,7 +1098,7 @@ class UI  {
                     if (className == "GroupRow"){
                        c.index = i;
                        b.add(c.build(b));
-                    }
+                    } 
  
                 }else {
                     b.add(c);
@@ -1205,17 +1120,15 @@ class UI  {
              b.shiftPos();
         }
 
-        if (b.rawin("postConstruct")){
-            if (b.postConstruct !=  null){
-                b.postConstruct();
-            }
-        }
+       
          if (o.rawin("Transform3D")){
             local pos = o.Transform3D.rawin("Position3D") ? o.Transform3D.Position3D : Vector(0,0,0);
             local rot = o.Transform3D.rawin("Rotation3D") ? o.Transform3D.Rotation3D : Vector(-1.6, 0.0, 0);
             local size = o.Transform3D.rawin("Size3D") ? o.Transform3D.Size3D : Vector(2, 2, 0.0);
             b.Set3DTransform(pos, rot, size);
         }
+
+         this.postConstruct(b);
         return b;
     }
    

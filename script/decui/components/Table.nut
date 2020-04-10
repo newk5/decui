@@ -54,7 +54,7 @@ class Table extends Component {
         if (o.rawin("afterPageChange")){
             this.afterPageChange = o.afterPageChange;
         }
-         base.constructor(this.id);
+        
         if (o.rawin("streamID")){
             this.streamID = o.streamID;
         }
@@ -200,7 +200,8 @@ class Table extends Component {
             this.build(false);
         }
       
-       
+        base.constructor(this.id,o);
+        this.metadata.list="datatables";
        
     } 
 
