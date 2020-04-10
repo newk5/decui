@@ -3,6 +3,9 @@ UI.Cursor("ON");
 
 local t = UI.DataTable({
     id="tbl", 
+    beforePageChange = function (oldPage, newPage) {
+        Console.Print(oldPage+", "+newPage);
+    }
     contextMenu = {
          options = [
              { 

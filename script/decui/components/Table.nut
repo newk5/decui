@@ -31,6 +31,8 @@ class Table extends Component {
     streamID = null;
     dataSize = null;
     rowModel = null;
+    beforePageChange = null;
+    afterPageChange = null;
 
     awatingResponse = null;
 
@@ -45,6 +47,12 @@ class Table extends Component {
         }
         if (o.rawin("rowModel")){
             this.rowModel = o.rowModel;
+        }
+        if (o.rawin("beforePageChange")){
+            this.beforePageChange = o.beforePageChange;
+        }
+        if (o.rawin("afterPageChange")){
+            this.afterPageChange = o.afterPageChange;
         }
          base.constructor(this.id);
         if (o.rawin("streamID")){
@@ -252,7 +260,12 @@ class Table extends Component {
     
     function setPage(p){ 
         if (p != null && p > 0 &&  p <= this.pages && this.page != p && !this.awatingResponse) {     
-
+            local oldp = this.page;
+            local newp = p;
+           
+            if (this.beforePageChange != null){
+                this.beforePageChange(oldp, newp);
+            }
            
             if (this.lazy) {
                this.lazySetPage(p);
@@ -275,6 +288,10 @@ class Table extends Component {
                 if (lastLine != null) {
                     lastLine.Size.X = wrapper.Size.X;
                 }
+            }
+
+            if (this.afterPageChange != null){
+                this.afterPageChange(oldp, newp);
             }
             
         }
@@ -822,9 +839,16 @@ class Table extends Component {
                     this.Size = VectorScreen(21,21);
                 },
                 onClick = function(){
+                    local firstPage = context.page==1;
+                    if (context.beforePageChange != null && !firstPage){
+                        context.beforePageChange(context.page, context.page-1);
+                    }
                    context.prevPage();
+                    if (context.afterPageChange != null && !firstPage ){
+                        context.afterPageChange(context.page+1, context.page);
+                    }
                   
-                }
+                } 
             }); 
 
             local nextBtn = UI.Sprite({
@@ -841,7 +865,14 @@ class Table extends Component {
                     this.Size = VectorScreen(21,21);
                 },
                 onClick = function(){
+                    local lastPage = context.page==context.pages;
+                    if (context.beforePageChange != null && !lastPage){
+                        context.beforePageChange(context.page, context.page+1);
+                    }
                     context.nextPage();
+                    if (context.afterPageChange != null && !lastPage){
+                        context.afterPageChange(context.page-1, context.page);
+                    }
                     
                 }
             }); 
@@ -1074,6 +1105,31 @@ class Table extends Component {
             c.Colour = column.background;
         }
         return c;
+    }
+
+    function changeHeader(column, newText){
+        local key= null;
+        foreach (i,k in this.dataPages[0][0]){
+            local match = k == column;
+            key = match ? i : null;            
+        }
+        if (key != null) {
+            for (local p = 0; p < this.pages; p++){
+                this.dataPages[p][0][key] = newText;
+            }  
+        }
+        this.rebuild();
+        foreach (c in this.columns){
+            if (c.header == column){
+                c.header = newText;
+            }
+        }
+             
+    }
+
+    function rebuild() {
+        this.clear();
+        this.build(true);
     }
 
 

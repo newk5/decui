@@ -7,8 +7,10 @@
     }
 
     function printTable(t){
-        foreach (k in t){
-            Console.Print("{ "+k+"="+t+" }");
+         
+        foreach (i,k in t){
+           //Console.Print(t[k]);
+            Console.Print("{ "+i+"="+k+" }");
         }
     }
 
