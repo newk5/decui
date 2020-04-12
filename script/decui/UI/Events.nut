@@ -14,49 +14,57 @@
                foreach(c,e in list ) { 
                    if (e.rawin("parents") && e.parents.len() == 0){
                  
+                        local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResize == null || !e.ignoreGameResize)) ||  !e.rawin("ignoreGameResizeAutoAdjust");
                         if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
 
-                            ::UI.applyRelativeSize(e); 
-                            e.resetPosition();
-                            e.realign();
-                            if (e.rawin("shiftPos") && e.shiftPos != null){
-                                e.shiftPos(); 
-                            } 
-                            e.updateBorders();
+                            if ( doesNotIgnoreEvent ){
                            
+                                ::UI.applyRelativeSize(e); 
+                                e.resetPosition();
+                                e.realign();
+                                if (e.rawin("shiftPos") && e.shiftPos != null){
+                                    e.shiftPos(); 
+                                } 
+                                e.updateBorders();
+                            }
                            
                         }else{
-
-                            e.resetPosition();
-                            e.realign();  
-                            if (e.rawin("shiftPos") && e.shiftPos != null){
-                                e.shiftPos(); 
-                            }
-                                
+                            if ( doesNotIgnoreEvent ){
+                                e.resetPosition();
+                                e.realign();  
+                                if (e.rawin("shiftPos") && e.shiftPos != null){
+                                    e.shiftPos(); 
+                                }
+                            }    
                         }
 
                         foreach (idx, child in e.getChildren() ){
-                            child.resetPosition();
-                            child.realign();  
-                            if (child.rawin("shiftPos") && child.shiftPos != null){
-                                child.shiftPos(); 
+                            if (doesNotIgnoreEvent){
+                                child.resetPosition();
+                                child.realign();  
+                                if (child.rawin("shiftPos") && child.shiftPos != null){
+                                    child.shiftPos(); 
+                                }
+                            
+                           
+                              
+                                if (child.hidden){
+                                    child.hide();
+                                }
+                                if (child.hidden){
+                                    child.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
+                                    child.hide(); 
+                                }
                             }
                             if (child.rawin("onGameResize") && child.onGameResize != null){
                                 child.onGameResize();
-                            }
-                            if (child.hidden){
-                                child.hide();
-                            }
-                             if (child.hidden){
-                                child.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
-                                child.hide(); 
                             }
                         }
                         if (e.rawin("onGameResize") && e.onGameResize != null){
                             e.onGameResize();
                         }
 
-                        if (e.hidden){
+                        if (e.hidden && doesNotIgnoreEvent){
                             e.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
                             e.hide(); 
                         }
@@ -124,7 +132,7 @@
                     }
                 }
                 el.onClick();
-            }                            
+            }                
         }
 
         function onFocus(el){

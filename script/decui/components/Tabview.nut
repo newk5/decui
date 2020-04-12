@@ -8,23 +8,22 @@ class Tabview  extends Component {
     style = null; 
     Size = null;
     onTabChangeEvent = null; 
-    tabHeight = null;
-    tabsSize = null;
+    tabsHeight = null;
     x = null;
     y = null;
     currentTabIdx = null; 
     lastHeight = null;
     lastWidth = null;
     maxContentSize = null;
-
+    initialSize =null;
+    activeContentCanvasID = null;
+    wasResizedDuringBuild = null;
 
     constructor(o) { 
         
         this.id = Script.GetTicks();
         this.tabs = [];
         this.move = {};
-        this.tabHeight = 0;
-        this.tabsSize = 0;
         this.x = 0; 
         this.currentTabIdx = -1; 
         this.maxContentSize =  VectorScreen(0,0);
@@ -53,6 +52,7 @@ class Tabview  extends Component {
         }
         if (o.rawin("Size")){
             this.Size = o.Size;
+            this.initialSize = o.Size.X;
         }
 
         if (o.rawin("move")){
@@ -152,33 +152,6 @@ class Tabview  extends Component {
  
     }   
 
-    function changeTab(tabIdx){ 
-        local firstDraw = this.currentTabIdx == -1;
-        local tab = this.tabs[tabIdx];
-        this.clearActiveTabs();
-        local t = UI.Canvas(this.id+"::tab"+tab.data.id+"::content");
-        if (t != null){
-          
-            this.currentTabIdx = tabIdx;
-            t.show(); 
-            
-            local c = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::canvas");
-            c.Colour = this.style.activeTabColor;
-            c.data.active = true;
-              local wrapper = UI.Canvas(this.id);
-            c.setBorderColor("bottom", c.data.tc );
-            c.SendToBottom();
-            this.resizeTabContentCanvas(wrapper, tabIdx );
-            if (this.onTabChangeEvent != null && !firstDraw) {
-                local tabTitle = this.tabs[tabIdx].title;
-                this.onTabChangeEvent(tabTitle);
-            }
-            t.SendToTop();
-              //printElementData(t) ; 
-
-        }
-    }
-
     function getTabByDataID(id){
         for (local i = 0; i<this.tabs.len(); i++){
             if (this.tabs[i].data.id == id){
@@ -186,135 +159,6 @@ class Tabview  extends Component {
             }
         }
     }
-    
- 
-    function removeTab(idx) {   
-  
-        if (idx < this.tabs.len()-1 ){  //if the tab that is removed is not the last one, readjust all tab headers
-            this.tabHeight = 0;
-            this.tabsSize = 0;
-            this.x = 0; 
-            this.currentTabIdx = 0;
-            local cid = this.id+"::tab"+this.tabs[idx].data.id+"::content"; 
-        
-
-           UI.Canvas(cid).destroy();
-
-            for (local i = 0; i<this.tabs.len(); i++){
-                
-                local canv = UI.Canvas(this.id+"::tab"+this.tabs[i].data.id+"::canvas");
-                if (canv != null)
-                    canv.destroy();
-            }
-             this.tabs.remove(idx);  
-             local canv = UI.Canvas(this.id+"::tabsHeader::canvas");
-             local canvSize = canv.Size.X;
-             canv.destroy(); 
- 
-            local wrapper = UI.Canvas(this.id); 
-              foreach (tabIdx, tabb in this.tabs) { 
-                local o = this.buildTab(tabIdx, tabb, tabHeight, tabsSize, wrapper, x, true);
-                this.x = o.x;
-                this.tabHeight = o.tabHeight;
-                this.tabsSize = o.tabsSize;
-                wrapper = o.wrapper;  
-                 UI.Canvas(this.id+"::tab"+tabb.data.id+"::canvas").SendToBottom();
-            }
-            wrapper =  this.buildTabsHeader(wrapper, VectorScreen(wrapper.Size.X-tabsSize, tabHeight), tabsSize);
-
-           
-            cid = this.id+"::tab"+this.tabs[0].data.id+"::content"; 
-            local cont = UI.Canvas(cid);  
-            wrapper.Size = VectorScreen(lastWidth, lastHeight);    
-            wrapper.updateBorders();
-            cont.Size = VectorScreen(lastWidth, lastHeight-tabHeight); 
-            cont.show();  
-        
- 
-            local s = wrapper.Size.X-this.Size.X; 
-        
-            if (wrapper.Size.X > this.Size.X){ 
-                local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
-                if (x < this.Size.X) {
-                    lastWidth = this.Size.X;    
-                    wrapper.Size.X =this.Size.X;
-                     wrapper.realign();
-
-                } else{
-                    wrapper.Size.X = x ;
-                     wrapper.realign();
-                } 
-                
-                wrapper.updateBorders(); 
-               
-                headerLine.Position.X = x;  
-                headerLine.Size.X =  wrapper.Size.X- x;
-                headerLine.updateBorders(); 
-               
-            }
-           
-             
-           
-       }else{  
-
-
-            local cont = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::content").destroy();
-            local canv = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::canvas");
-    
-            local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
-            local wrapper = UI.Canvas(this.id);
-            
-            
-            this.x -= canv.Size.X;
-            this.tabsSize -= wrapper.Size.X;
-            local width = canv.Size.X;
-        
-        
-            if (x < this.Size.X){
-                if (wrapper.Size.X > this.Size.X){ 
-                    local s = wrapper.Size.X-this.Size.X;
-                    wrapper.Size.X =this.Size.X;
-                    wrapper.updateBorders(); 
-                    headerLine.Position.X -= canv.Size.X; 
-                    headerLine.Size.X += canv.Size.X-s;
-                }else{
-                    headerLine.Position.X -= canv.Size.X; 
-                    headerLine.Size.X +=canv.Size.X;  
-                }
-            }else{  
-                headerLine.Position.X = x; 
-                headerLine.Size.X =0;   
-                wrapper.Size .X -= canv.Size.X;
-                wrapper.updateBorders();
-            }
-            
-        
-            headerLine.removeBorders();
-            headerLine.addBottomBorder({
-                color = this.style.headerBorderColor,
-                size = this.style.headerBorderSize
-            });
-        
-        
-            canv.destroy();
-
-        
-            this.tabs.remove(idx);  
-            wrapper.realign();
-            if (idx == this.currentTabIdx){
-                if (idx > 0){
-                    this.changeTab(0); 
-                    this.resizeTabContentCanvas(wrapper,0);   
-                }
-               
-            }  
-  
-       }
-       //
- 
-    }
-
-
 
     function indexOfTab(t){  
         foreach(idx,  tab in this.tabs){
@@ -325,70 +169,71 @@ class Tabview  extends Component {
         return null;
     } 
  
-    function addTab(tab) {
-        if (!tab.rawin("data")){
-            tab["data"] <- { id =Script.GetTicks() +""+this.tabs.len()};
-        }
-       
-        local wrapper = UI.Canvas(this.id);
+    
+    function getTabHeaderStyle(tab){
+        local color = null;
+        local ac = null;
+        local tc = null;
 
-        wrapper.removeBorders();
-        local o = this.buildTab(this.tabs.len(), tab, this.tabHeight, this.tabsSize, wrapper, this.x, false);
-        this.tabs.push(tab);
-        this.x = o.x;
-        this.tabHeight = o.tabHeight; 
-        this.tabsSize = o.tabsSize; 
-
-        this.setDimensions(wrapper);
-        
-        this.alignAndBorderWrapper(wrapper);
-
-        local headerLine = UI.Canvas(this.id+"::tabsHeader::canvas");
-      
-        if (x < this.Size.X){  
-            headerLine.Position.X += o.canvas.Size.X;
-            headerLine.Size.X -= o.canvas.Size.X; 
-        }else{
-
-             headerLine.Position.X = x;
-             headerLine.Size.X = 0;
-        }
-      
-        local canv = UI.Canvas(this.id+"::tab"+this.tabs[this.currentTabIdx].data.id+"::canvas");
- 
-        canv.removeBorders();  
-       
-        canv.addBottomBorder({ 
-       //     move = { down = 2 } ,
-            color = this.style.titleColor
-        });
-
-        foreach (idx, tab in this.tabs) {
-            if (idx != currentTabIdx){
-                local c = UI.Canvas(this.id+"::tab"+tab.data.id+"::canvas");
-                c.removeBorders();
-                c.addBottomBorder({ 
-               //     move = { down = 2 } 
-                   
-                });
+        if (tab.rawin("style") && tab.style != null && tab.style.rawin("tabColor") && tab.style.tabColor != null ){
+               color =  tab.style.tabColor;
+        } else{
+            if (this.style.rawin("tabColor") && this.style.tabColor != null){
+                color  =  this.style.tabColor;
             }
+           
+        }  
+        if (tab.rawin("style") && tab.style != null && tab.style.rawin("activeTabColor") && tab.style.activeTabColor != null ){
+            ac =  tab.style.activeTabColor;
+        } else{
+              if (this.style.rawin("activeTabColor") && this.style.activeTabColor != null){
+                ac  =  this.style.activeTabColor;
+              }
+        } 
+        if (tab.rawin("style") && tab.style != null && tab.style.rawin("titleColor") && tab.style.titleColor != null ){
+            tc =  tab.style.titleColor;
+        } else{
+            if (this.style.rawin("titleColor") && this.style.titleColor != null){
+                tc  =  this.style.titleColor; 
+            }
+        } 
+
+        return {tabColor = color, activeTabColor = ac, titleColor = tc};
+    }
+
+    function changeTab(tabIdx){
+        local tab = this.tabs[tabIdx];
+        if (tab != null){
+            local wrapper = UI.Canvas(this.id);
+            this.clearActiveTabs();
+            local content =  UI.Canvas(this.activeContentCanvasID);
+            if (content != null){
+                content.hide();
+            }
+            local t = UI.Canvas(this.id+"::tab"+tab.data.id+"::tabContent");
+            this.activeContentCanvasID = t.id;
+            t.show();
+
+            local c = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::tabHeaderCanvas");
+            c.Colour = this.style.activeTabColor;
+           c.data.active = true;
+            c.setBorderColor("bottom",  this.style.titleColor );
+            c.SendToBottom();
+
+            t.Size.X = wrapper.Size.X-2;
+            t.Size.Y = wrapper.Size.Y-this.tabsHeight-2;
+            if (this.onTabChangeEvent != null) {
+                local tabTitle = tab.title;
+                this.onTabChangeEvent(tabTitle);
+            }
+            t.SendToTop();
         }
- 
-        headerLine.removeBorders();
-        headerLine.addBottomBorder({
-           color = this.style.headerBorderColor,
-            size = this.style.headerBorderSize
-        });
-        this.lastHeight = wrapper.Size.Y;
-        this.lastWidth = wrapper.Size.X;
-        o.tabContent.SendToBottom();
-       
-    } 
+    }
 
     function clearActiveTabs(){
         foreach(idx,  tab in this.tabs){
-            local c = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::canvas");
-            local content = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::content");
+            local c = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::tabHeaderCanvas");
+            local content = this.UI.Canvas(this.id+"::tab"+tab.data.id+"::tabContent");
             if (c !=null){
                 c.Color = this.style.tabColor;
                 c.data.active = false;
@@ -401,234 +246,151 @@ class Tabview  extends Component {
         }
     }
 
-    function buildTabsHeader(c,size, x){
+    function showTabContentCanvas(contentCanvasID, tabTitle){
+        local wrapper = UI.Canvas(this.id);
+        local content = this.UI.Canvas(contentCanvasID);
+        this.activeContentCanvasID = contentCanvasID;
+        content.show();
+        if (this.onTabChangeEvent != null){ 
+            this.onTabChangeEvent(tabTitle);
+        }
+        content.Size.X = wrapper.Size.X-2;
+        content.Size.Y = wrapper.Size.Y-this.tabsHeight-2;
+    }
 
-        local h = UI.Canvas({
-            id = this.id+"::tabsHeader::canvas",
-            Size =size,
-            Position = VectorScreen(x, 0),
-            context = this,
-            onClick = function () {
-                this.SendToBottom(); 
-            }
-           
-        }); 
-         c.add(h); 
-        h.addBottomBorder({
-            color = this.style.headerBorderColor,
-            size = this.style.headerBorderSize
-        });
-       
+    function applyTabHeaderStyleOnClick(c,tabHeaderCanvasStyle){
+        c.Colour = this.style.activeTabColor;
+        c.data.active = true;
+        c.setBorderColor("bottom",  tabHeaderCanvasStyle.titleColor );
+        c.SendToBottom(); 
+    }
+
+    function buildTab(idx, tab){
         
-        h.SendToBottom(); 
-        return c; 
-    }
-      
-    function buildTab(idx, tab, tabHeight, tabsSize, wrapper, x, rebuild) {             
-              
-            local contentID = tab.data.id; 
+        if (tab.rawin("data")) {
+            tab.data["id"] <- Script.GetTicks() +""+idx;
+        } else {
+            tab["data"] <- { id =  Script.GetTicks()+""+idx };
+        }
+        
+        //create the content canvas
+        local contentCanvasID = this.id+"::tab"+tab.data.id+"::tabContent";
+        local tabContentCanvas = UI.Canvas({id=contentCanvasID, autoResize=true, Colour = this.style.background, align = "middle"});
+        //create the header canvas and the label
+        local tabHeaderCanvasID =this.id+"::tab"+tab.data.id+"::tabHeaderCanvas";
+        local tabHeaderCanvasStyle = getTabHeaderStyle(tab);
 
-            local tabContent = rebuild ? UI.Canvas(this.id+"::tab"+contentID+"::content") : UI.Canvas({ id = this.id+"::tab"+contentID+"::content"  }) ;
-            tabContent.Size = this.Size;
-
-             local color = null;
-            local ac = null;
-            local tc = null;
-            
-             if (tab.rawin("style") && tab.style != null && tab.style.rawin("tabColor") && tab.style.tabColor != null ){
-               color =  tab.style.tabColor;
-            } else{
-                if (this.style.rawin("tabColor") && this.style.tabColor != null){
-                    color  =  this.style.tabColor;
-                }
-               
-            }  
-
-            if (tab.rawin("style") && tab.style != null && tab.style.rawin("activeTabColor") && tab.style.activeTabColor != null ){
-                ac =  tab.style.activeTabColor;
-            } else{
-
-                  if (this.style.rawin("activeTabColor") && this.style.activeTabColor != null){
-                    ac  =  this.style.activeTabColor;
-                  }
-            } 
-            if (tab.rawin("style") && tab.style != null && tab.style.rawin("titleColor") && tab.style.titleColor != null ){
-                tc =  tab.style.titleColor;
-            } else{
-                if (this.style.rawin("titleColor") && this.style.titleColor != null){
-                    tc  =  this.style.titleColor; 
-                }
-            } 
-            
-            local label =UI.Label({
-                id = this.id+"::tab"+contentID+"::label"
-                Text = tab.title 
-            });
-            
-            if (this.style.rawin("titleSize") && this.style.titleSize != null) {
-                label.FontSize = this.style.titleSize; 
-            }
-            local tabCanvas =UI.Canvas({ 
-                id = this.id+"::tab"+contentID+"::canvas",
-                Size = VectorScreen(label.Size.X+5, label.Size.Y+5),
-                Position = VectorScreen(x, 0),
-                data = { defaultColor = color, active = false, idx = idx, tab = tab.title, wrapper = wrapper, content = contentID, ac = ac, tc = tc, tabColor= color},
-                Colour = color,
-                context = this,
-                 metadata = { contentID = contentID},
-                onHoverOver = function(){ 
-                    this.Colour = context.style.onHoverTabColor;
-                }, 
-                 onHoverOut = function(){
-                    
-                    if (!this.data.active) {
-                        this.Colour = this.data.tabColor;
-                    }
-                }, 
-                onClick = function(){ 
-                    context.clearActiveTabs();
-                    this.Colour = context.style.activeTabColor;
-                    this.data.active = true;
-                    this.setBorderColor("bottom",  this.data.tc );
-                    this.SendToBottom(); 
-
-                     local cid = context.id+"::tab"+this.data.content+"::content";
-                    local content = this.UI.Canvas(cid);
-                    content.show();
-                    if (context.onTabChangeEvent != null){ 
-                        context.onTabChangeEvent(this.data.tab);
-                    }
-                    context.resizeTabContentCanvas(wrapper, this.data.idx );
-                    
-                }
-            });   
-
-            label.destroy();
-             label = UI.Label({
-                id = this.id+"::tab"+contentID+"::label",
-                Text = tab.title,
-                context = this, 
-                data = { idx = idx, tab = tab.title, wrapper = wrapper ,content = contentID, ac = ac, tc = tc, tabColor= color},
-                onHoverOver = function(){
-                   this.TextColour = this.data.tc;
-                    local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
-                    c.Colour = context.style.onHoverTabColor;
-                },
-                 onHoverOut = function(){      
-                      
-                   this.TextColour = this.data.tc; 
-
-                    local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
-                    if (c != null && !c.data.active) {
-                         c.Colour = this.data.tabColor; 
-                    } 
-                  
-                },
-                onClick = function(){
-                    
-                    context.clearActiveTabs(); 
-                    local c = this.UI.Canvas(context.id+"::tab"+this.data.content+"::canvas");
-                    c.Colour = context.style.activeTabColor;
-                    c.data.active = true;
-                    c.setBorderColor("bottom",  this.data.tc ); 
-                    c.SendToBottom();
-                   
-                    local cid = context.id+"::tab"+this.data.content+"::content";
-                    local content = this.UI.Canvas(cid);
-                   // ::getroottable().printElementData(content);
-                    content.show();
-                    if (context.onTabChangeEvent != null){
-                        context.onTabChangeEvent(this.data.tab); 
-                       
-                    }
-                     context.resizeTabContentCanvas(wrapper, this.data.idx );
-                   
-                }
-                postConstruct = function () {
-                    
-                }
-            });
-
-            if (this.style.rawin("titleSize") && this.style.titleSize != null) {
-                label.FontSize = this.style.titleSize; 
-            }
-            
-            label.TextColour = tc; 
-           
-            
-            tabHeight = tabCanvas.Size.Y;
-            tabsSize += tabCanvas.Size.X;
-           
-            wrapper.Size.Y = tabCanvas.Size.Y;
+        local tabHeaderCanvas = UI.Canvas({
+            id = tabHeaderCanvasID
+            Position = VectorScreen(this.x, 0)
+            context = this
+            data = {tabHeaderCanvasStyle = tabHeaderCanvasStyle, active = idx == 0, idx = idx, tabTitle = tab.title, contentCanvasID = contentCanvasID}
+            Colour = idx == 0 ? tabHeaderCanvasStyle.activeTabColor : tabHeaderCanvasStyle.tabColor
+            Size = VectorScreen(0,0)
+            onHoverOver = function(){ 
+                this.Colour = context.style.onHoverTabColor;
+            },
+            onClick = function(){ 
+                context.clearActiveTabs();
+                context.applyTabHeaderStyleOnClick(this, this.data.tabHeaderCanvasStyle);
+                context.showTabContentCanvas(this.data.contentCanvasID, this.data.tabTitle)
                 
-      
-            x += tabCanvas.Size.X;  
-         
-          //  if (!rebuild){ 
-                tabContent.Position.Y = tabCanvas.Size.Y;
-          //  }
-            if (idx == 0){ 
-                tabCanvas.Colour = ac;
-                tabCanvas.data.active = true;
-                tabCanvas.setBorderColor("bottom",  tc );
-                tabCanvas.SendToBottom();
-            }
-           
-            wrapper.add(tabCanvas);  
-            tabCanvas.addBottomBorder({ color = this.style.headerInactiveBorderColor });
-            tabCanvas.add(label);
-            wrapper.add(tabContent);
-            
-            if (tab.rawin("content")){  
-                 foreach (i, child in tab.content){
-                    if ( child.rawin("className")){  
-             
-                        if (child.className == "InputGroup"){
-                            child.attachParent(tabContent,0);
-                        } else if (child.className == "GroupRow"){  
-                            child.parentID = tabContent.id;
-                            child.calculatePositions();
-                        } else {
-                            tabContent.add(UI.Canvas(child.id)); 
-                        }
-                    }else{
-                        tabContent.add(child); 
-                        
-                         if (child.Position.X + child.Size.X > this.maxContentSize.X){
-                            this.maxContentSize.X = child.Position.X + child.Size.X;
-                        }
-                         if (child.Position.Y + child.Size.Y > this.maxContentSize.Y){
-                            this.maxContentSize.Y = child.Position.Y + child.Size.Y;
-                        }
-                       
-                    }
+            } 
+            onHoverOut = function(){
+                if (!this.data.active) {
+                    this.Colour = tabHeaderCanvasStyle.tabColor;
                 }
             }
-            if (!rebuild){
-                wrapper.Size.Y = this.Size.Y;
-                wrapper.Size.X = this.Size.X;
+            children = [
+                UI.Label({ 
+                    id = tabHeaderCanvasID+"::label"
+                    TextColour = tabHeaderCanvasStyle.titleColor
+                    Text = tab.title
+                    FontSize = this.style.titleSize
+                    context = this
+                    data = { tabHeaderCanvasStyle = tabHeaderCanvasStyle, tabHeaderCanvasID = tabHeaderCanvasID }
+                    onHoverOver = function(){
+                        this.TextColour = this.data.tabHeaderCanvasStyle.titleColor;
+                        local c = this.UI.Canvas(this.data.tabHeaderCanvasID);
+                        c.Colour = context.style.onHoverTabColor;
+                    }
+                    onHoverOut = function(){      
+                        this.TextColour = this.data.tabHeaderCanvasStyle.titleColor;
+                        local c = this.UI.Canvas(this.data.tabHeaderCanvasID);
+                        if (c != null && !c.data.active) {
+                            c.Colour = this.data.tabHeaderCanvasStyle.tabColor; 
+                        } 
+                        
+                    }
+                     onClick = function(){
+                        context.clearActiveTabs(); 
+                        local c = this.UI.Canvas(this.data.tabHeaderCanvasID);
+                        context.applyTabHeaderStyleOnClick(c, this.data.tabHeaderCanvasStyle);
+                        context.showTabContentCanvas(c.data.contentCanvasID, c.data.tabTitle)
+                    
+                    }
+                })
+            ]
+            postConstruct = function() {
+               local l = UI.Label(tabHeaderCanvasID+"::label");
+               this.Size.X = l.Size.X +5;
+               this.Size.Y = l.Size.Y +5;
+
             }
-            return { tabHeight = tabHeight,tabsSize = tabsSize, wrapper = wrapper, x = x, canvas = tabCanvas, tabContent = tabContent };
+        });
+        tabContentCanvas.Size.X = this.Size.X-4;
+        tabContentCanvas.Size.Y = this.Size.Y - tabHeaderCanvas.Size.Y-4;
+        tabHeaderCanvas.addBottomBorder({ color =  idx == 0 ? tabHeaderCanvasStyle.titleColor : this.style.headerInactiveBorderColor });
+        if (tab.rawin("content")){  
+             foreach (i, child in tab.content){
+                if ( child.rawin("className")){  
+         
+                    if (child.className == "InputGroup"){
+                        child.attachParent(tabContentCanvas,0);
+                    } else if (child.className == "GroupRow"){  
+                        child.parentID = tabContentCanvas.id;
+                        child.calculatePositions();
+                    } else {
+                        tabContentCanvas.add(UI.Canvas(child.id)); 
+                    }
+                }else{ 
+                    tabContentCanvas.add(child); 
+                   
+                }
+            }
+        }
+        return { headerCanvas = tabHeaderCanvas, contentCanvas = tabContentCanvas };
     }
+  
 
     function build() { 
-        
-        this.tabHeight = 0;
-        this.tabsSize = 0;
+      
         local wrapper = UI.Canvas({
-            id= this.id,
+            id= this.id
             Position =this.Position == null ? VectorScreen(0,0) : this.Position,
             move = this.move,
             context = this
+            Size = this.Size
+            align = this.align
+            move = { down = "15%" }
+            ignoreGameResizeAutoAdjust = true
+            onGameResize = function(){
+                this.realign(); 
+                this.shiftPos(); 
+                 
+            }
         });
-        wrapper.Size.X =this.Size.X;
-        wrapper.Size.Y = this.Size.Y;
-        
-        if (this.align != null) {
-            wrapper.align = this.align;
-        }
+      
+       
         this.x = 0;
-        this.y = 0;
+        this.y = 0; 
+
+        local headerBg = UI.Canvas({
+            id = this.id+"::headerBg", 
+            Colour = this.style.background
+            align = "top_right"
+            Size = VectorScreen(this.Size.X,0)
+        })
          
         foreach (idx, tab in this.tabs) {
 
@@ -638,111 +400,219 @@ class Tabview  extends Component {
                 tab["data"] <- { id =  Script.GetTicks()+""+idx };
             }
            
-            local o = this.buildTab(idx, tab, tabHeight, tabsSize, wrapper, x, false);
-            this.x = o.x;
-            this.tabHeight = o.tabHeight;
-            this.tabsSize = o.tabsSize;
-             wrapper = o.wrapper; 
-        } 
-          
-         if (wrapper.Size.X < this.maxContentSize.X){
-                
-            this.Size.X = this.maxContentSize.X+5;
-            x= this.maxContentSize.X+5;
-        } 
+            local tab = this.buildTab(idx, tab);
+            this.x += tab.headerCanvas.Size.X;
+            this.tabsHeight = tab.headerCanvas.Size.Y;
+            //if the tab's content exceeeds the initial size set for the tabview, re-size the tabview to fit it
+            if (tab.contentCanvas.Size.X > wrapper.Size.X){
+                wrapper.Size.X = tab.contentCanvas.Size.X;
+                this.Size.X = wrapper.Size.X;
+                this.wasResizedDuringBuild = true;
+            }
+             if (tab.contentCanvas.Size.Y > wrapper.Size.Y){
+                wrapper.Size.Y = tab.contentCanvas.Size.Y-this.tabsHeight-2;
+                this.Size.Y = wrapper.Size.Y;
+                 this.wasResizedDuringBuild = true;
+            }
+            headerBg.Size = VectorScreen(this.Size.X-this.x-2, this.tabsHeight-2);
+           
+            wrapper.add(tab.headerCanvas);
+            wrapper.add(tab.contentCanvas);
+            tab.contentCanvas.Position.Y += this.tabsHeight;
+            tab.contentCanvas.Position.X +=2;
 
-         if (wrapper.Size.Y - this.tabHeight < this.maxContentSize.Y){
-                
-            this.Size.Y = this.maxContentSize.Y+5;
-            y = this.maxContentSize.Y+5;
+           
+            if (idx > 0){
+                tab.contentCanvas.hide();
+            }else{  
+                this.activeContentCanvasID = tab.contentCanvas.id;
+                tab.contentCanvas.SendToBottom();
+            }
         } 
-              
-
-         this.setDimensions(wrapper); 
-        wrapper =  this.buildTabsHeader(wrapper, VectorScreen(wrapper.Size.X-tabsSize, tabHeight), tabsSize);
-        this.alignAndBorderWrapper(wrapper);
-        this.changeTab(0);
-        this.alignTabContents(wrapper);
-        lastHeight = wrapper.Size.Y;
-        lastWidth = wrapper.Size.X;
-        wrapper.SendToBottom();
-        this.Size.X = wrapper.Size.X;
-        this.Size.Y = wrapper.Size.Y;
-        
-
+       
+        wrapper.add(headerBg);
+        headerBg.Position.Y +=2;
+        headerBg.Position.X -=2;
+        headerBg.addBottomBorder({});
+        wrapper.addBorders({});
+        wrapper.realign();
         
     } 
 
-    function setDimensions(wrapper){
-         wrapper.Size.X = x;
-         wrapper.Size.X = y;
+    function addTab(newTab) { 
+         local headerBg = UI.Canvas(this.id+"::headerBg");
+        if (newTab.rawin("data")) {
+            newTab.data["id"] <- Script.GetTicks() +""+this.tabs.len()+1;
+        } else {
+            newTab["data"] <- { id =  Script.GetTicks()+""+this.tabs.len()+1 };
+        }
+        
+        local wrapper = UI.Canvas(this.id); 
+        local tab = this.buildTab(this.tabs.len()+1, newTab);
+        //increase X header cursor coordinate
+        this.x += tab.headerCanvas.Size.X;
+        //set tab height
+        this.tabsHeight = tab.headerCanvas.Size.Y;
+        
+        //if the tab's content exceeeds the initial size set for the tabview, re-size the tabview to fit it
+        if (tab.contentCanvas.Size.X > wrapper.Size.X){ 
+            wrapper.Size.X = tab.contentCanvas.Size.X;
+            this.Size.X = wrapper.Size.X;
+            
+        }
+         if (tab.contentCanvas.Size.Y > wrapper.Size.Y){
+            wrapper.Size.Y = tab.contentCanvas.Size.Y-this.tabsHeight-2;
+            this.Size.Y = wrapper.Size.Y;
+            
+        }
+        //set header size to the (wrapperSize - maxCursorX)
+        headerBg.Size.X = wrapper.Size.X-this.x;
+        //increase X Position by the same amount of the header size
+        headerBg.Position.X += tab.headerCanvas.Size.X;
+        headerBg.updateBorders();
 
-        if (this.Size != null){
-            if (this.Size.X > wrapper.Size.X){
-                wrapper.Size.X = this.Size.X;
+        wrapper.add(tab.headerCanvas);  
+        wrapper.add(tab.contentCanvas);
+
+        tab.contentCanvas.Position.Y += this.tabsHeight;
+        tab.contentCanvas.Position.X +=2;
+        tab.contentCanvas.hide();
+        tab.headerCanvas.SendToBottom(); 
+
+
+
+        this.tabs.push(newTab);
+       this.resizeWrapperDimensionsAfterAddingTab();
+        
+    } 
+
+   
+    function removeTab(idx) {
+        if (idx < 0 || idx >= this.tabs.len()){
+            return;
+        }
+        local wrapper = UI.Canvas(this.id);
+        local headerBg = UI.Canvas(this.id+"::headerBg");
+        if (idx < this.tabs.len()-1 ){  //if the tab that is removed is not the last one, readjust all tab headers
+            /*
+            1. get the IDs of the canvas' headers ahead of this tab
+            2. get tab and delete it from the array
+            3. delete tab content canvas
+            4. get the width of the header to delete
+            5. delete tab header canvas
+            6. with the IDs that were gathered, use them to re-position the tab header canvas'
+            */
+            
+            //1.
+            local ids = [];
+            local tab = this.tabs[idx];
+            if (tab == null){
+                return;
             }
-            if (this.Size.Y > wrapper.Size.Y){
-                wrapper.Size.Y = this.Size.Y+tabHeight;
+            for (local i = 0; i<this.tabs.len(); i++){
+               
+                if (i > idx){
+                   ids.push(this.tabs[i].data.id);
+                }
             } 
+
+            //2.
+            this.tabs.remove(idx);   
+            //3.
+            local contentCanvas = UI.Canvas(this.id+"::tab"+tab.data.id+"::tabContent");
+             contentCanvas.destroy();
+            //4. 
+            local headerCanvas = UI.Canvas(this.id+"::tab"+tab.data.id+"::tabHeaderCanvas");
+            local width =  headerCanvas.Size.X;
+            //5.
+            headerCanvas.destroy();
+            //6.
+            local contentCanvasToShow = null;
+            foreach (index, tabID in ids) {
+                local header = UI.Canvas(this.id+"::tab"+tabID+"::tabHeaderCanvas");
+                header.Position.X -= width;
+
+                if (index == 0){
+                    this.clearActiveTabs();
+                    header.Colour = this.style.activeTabColor;
+                    header.data.active = true;
+                    header.setBorderColor("bottom",  this.style.titleColor );
+                    header.SendToBottom(); 
+                    contentCanvasToShow = UI.Canvas(this.id+"::tab"+tabID+"::tabContent");
+                }
+            }
+            this.x -= width; 
+            if (this.x > this.initialSize){
+                 if (this.x > this.Size.X){
+                    wrapper.Size.X -= width;
+                    wrapper.updateBorders(); 
+                    contentCanvasToShow.Size.X -= width;
+                 }
+            }
+            headerBg.Size.X = wrapper.Size.X-this.x;
+            headerBg.Position.X -= width;
+            headerBg.updateBorders();
+            if (wrapper.Size.X > contentCanvasToShow.Size.X){
+                contentCanvasToShow.Size.X = wrapper.Size.X;
+            }
+             if (wrapper.Size.Y-this.tabsHeight > contentCanvasToShow.Size.Y){
+                contentCanvasToShow.Size.Y = wrapper.Size.Y-this.tabsHeight;
+            }
+            contentCanvasToShow.show();
+            this.activeContentCanvasID = contentCanvasToShow.id;
+        
+        } else{
+             
            
+            local contentCanvas = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::tabContent");
+            local headerCanvas = UI.Canvas(this.id+"::tab"+this.tabs[idx].data.id+"::tabHeaderCanvas");
+
+            local overflow = this.x > this.Size.X;
+            local overflowVal = this.x-this.Size.X; 
+            this.x -= headerCanvas.Size.X;
+
+ 
+            if (this.x > this.initialSize){
+                 if (this.x > this.Size.X){
+                    wrapper.Size.X -= headerCanvas.Size.X;
+                    wrapper.updateBorders();
+                    UI.Canvas(activeContentCanvasID).Size.X -= headerCanvas.Size.X;
+                 }
+            }
+            
+            headerBg.Size.X = wrapper.Size.X-this.x;
+            headerBg.Position.X -= headerCanvas.Size.X;
+            headerBg.updateBorders();
+
+            contentCanvas.destroy(); 
+            headerCanvas.destroy();
+            headerBg.updateBorders();
+            this.resizeWrapperDimensionsAfterAddingTab();
+
+            if (this.activeContentCanvasID == this.id+"::tab"+this.tabs[idx].data.id+"::tabContent") {
+                this.changeTab(0);
+            }
+
+             this.tabs.remove(idx);  
+        }
+        
+    } 
+
+     function resizeWrapperDimensionsAfterAddingTab() {
+         local headerBg = UI.Canvas(this.id+"::headerBg");
+        if (this.x > this.initialSize){
+            local wrapper = UI.Canvas(this.id); 
+           
+            if (this.x > this.Size.X){
+                 wrapper.Size.X = this.x;
+                UI.Canvas(this.activeContentCanvasID).Size.X = this.x;
+            }
+            
+            wrapper.updateBorders();
+            headerBg.updateBorders();
+            wrapper.realign();
         }
     }
 
-    function alignAndBorderWrapper(wrapper){
-         wrapper.Colour = this.style.background;
-        wrapper.realign();
-        wrapper.addBorders({
-            color = this.style.borderColor,
-            size = this.style.borderSize
-        });  
-        wrapper.shiftPos();
-    }
-
-    function resizeTabContentCanvas(wrapper, tabIdx){
-         local tab = this.tabs[tabIdx];
-         local c = UI.Canvas(this.id+"::tab"+tab.data.id+"::content");
-         if (c != null) {
-             c.Size.X = wrapper.Size.X;
-             c.Size.Y =wrapper.Size.Y-tabHeight;
-             c.updateBorders();
-
-             
-            if (this.tabs.len() > tabIdx){                 
-                if (tab.rawin("content")){
-                    foreach (i, child in tab.content){
-                       child.realign();
-                       if (child.rawin("move")){
-                           if (typeof child == "instance"){
-                               local el = UI.Canvas(child.id);
-                             
-                               el.shiftPos();
-                           }
-                           
-                       }
-                    }
-                }
-            }
-         }
-    } 
-
-    function alignTabContents(wrapper){  
- 
-         foreach (idx, tab in this.tabs) {
-
-            local c = UI.Canvas(this.id+"::tab"+tab.data.id+"::content");
-            
-            if (tab.rawin("content")){
-               foreach (i, child in tab.content){
-                   c.Size.Y= wrapper.Size.Y-tabHeight;
-                   c.Size.X= wrapper.Size.X;
-                  
-                  child.realign();
-                  if (child.rawin("move") && child.move != null ){
-                    child.shiftPos(); 
-                  }
-               }
-            }
-         }
-    }
     
 }

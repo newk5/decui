@@ -19,7 +19,7 @@ elements <- [
         }
     }
  
-attachProps([ "UI", "file","remove","autoResize", "RelativeSize"
+attachProps([ "UI", "file","remove","autoResize", "RelativeSize", "ignoreGameResize"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
