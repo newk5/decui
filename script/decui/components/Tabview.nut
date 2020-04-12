@@ -372,7 +372,6 @@ class Tabview  extends Component {
             context = this
             Size = this.Size
             align = this.align
-            move = { down = "15%" }
             ignoreGameResizeAutoAdjust = true
             onGameResize = function(){
                 this.realign(); 
