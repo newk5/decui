@@ -409,7 +409,7 @@ foreach(i,e in elements ) {
           
            if (this.isWrapped()){
 
-                if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontFamily"){
+                if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontName"){
                     local text = firstText;
                     foreach (line in this.metadata.lines) {
                         local l = UI.Label(line);
