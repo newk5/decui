@@ -11,7 +11,17 @@ local tv = UI.TabView({
            {  
                title = "tab1",
                content = [ 
-                 
+                    UI.Label({
+                        id = "lbl"  
+                        TextColour = Colour(255,0,0)
+                        Text = "TestttttttttttttttttasdasasdaddsdadasdttttAAAAAAA123 111 222 333 444 555 666 777 888 999"
+                        wrap = true
+                        wrapOptions = {
+                            lineSpacing = 5
+                          
+                        }
+                       
+                    })
                    UI.Button({   
                        id="btrn",
                        align = "center",

@@ -10,7 +10,7 @@ elements <- [
                      e[prop] <- { };
                 } else if (prop == "parents" || prop == "childLists") {
                      e[prop] <- [];
-                }  else if (prop == "autoResize") {
+                }  else if (prop == "autoResize" || prop == "delayWrap") {
                      e[prop] <- false;
                 } else {
                     e[prop] <- null;
@@ -19,8 +19,8 @@ elements <- [
         }
     }
  
-attachProps([ "UI", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
-    "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer"
+attachProps([ "UI","wrapOptions", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
+    "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
@@ -195,6 +195,12 @@ foreach(i,e in elements ) {
             if (this.rawin("preDestroy") && this.preDestroy != null){
                 this.preDestroy();
             }
+            if (this.isWrapped()){
+                foreach (line in this.metadata.lines) {
+                    UI.Label(line).destroy();
+                }
+                this.metadata.lines.clear();
+            }
         }
         this.UI.Delete(this);
     }, null, false);
@@ -266,6 +272,12 @@ foreach(i,e in elements ) {
              this.Position = VectorScreen(-999999,-999999);
              this.hidden = true;
              //this.Alpha = 0;
+             if (this.isWrapped()){
+                foreach (line in this.metadata.lines) {
+                    UI.Label(line).hide();
+                }
+               
+            }
          }
     }, null, false);
 
@@ -275,13 +287,24 @@ foreach(i,e in elements ) {
             this.hidden = false;
             this.Position = VectorScreen(this.lastPos);
             this.lastPos = null; 
-            // this.Alpha = 255;
+             if (this.isWrapped()){
+                foreach (line in this.metadata.lines) {
+                    UI.Label(line).show();
+                }
+               
+            }
          }
     }, null, false);
 
     //realign()
      e.rawnewmember("realign", function() {
         this.UI.align(this);
+         if (this.isWrapped()){
+            foreach (line in this.metadata.lines) {
+                 this.UI.align(UI.Label(line));
+            }
+               
+        }
     }, null, false);
 
 
@@ -349,6 +372,136 @@ foreach(i,e in elements ) {
             return wrapper;
        })
 
+
+      
+         //hasWrapOptions()
+       e.rawnewmember("hasWrapOptions", function() {
+            return this.rawin("wrapOptions") && this.wrapOptions != null;
+       })
+
+        //setText()
+       e.rawnewmember("setText", function(t) {
+            this.set("Text",t);
+       })
+
+
+         //isWrapped()
+       e.rawnewmember("isWrapped", function() {
+           return (this.rawin("metadata") && this.metadata != null && this.metadata.rawin("lines") && this.metadata.lines != null &&  this.metadata.lines.len()> 0 && (this.hasWrap() )  );
+       })
+ 
+         //set(fieldName, value)
+       e.rawnewmember("set", function(fieldName, value) {
+            local firstText = this.Text;
+            this[fieldName] = value;
+            if (fieldName == "Text" || fieldName == "FontSize"){
+                this.Size.X = this.TextSize.X+10;
+                this.Size.Y = this.TextSize.Y+10;
+            }
+
+             if (this.metadata.originalObject.rawin(fieldName)){
+                    this.metadata.originalObject[fieldName] = value;
+                }else {
+                    this.metadata.originalObject[fieldName] <- value; 
+            }
+
+            
+          
+           if (this.isWrapped()){
+
+                if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontFamily"){
+                    local text = firstText;
+                    foreach (line in this.metadata.lines) {
+                        local l = UI.Label(line);
+                        text += l.Text;
+                        l.destroy();
+                       
+                    }
+                   
+                    if (fieldName == "FontSize"){
+                       this.Text = text;
+                    }
+                    this.metadata.lines.clear();
+                    local parentID = this.metadata.rawin("parentID") ? this.metadata.parentID : null;
+                    if (parentID != null){
+                        local parent = UI.Canvas(parentID);
+                        this.wrapText(parent, this, parent.Size.X-10)
+                    }
+                }else{   
+                     foreach (line in this.metadata.lines) {
+                        try {
+                            UI.Label(line)[fieldName] = value;
+                        } catch(e){}
+                        
+                    }
+                }
+
+              
+               
+           }
+       });
+
+       //hasWrap()
+       e.rawnewmember("hasWrap", function() {
+            return this.rawin("wrap") && this.wrap != null && this.wrap == true;
+       });
+       
+       //forceWrap()
+       e.rawnewmember("forceWrap", function() {
+            local parentID = this.metadata.rawin("parentID") ? this.metadata.parentID : null;
+            if (parentID != null){
+                local parent = UI.Canvas(parentID);
+                this.wrapText(parent, this, parent.Size.X-10)
+            }
+       });
+    
+
+      //wrapText(parent, firstLabel, size)
+       e.rawnewmember("wrapText",function (parent, firstlabel,  size){ 
+       
+        local width = size;
+        if (this.hasWrapOptions()){
+            if (this.wrapOptions.rawin("maxWidth")){
+                width = this.wrapOptions.maxWidth;
+            }
+        }   
+        local rem = [];
+        local resized = false;
+        while (this.Position.X + this.TextSize.X > width){
+            
+        
+            local lastLetter =  this.Text.slice( this.Text.len()-1, this.Text.len());
+            local remaining = this.Text.slice(0,this.Text.len()-1)
+            this.set("Text", remaining);
+        
+            rem.push(lastLetter);
+            resized = true;
+        }  
+        if (resized){
+           
+            rem.reverse();
+            local obj = this.metadata.originalObject;
+            obj.id = obj.id+"::line"+ (firstlabel.metadata.lines.len()+1);
+            obj.Text = rem.reduce(@(p, c) p + c);
+            local line = UI.Label(obj);
+            
+            line.set("Text", obj.Text);
+            local lineSpacing = 0;
+            if (firstlabel.hasWrapOptions()){
+                if (firstlabel.wrapOptions.rawin("lineSpacing")){
+                    lineSpacing = firstlabel.wrapOptions.lineSpacing;
+                }
+            }
+            line.Position.Y = this.Position.Y+this.TextSize.Y+5 + lineSpacing;
+            firstlabel.metadata.lines.push(line.id);
+            line.wrapText(parent,firstlabel,size);
+            parent.add(line);
+          
+
+        }
+        return resized;
+    });
+
       //applyRelativeSize()
        e.rawnewmember("applyRelativeSize", function() {
            ::UI.applyRelativeSize(this);
@@ -371,7 +524,7 @@ foreach(i,e in elements ) {
             }else{ 
                 p.metadata["parentPos"] <- this.Position;
             } 
-          
+            p.metadata["parentID"] <- this.id;
             p.parents = list;
             this.AddChild(p);
             if (p.rawin("RelativeSize") && p.RelativeSize != null) {
@@ -380,8 +533,8 @@ foreach(i,e in elements ) {
             if (p.rawin("align") && p.align != null){
                 p.realign();
             }
-            if ( this.autoResize   ){ 
-                
+           
+            if ( this.autoResize  &&  !p.hasWrap() ){ 
                 local adjusted = false;
                 if (this.Size.X < p.Size.X){
                     this.Size.X = p.Size.X;
@@ -406,7 +559,7 @@ foreach(i,e in elements ) {
                    this.Size.Y = p.Position.Y+p.Size.Y;
                 } 
                 this.realign();
-                this.shiftPos();
+                this.shiftPos(); 
                  if (p.rawin("align") && p.align != null){
                     p.realign();
                 }
@@ -421,6 +574,9 @@ foreach(i,e in elements ) {
             }
            if (p.rawin("shiftPos") && p.shiftPos != null){
                  p.shiftPos(); 
+            }
+            if (p.hasWrap() && !p.delayWrap){
+               p.wrapText(this,p,this.Size.X-10)
             }
            
         }
@@ -455,6 +611,12 @@ foreach(i,e in elements ) {
      //shift()
      e.rawnewmember("shiftPos", function() {
        this.UI.shift(this);
+        if (this.isWrapped()){
+            foreach (line in this.metadata.lines) {
+                 this.UI.shift(UI.Label(line));
+           }
+               
+        }
     }, null, false);
 
     //removeChildren()

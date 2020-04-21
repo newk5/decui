@@ -689,6 +689,7 @@ class UI  {
                     ORIGINAL_POS = VectorScreen(element.Position.X, element.Position.Y)
                     list = ""
                     index = null
+                    originalObject = null
                 }; 
                 this.align(element); 
               
@@ -880,8 +881,12 @@ class UI  {
         b.metadata.list = "labels";
 
         b.metadata.index = this.listsNumeration.labels;
+        b.metadata.originalObject = o;
+        b.metadata["lines"] <- [];
+        b.metadata["originalText"] <- o.Text;
 
         lists[names.find("labels")].push(b); 
+        
  
         idsMetadata[this.cleanID(o.id)] <- { 
             list = b.metadata.list,

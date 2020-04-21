@@ -354,12 +354,15 @@ class Tabview  extends Component {
                         tabContentCanvas.add(UI.Canvas(child.id)); 
                     }
                 }else{ 
+                    if (child.hasWrap()){
+                        child.delayWrap=true;
+                    }
                     tabContentCanvas.add(child); 
                    
                 }
             }
         }
-        return { headerCanvas = tabHeaderCanvas, contentCanvas = tabContentCanvas };
+        return { headerCanvas = tabHeaderCanvas, contentCanvas = tabContentCanvas, children = tab.rawin("content") ? tab.content : [] };
     }
   
 
@@ -427,6 +430,13 @@ class Tabview  extends Component {
                 this.activeContentCanvasID = tab.contentCanvas.id;
                 tab.contentCanvas.SendToBottom();
             }
+            
+            foreach (i, child in tab.children){
+                if (child.hasWrap()){
+                    child.forceWrap();
+                }
+            }
+
         } 
        
         wrapper.add(headerBg);
@@ -478,7 +488,7 @@ class Tabview  extends Component {
         tab.contentCanvas.hide();
         tab.headerCanvas.SendToBottom(); 
 
-
+ 
 
         this.tabs.push(newTab);
        this.resizeWrapperDimensionsAfterAddingTab();
@@ -487,7 +497,7 @@ class Tabview  extends Component {
 
    
     function removeTab(idx) {
-        if (idx < 0 || idx >= this.tabs.len()){
+        if ((idx == 0 && this.tabs.len() == 1) || idx < 0 || idx >= this.tabs.len()){
             return;
         }
         local wrapper = UI.Canvas(this.id);

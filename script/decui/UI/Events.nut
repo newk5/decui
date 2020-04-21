@@ -14,7 +14,7 @@
                foreach(c,e in list ) { 
                    if (e.rawin("parents") && e.parents.len() == 0){
                  
-                        local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResize == null || !e.ignoreGameResize)) ||  !e.rawin("ignoreGameResizeAutoAdjust");
+                        local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResizeAutoAdjust  == null || !e.ignoreGameResizeAutoAdjust )) ||  !e.rawin("ignoreGameResizeAutoAdjust");
                         if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
 
                             if ( doesNotIgnoreEvent ){
