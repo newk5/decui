@@ -432,9 +432,12 @@ class Tabview  extends Component {
             }
             
             foreach (i, child in tab.children){
-                if (child.hasWrap()){
-                    child.forceWrap();
+                if (child.rawin("hasWrap")){
+                    if (child.hasWrap()){
+                        child.forceWrap();
+                    }
                 }
+                
             }
 
         } 
@@ -443,7 +446,10 @@ class Tabview  extends Component {
         headerBg.Position.Y +=2;
         headerBg.Position.X -=2;
         headerBg.addBottomBorder({});
-        wrapper.addBorders({});
+        wrapper.addBorders({
+            color = this.style.borderColor,
+            size = this.style.borderSize
+        });  
         wrapper.realign();
         
     } 
