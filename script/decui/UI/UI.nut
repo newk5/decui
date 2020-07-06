@@ -94,6 +94,7 @@ class UI  {
         local borderPos = null;
         local parentsList =   e.id == null ? e.parents : mergeArray(e.parents, e.id);
         local move = {};
+        local offset = b.rawin("offset") ? b.offset:0;
        
  
         if (align == "top_left"){
@@ -106,7 +107,7 @@ class UI  {
             borderPos = "bottom";
         }
         if (b.rawin("move")){
-            move = b.move;
+            move = b.move; 
         }
 
         if (align == "top_left" || align == "top_right"){
@@ -114,15 +115,17 @@ class UI  {
         }else{
             size = VectorScreen(e.Size.X, b.rawin("size") ? b.size : 2);
         }
+           
         local border = this.Canvas({ 
-                id = id+"::"+align+"::border",
-                data = { isBorder = true, borderPos = borderPos},
+                id = id+"::"+align+"::border", 
+                data = { isBorder = true, borderPos = borderPos, offset = offset},
                 Colour = b.rawin("color") ? b.color : Colour(255,255,255), 
                 align  = align, 
                 Size = size,
                 parents = parentsList,
                 move = move
         });
+        
         if (e.rawin("data") && e.data != null){
             if (e.data.rawin("borderIDs")){
                 if (e.data.borderIDs.find(border.id)==null){
@@ -137,8 +140,8 @@ class UI  {
 
        
         e.add(border);
-        border.realign(); 
-        border.shiftPos();
+       // border.realign(); 
+        //border.shiftPos();
     }
 
     function applyRelativeSize(e) {
@@ -170,30 +173,45 @@ class UI  {
             local sizeX = isLabel ? e.TextSize.X : e.Size.X;
             local sizeY = isLabel ? e.TextSize.Y : e.Size.Y;
             local wrapper = null; 
-            if (e.parents.len() == 0){ 
-                wrapper = GUI.GetScreenSize(); 
-            }else{ 
-                local lastID = e.parents[e.parents.len()-1];
-               
-                local parent = findById(lastID);
-                wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
+            local offset = 0;
+
+             if (e.rawin("data") && e.data.rawin("offset")){
+                offset = e.data.offset;
             }
             
+            if (e.parents.len() == 0){  
+                wrapper = GUI.GetScreenSize(); 
+            }else{ 
+               
+                local lastID = e.parents[e.parents.len()-1];
+                local parent = findById(lastID);
+
+                wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size; 
+            }
+   
+         
             if (a == "top_right"){
+                
                 e.Position.Y = 0;
                 e.Position.X = wrapper.X - sizeX;
+                e.Position.X += offset;
+               
             } else if (a == "top_left"){
                 e.Position.Y = 0;
                 e.Position.X = 0;
+                e.Position.X -= offset;
             } else if (a == "top_center"){
                 e.Position.Y = 0;
                 e.Position.X = wrapper.X / 2 - sizeX /2;
+                e.Position.Y -= offset;
             } else if (a == "bottom_right"){
                 e.Position.Y = wrapper.Y - sizeY;
                 e.Position.X = wrapper.X - sizeX;
+               
             } else if (a == "bottom_left"){
                 e.Position.Y =  wrapper.Y - sizeY;
                 e.Position.X = 0;
+                 e.Position.Y += offset;
             } else if (a == "bottom_center" || a == "bottom"){
                 e.Position.Y = wrapper.Y - sizeY;
                 e.Position.X = wrapper.X / 2 - sizeX /2;
@@ -228,6 +246,8 @@ class UI  {
                 e.Position.Y =  wrapper.Y -(wrapper.Y / 1.0712);
                 e.Position.X = wrapper.X - (wrapper.X /20);
             }
+           
+            
         }
         
     }
@@ -340,7 +360,7 @@ class UI  {
     }
 
     function removeChildren(parent){
-        if (parent.id != null && parent.id != ""){ 
+        if (parent.id != null && parent.id != ""){    
             foreach(i,name in parent.childLists ) {   
                 local list = this.lists[this.names.find(name)];
                 local sizeBefore = list.len();
@@ -356,6 +376,7 @@ class UI  {
                     local isChildren =  e.parents.find(parent.id) != null;
                    
                     if (isChildren){ 
+                       e.removeChildren();
                        UI.addToDeleteQueue(e);
                        return false;
                     }
@@ -375,8 +396,8 @@ class UI  {
      
         if (id == null){
             return null;
-        }
-        foreach(i,e in list ) {
+        } 
+        foreach(i,e in list ) { 
            if (e.id == id){
                return e;
            } 
@@ -387,21 +408,23 @@ class UI  {
    
     function findById(id) { 
         local newid = this.cleanID(id);
-
-        try {
+        try { 
             local listName =this.idsMetadata[newid].list; 
-            
-            
+           
             local list = this.lists[names.find(listName)];
 
             local idx = this.bSearch(list, idsMetadata[newid].index, 0, list.len()-1);
+            
             if (idx == null){
                 return null;
             }
-            local e =  list[idx];
-            
-            return e;
+            local e =  list[idx]; 
+           return e;
+           
+          
         }catch (ex){
+            Console.Print(ex);
+            Console.Print("FAILED TO FIND "+newid);
             return null;
         }
     }
@@ -500,11 +523,13 @@ class UI  {
                     local pos =null; 
                     if (typeof el.tooltip == "string"){
                         col = Colour(0,0,0,150);
-                        l = UI.Label({id = el.id+"::tooltip::label", align="center" Alpha = 200,  Text = el.tooltip, TextColour  = Colour(255,255,255,0) });
+                        local exists = idExists(el.id+"::tooltip::label");
+                        if (exists){
+                             l = UI.Label(el.id+"::tooltip::label");
+                        } else {
+                            l = UI.Label({id = el.id+"::tooltip::label", align="center" Alpha = 200,  Text = el.tooltip, TextColour  = Colour(255,255,255,0) });
+                        }
                         y -= el.Size.Y+10;
-                       
-                                        
-                        
                     }else{
                          col = el.tooltip.rawin("canvasColor") ? el.tooltip.canvasColor : Colour(0,0,0,150);
                         if (el.tooltip.rawin("label")){
@@ -528,17 +553,24 @@ class UI  {
                         }
                     }  
                       pos =  VectorScreen(x, y);   
-                  
-                    local c = UI.Canvas({ 
-                        id = el.id+"::tooltip",
-                        Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
-                        Color= col  
-                        Position = pos
-                        autoResize = true
-                    }); 
+                    local c = null;
+                    if (idExists(el.id+"::tooltip")){
+                       c = UI.Canvas(el.id+"::tooltip");
+                    }else {
+                        c = UI.Canvas({ 
+                            id = el.id+"::tooltip",
+                            Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
+                            Color= col  
+                            Position = pos
+                            autoResize = true
+                        }); 
+                    }
+                     
+                    
                     if (l != null){ 
                         c.add(l);
                     }
+                     el.tooltipVisible = true;
                     if (el.tooltip.rawin("extraLabels")){
                         foreach(i,ce in el.tooltip.extraLabels ) {
                             local cid = Script.GetTicks()+""+i;
@@ -546,12 +578,14 @@ class UI  {
                             c.add(UI.Label(ce));  
                         }
                     }
+                     
                     if (el.tooltip.rawin("border")){
                         c.addBorders(el.tooltip.border);
                     }
 
 
-                    el.tooltipVisible = true;
+                   
+                  
                 }
             } 
         }    
@@ -633,9 +667,14 @@ class UI  {
     function idIsValid(obj){
         if (obj.rawin("id")){
             if (obj.id == null){  
+               
                 return false; 
             }
-            return !idExists(obj.id);
+            local exists = idExists(obj.id);
+            if (exists){
+                Console.Print("[ERROR] ----> "+obj.id +" already exists!");
+            }
+            return !exists;
            
         }
         return false;
@@ -691,12 +730,13 @@ class UI  {
                     index = null
                     originalObject = null
                 }; 
+                
                 this.align(element); 
               
                 this.shift(element);
                 
             }else{
-                //print("ID NOT VALID "+ obj.id);
+                //Console.Print("ID NOT VALID "+ obj.id);
           
                 
             }
@@ -922,26 +962,31 @@ class UI  {
             return this.fetch.canvas(o);
         }
        
+       
         local b = this.applyElementProps(GUICanvas(), o);
         
         b.metadata.list = "canvas";
         b.metadata.index = this.listsNumeration.canvas;
-         lists[names.find("canvas")].push(b);
+        lists[names.find("canvas")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { 
             list = b.metadata.list,
             index = this.listsNumeration.canvas
         };
+
+        this.listsNumeration.canvas++;
         
-        if (o.rawin("children")  && o.children != null){
+        if (o.rawin("children")  && o.children != null){ 
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
                     local className = c.className;
  
-                    if (className == "GroupRow"){
+                    if (className == "InputGroup"){
+                      c.attachParent(b);
+                    }else if (className == "GroupRow"){
                        c.index = i;
                        b.add(c.build(b));
                     } else if (className == "Combobox"){
-                        c.attachParent(b);
+                        b.add(UI.Canvas(c.id));
                     } else{ 
                         local t= typeof c;
                         b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
@@ -970,10 +1015,9 @@ class UI  {
         }
        
        
-        this.listsNumeration.canvas++;
         
         this.postConstruct(b);
-
+         
         return b;
     }
     function Checkbox(o){
@@ -1089,28 +1133,37 @@ class UI  {
         } 
         local b = this.applyElementProps(GUIWindow(), o);
        
-           b.metadata.list = "windows";
+        b.metadata.list = "windows";
         b.metadata.index = this.listsNumeration.windows;
 
         lists[names.find("windows")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
          this.listsNumeration.windows++;
-        if (o.rawin("children")  && o.children != null){
+          if (o.rawin("children")  && o.children != null){ 
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
                     local className = c.className;
-
-                    if (className == "GroupRow"){
+ 
+                    if (className == "InputGroup"){
+                      c.attachParent(b);
+                    }else if (className == "GroupRow"){
                        c.index = i;
                        b.add(c.build(b));
-                    } 
- 
+                    } else if (className == "Combobox"){
+                        b.add(UI.Canvas(c.id));
+                    } else{ 
+                        local t= typeof c;
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                    }
+
                 }else {
                     b.add(c);
-                   
+                  
                 }
             }
         }
+
+              
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
@@ -1133,7 +1186,7 @@ class UI  {
             b.Set3DTransform(pos, rot, size);
         }
 
-         this.postConstruct(b);
+        this.postConstruct(b);
         return b;
     }
    

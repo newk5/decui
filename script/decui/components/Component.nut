@@ -2,6 +2,7 @@ class Component  {
     id = null;
     metadata = null;
     preDestroy = null;
+    elementData = null;
     constructor(id, o) {
         this.id = id;
         this.metadata = { list = "", index = null };

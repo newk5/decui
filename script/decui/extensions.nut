@@ -6,7 +6,7 @@ elements <- [
     function attachProps(props) {
         foreach(p,prop in props ) { 
             foreach(i,e in elements ) { 
-                if (prop == "data") {
+                if (prop == "data" || prop == "elementData") {
                      e[prop] <- { };
                 } else if (prop == "parents" || prop == "childLists") {
                      e[prop] <- [];
@@ -22,11 +22,11 @@ elements <- [
 attachProps([ "UI","wrapOptions", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
-    "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow",
+    "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow", "elementData"
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
        ]);
-
+ 
 //attach new functions
 foreach(i,e in elements ) { 
      
@@ -54,10 +54,17 @@ foreach(i,e in elements ) {
     //addLeftBorder(borderObj)
     e.rawnewmember("addBorders", function(b) {
 
-        this.addLeftBorder(b);
-        this.addRightBorder(b);
-        this.addTopBorder(b);
-        this.addBottomBorder(b);
+       this.addLeftBorder(b);
+       this.addRightBorder(b);
+       this.addTopBorder(b);
+       this.addBottomBorder(b);
+       
+    }, null, false);
+
+      //isBorder()
+    e.rawnewmember("isBorder", function() {
+
+        return this.rawin("data") && this.data.rawin("isBorder") && this.data.isBorder;
        
     }, null, false);
 
@@ -86,7 +93,7 @@ foreach(i,e in elements ) {
                             b.Colour = colour;  
                             break;
                         }
-                    }
+                    } 
                 }
             }
         }
@@ -118,6 +125,7 @@ foreach(i,e in elements ) {
         local t = typeof this;
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite"){
+         
            ui.addBorder(this, b, "top_right");
         }
        
@@ -155,7 +163,7 @@ foreach(i,e in elements ) {
                 local maxX = 0;
                 foreach (i, c in this.getChildren()) {
                     if (!c.rawin("className")) {
-                        if (this.autoResize){
+                        if (this.autoResize && !c.isBorder()){
                             local x = c.Position.X + c.Size.X;
                             local y = c.Position.Y + c.Size.Y;
 
@@ -229,6 +237,9 @@ foreach(i,e in elements ) {
         local e = this; 
         local id = e.id;
         e.show();
+        if (e.fadeStep == null){
+            e.fadeStep = 15;
+        }
         if (e.fadeHigh == null){
             e.fadeHigh = 255;
         }
@@ -286,6 +297,8 @@ foreach(i,e in elements ) {
          if (this.lastPos != null){
             this.hidden = false;
             this.Position = VectorScreen(this.lastPos);
+            this.realign();
+            this.shiftPos();
             this.lastPos = null; 
              if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
@@ -396,7 +409,7 @@ foreach(i,e in elements ) {
             this[fieldName] = value;
             if (fieldName == "Text" || fieldName == "FontSize"){
                 this.Size.X = this.TextSize.X+10;
-                this.Size.Y = this.TextSize.Y+10;
+                this.Size.Y = this.TextSize.Y+4;
             }
 
              if (this.metadata.originalObject.rawin(fieldName)){
@@ -406,9 +419,9 @@ foreach(i,e in elements ) {
             }
 
             
-          
+       
            if (this.isWrapped()){
-
+               
                 if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontName"){
                     local text = firstText;
                     foreach (line in this.metadata.lines) {
@@ -418,13 +431,16 @@ foreach(i,e in elements ) {
                        
                     }
                    
-                    if (fieldName == "FontSize"){
+                    if (fieldName == "FontSize"){ 
                        this.Text = text;
                     }
                     this.metadata.lines.clear();
-                    local parentID = this.metadata.rawin("parentID") ? this.metadata.parentID : null;
+                    local parentID = this.parents[this.parents.len()-1];
                     if (parentID != null){
                         local parent = UI.Canvas(parentID);
+                        if (parent == null){
+                            parent = UI.Window(parentID);
+                        }
                         this.wrapText(parent, this, parent.Size.X-10)
                     }
                 }else{   
@@ -448,9 +464,10 @@ foreach(i,e in elements ) {
        
        //forceWrap()
        e.rawnewmember("forceWrap", function() {
-            local parentID = this.metadata.rawin("parentID") ? this.metadata.parentID : null;
-            if (parentID != null){
-                local parent = UI.Canvas(parentID);
+             local lastID = this.parents[this.parents.len()-1];
+          
+            if (lastID != null){
+                local parent = ::UI.findById(lastID);
                 this.wrapText(parent, this, parent.Size.X-10)
             }
        });
@@ -483,6 +500,12 @@ foreach(i,e in elements ) {
             local obj = this.metadata.originalObject;
             obj.id = obj.id+"::line"+ (firstlabel.metadata.lines.len()+1);
             obj.Text = rem.reduce(@(p, c) p + c);
+            if (!obj.rawin("move")){
+                obj["move"] <- {};
+            }else{
+                obj.move = {};
+            }
+
             local line = UI.Label(obj);
             
             line.set("Text", obj.Text);
@@ -492,7 +515,9 @@ foreach(i,e in elements ) {
                     lineSpacing = firstlabel.wrapOptions.lineSpacing;
                 }
             }
-            line.Position.Y = this.Position.Y+this.TextSize.Y+5 + lineSpacing;
+          
+            line.Position.Y = this.Position.Y;
+            line.Position.Y += this.TextSize.Y+5 + lineSpacing;
             firstlabel.metadata.lines.push(line.id);
             line.wrapText(parent,firstlabel,size);
             parent.add(line);
@@ -515,7 +540,7 @@ foreach(i,e in elements ) {
          if (this.id != null && p.id != this.id ) {
                  
                 
-            local list =  this.UI.mergeArray(this.parents, this.id); 
+            local list =  this.UI.mergeArray(this.parents, this.id);  
             if (this.childLists.find(p.metadata.list) == null) {
                 this.childLists.push(p.metadata.list); 
             }
@@ -524,56 +549,43 @@ foreach(i,e in elements ) {
             }else{ 
                 p.metadata["parentPos"] <- this.Position;
             } 
-            p.metadata["parentID"] <- this.id;
+            p.metadata["parentID"] <- this.id; 
             p.parents = list;
             this.AddChild(p);
             if (p.rawin("RelativeSize") && p.RelativeSize != null) {
                  ::UI.applyRelativeSize(p); 
             }
-            if (p.rawin("align") && p.align != null){
+            if (p.rawin("align") && p.align != null && !p.isBorder()){
                 p.realign();
             }
            
-            if ( this.autoResize  &&  !p.hasWrap() ){ 
+            if ( this.autoResize  &&  !p.hasWrap() && !p.isBorder() ){ 
                 local adjusted = false;
-                if (this.Size.X < p.Size.X){
-                    this.Size.X = p.Size.X;
-                    adjusted = true;
-                }
-                if (this.Size.Y < p.Size.Y){
-                    this.Size.Y = p.Size.Y; 
-                    adjusted = true;
-                }
-                if (adjusted){
-                    this.realign(); 
-                    this.shiftPos(); 
-                }
-                if (p.rawin("align") && p.align != null){
-                    p.realign();
-                }
-
+              
                 if ( p.Position.X+p.Size.X > this.Size.X){
-                   this.Size.X = p.Position.X+p.Size.X;
+                    this.Size.X = p.Position.X+p.Size.X;
+                    adjusted = true;
                 }
                 if ( p.Position.Y+p.Size.Y > this.Size.Y){
-                   this.Size.Y = p.Position.Y+p.Size.Y;
+                    this.Size.Y = p.Position.Y+p.Size.Y;
+                    adjusted = true;
                 } 
-                this.realign();
-                this.shiftPos(); 
-                 if (p.rawin("align") && p.align != null){
-                    p.realign();
-                }
-                foreach (i, c in this.getChildren()) {
-                    if (!c.rawin("className")) {
-                        c.resetPosition();
-                        c.realign();
-                        c.shiftPos();
+               if (adjusted){
+                    this.realign(); 
+                    this.shiftPos(); 
+
+                     foreach (i, c in this.getChildren()) {
+                        if (!c.rawin("className")) {
+                            c.resetPosition();
+                            c.realign();
+                            c.shiftPos();
+                        }
                     }
                 }
-                
+           
             }
-           if (p.rawin("shiftPos") && p.shiftPos != null){
-                 p.shiftPos(); 
+            if (p.rawin("shiftPos") && p.shiftPos != null){
+                p.shiftPos(); 
             }
             if (p.hasWrap() && !p.delayWrap){
                p.wrapText(this,p,this.Size.X-10)

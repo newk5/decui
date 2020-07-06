@@ -336,7 +336,7 @@ class Tabview  extends Component {
                this.Size.X = l.Size.X +5;
                this.Size.Y = l.Size.Y +5;
 
-            }
+            } 
         });
         tabContentCanvas.Size.X = this.Size.X-4;
         tabContentCanvas.Size.Y = this.Size.Y - tabHeaderCanvas.Size.Y-4;
@@ -346,7 +346,7 @@ class Tabview  extends Component {
                 if ( child.rawin("className")){  
          
                     if (child.className == "InputGroup"){
-                        child.attachParent(tabContentCanvas,0);
+                        child.attachParent(tabContentCanvas);
                     } else if (child.className == "GroupRow"){  
                         child.parentID = tabContentCanvas.id;
                         child.calculatePositions();
@@ -367,7 +367,7 @@ class Tabview  extends Component {
   
 
     function build() { 
-      
+        this.wasResizedDuringBuild= false;
         local wrapper = UI.Canvas({
             id= this.id
             Position =this.Position == null ? VectorScreen(0,0) : this.Position,
@@ -432,11 +432,19 @@ class Tabview  extends Component {
             }
             
             foreach (i, child in tab.children){
-                if (child.rawin("hasWrap")){
+                if (child.rawin("hasWrap") && child.hasWrap()){
+                  
                     if (child.hasWrap()){
                         child.forceWrap();
                     }
+                }/*
+                if (child.rawin("realign")){
+                    child.realign();
                 }
+                if (!child.rawin("className") && child.rawin("move")){
+                     child.shiftPos();
+                }*/
+              
                 
             }
 
@@ -446,10 +454,24 @@ class Tabview  extends Component {
         headerBg.Position.Y +=2;
         headerBg.Position.X -=2;
         headerBg.addBottomBorder({});
+        
+        
+        if(!this.wasResizedDuringBuild) {
+            if (x > wrapper.Size.X) {
+
+           
+                wrapper.Size.X = x;
+                local contentCanvas = UI.Canvas(this.id+"::tab"+this.tabs[0].data.id+"::tabContent");
+                contentCanvas.Size.X = x;
+            }
+           // contentCanvas.addBorders({}) 
+        }
+      
         wrapper.addBorders({
             color = this.style.borderColor,
             size = this.style.borderSize
         });  
+      
         wrapper.realign();
         
     } 

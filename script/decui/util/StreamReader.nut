@@ -1,10 +1,9 @@
-class StreamRequest {
+class StreamReader {
 
     identifier = null; //something to identify the stream (usually an int/byte)
-    body = null; // array with the stream body
+  
     onComplete = null;
     
-    expectsResponse = null;
     responseObject = null;
     result = null;
     arraySize = null;
@@ -18,16 +17,12 @@ class StreamRequest {
 
     constructor(o) {
         this.list = [];
-        this.body = [];
         this.isArray = false;
         this.arraySize = 0;
-        this.expectsResponse = false;
         this.firstValueAsByte = false;
         this.identifier = o.id;
         
-        if (o.rawin("body")) {
-            this.body = o.body;
-        }
+       
          if (o.rawin("context")) {
             this.context = o.context;
         }
@@ -43,7 +38,6 @@ class StreamRequest {
    
         if (o.rawin("responseObject")) {
             this.responseObject = o.responseObject;
-             this.expectsResponse = true;
         }
          if (o.rawin("onComplete")) {
             this.onComplete = o.onComplete;
@@ -53,15 +47,11 @@ class StreamRequest {
         }
         
         
-        local s = Stream();
-        this.writeValue(s, this.firstValueAsByte ? {byte=identifier} : identifier);    
-        foreach (idx, v in body) {
-            this.writeValue(s, v);
-        }
-        if (this.expectsResponse){
-            ::UI.streamControllers.push(this);
-        }
-        Server.SendData(s);
+      
+       
+        ::UI.streamControllers.push(this);
+        
+        //Server.SendData(s);
        // Debug.SendData(s);
 
         
@@ -108,21 +98,5 @@ class StreamRequest {
     }
 
 
-
-    function writeValue(stream, value) {
-        local t = typeof value;
-        if (t == "string"){
-            stream.WriteString(value);
-        } else if (t == "float"){
-            stream.WriteFloat(value);
-        } else if (t == "integer"){
-            stream.WriteInt(value);
-        } else if (t == "table"){
-            if (value.rawin("byte")){
-                stream.WriteByte(value.byte);
-            }
-           
-        }
-    }
     
 }

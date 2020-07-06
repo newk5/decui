@@ -6,6 +6,19 @@
         return "[ "+str+" ]";
     }
 
+    function stringArrayWithIds(a) {
+        try {
+        local str  = a.reduce(function(previousValue, currentValue){
+            return (previousValue.id +","+ currentValue.id);
+        });
+        
+        if (str == null) return "[ ]";
+        return "[ "+str+" ]";
+        } catch( ex){
+            Console.Print(ex);
+        }
+    }
+
     function printTable(t){
          
         foreach (i,k in t){
@@ -41,12 +54,13 @@
     }
 
     function printList(l){
-       Console.Print("-----------------------------------------------------------------")
+       Console.Print("----------------------CANVAS START-------------------------------------------")
 
          foreach (i, s in UI.lists[UI.names.find(l)] ) {
             
             Console.Print(s.id);
         } 
+          Console.Print("----------------------CANVAS END-------------------------------------------")
     }
     
     

@@ -17,6 +17,7 @@ dofile("decui/UI/Events.nut");
 dofile("decui/UI/UI.nut");
  
 dofile("decui/util/StreamRequest.nut");
+dofile("decui/util/StreamReader.nut");
  
 UI <- UI();  
 

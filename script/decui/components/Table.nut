@@ -69,11 +69,13 @@ class Table extends Component {
         }
         if (o.rawin("style")){
             this.style = o.style;
-        }else{
+        }else{ 
             this.style = {
                 background = Colour(51,57,	61,200),
                 headerTextColor = Colour(51,150,255),
                 cellTextColor = Colour(255,255,255),
+                outerBorderColor =  Colour(51,57,61,200)
+                outerBorderSize =  2
                 headerTextSize = 20,  
                 cellTextSize = 12,
                 selectedRowColor = Colour(52,129,216,80)
@@ -244,8 +246,8 @@ class Table extends Component {
                 local wrapper = ::UI.Canvas(context.id);
                 wrapper.removeBorders();
                 wrapper.addBorders({
-                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
-                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                    color = context.style.rawin("outerBorderColor") ? context.style.outerBorderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("outerBorderSize") ? context.style.outerBorderSize :  2
                 });
                 local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
                 if (lastLine != null){
@@ -282,8 +284,8 @@ class Table extends Component {
                 local wrapper = UI.Canvas(this.id);
                 wrapper.removeBorders();
                 wrapper.addBorders({
-                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
-                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                    color = this.style.rawin("outerBorderColor") ? this.style.outerBorderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("outerBorderSize") ? this.style.outerBorderSize :  2
                 });
                 local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
                 if (lastLine != null) {
@@ -338,8 +340,8 @@ class Table extends Component {
                 local wrapper = ::UI.Canvas(context.id);
                 wrapper.removeBorders();
                 wrapper.addBorders({
-                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
-                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                    color = context.style.rawin("outerBorderColor") ? context.style.outerBorderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("outerBorderSize") ? context.style.outerBorderSize :  2
                 });
                 local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
                 if (lastLine != null){
@@ -376,8 +378,8 @@ class Table extends Component {
                 local wrapper = UI.Canvas(this.id);
                 wrapper.removeBorders();
                 wrapper.addBorders({
-                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
-                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                    color = this.style.rawin("outerBorderColor") ? this.style.outerBorderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("outerBorderSize") ? this.style.outerBorderSize :  2
                 });
                 local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
                 if (lastLine != null) {
@@ -434,9 +436,9 @@ class Table extends Component {
                 //re-apply table borders because the table size may change
                 local wrapper = ::UI.Canvas(context.id);
                 wrapper.removeBorders();
-                wrapper.addBorders({
-                    color = context.style.rawin("borderColor") ? context.style.borderColor : Colour(0,0,0,150),
-                    size = context.style.rawin("borderSize") ? context.style.borderSize :  2
+                wrapper.addBorders({ 
+                    color = context.style.rawin("outerBorderColor") ? context.style.outerBorderColor : Colour(0,0,0,150),
+                    size = context.style.rawin("outerBorderSize") ? context.style.outerBorderSize :  2
                 });
                 local lastLine =  ::UI.Canvas(context.id+"::table::row:::line"+context.rows);
                 if (lastLine != null){
@@ -473,8 +475,8 @@ class Table extends Component {
                 local wrapper = UI.Canvas(this.id);
                 wrapper.removeBorders();
                 wrapper.addBorders({
-                    color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
-                    size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                    color = this.style.rawin("outerBorderColor") ? this.style.outerBorderColor : Colour(0,0,0,150),
+                    size = this.style.rawin("outerBorderSize") ? this.style.outerBorderSize :  2
                 });
                 local lastLine =  UI.Canvas(this.id+"::table::row:::line"+this.rows);
                 if (lastLine != null) {
@@ -816,8 +818,8 @@ class Table extends Component {
         if (!rebuild) {
 
             canv.addBorders({
-                color = this.style.rawin("borderColor") ? this.style.borderColor : Colour(0,0,0,150),
-                size = this.style.rawin("borderSize") ? this.style.borderSize :  2
+                color = this.style.rawin("outerBorderColor") ? this.style.outerBorderColor : Colour(0,0,0,150),
+                size = this.style.rawin("outerBorderSize") ? this.style.outerBorderSize :  2
             });
 
             pagesLabel.move = {up = 8};
@@ -1059,7 +1061,7 @@ class Table extends Component {
         local labelConstructor = "flags";   
         if (row.rawin(column.field)){
             local value = row[column.field];
-            if (typeof value == "string"){
+            if (typeof value == "string" || typeof value == "integer" || typeof value == "float" || typeof value=="boolean"){ 
                  local l = UI.Label({
                     id = this.id+"::table::cell"+rowIdx+"-"+columnIndex,
                     Text =value,
