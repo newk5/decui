@@ -178,7 +178,6 @@ class UI  {
              if (e.rawin("data") && e.data.rawin("offset")){
                 offset = e.data.offset;
             }
-            
             if (e.parents.len() == 0){  
                 wrapper = GUI.GetScreenSize(); 
             }else{ 
@@ -1122,7 +1121,45 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.sprites  };
         this.listsNumeration.sprites++;
 
-        
+        if (o.rawin("children")  && o.children != null){ 
+            foreach (i, c in o.children) {
+                if (c.rawin("className")){
+                    local className = c.className;
+ 
+                    if (className == "InputGroup"){
+                      c.attachParent(b);
+                    }else if (className == "GroupRow"){
+                       c.index = i;
+                       b.add(c.build(b));
+                    } else if (className == "Combobox"){
+                        b.add(UI.Canvas(c.id));
+                    } else{ 
+                        local t= typeof c;
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                    }
+
+                }else {
+                    b.add(c);
+                  
+                }
+            }
+        }
+
+              
+         if (o.rawin("children")  && o.children != null){
+            foreach (i, c in o.children) {
+                 if (!c.rawin("className")) {
+                    c.realign();
+                    c.shiftPos();
+                }
+            }
+        }
+
+         if (b.autoResize){
+             b.realign();
+             b.shiftPos();
+        }        
+
         this.postConstruct(b);
 
         return b;

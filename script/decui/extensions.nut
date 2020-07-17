@@ -282,6 +282,7 @@ foreach(i,e in elements ) {
              this.lastPos = VectorScreen(this.Position.X, this.Position.Y);
              this.Position = VectorScreen(-999999,-999999);
              this.hidden = true;
+             this.RemoveFlags(GUI_FLAG_VISIBLE);
              //this.Alpha = 0;
              if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
@@ -300,6 +301,7 @@ foreach(i,e in elements ) {
             this.realign();
             this.shiftPos();
             this.lastPos = null; 
+            this.AddFlags(GUI_FLAG_VISIBLE);
              if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
                     UI.Label(line).show();
