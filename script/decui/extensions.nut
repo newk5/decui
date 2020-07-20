@@ -302,7 +302,10 @@ foreach(i,e in elements ) {
             this.shiftPos();
             this.lastPos = null; 
             this.AddFlags(GUI_FLAG_VISIBLE);
-             if (this.isWrapped()){
+            if (this.Alpha == 0 ){
+                this.Alpha = 255;
+            }
+            if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
                     UI.Label(line).show();
                 }
