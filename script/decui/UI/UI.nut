@@ -260,6 +260,8 @@ class UI  {
                     local isString = typeof s.left == "string";
                     if (isString){
                         local wrapper =  e.getWrapper();
+                        e.resetPosition();
+                        e.realign();   
                         local percent = this.removePercent(s.left).tofloat();
                         e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
                     }else{
@@ -270,6 +272,8 @@ class UI  {
                     local isString = typeof s.right == "string";
                      if (isString){
                         local wrapper =  e.getWrapper();
+                        e.resetPosition();
+                        e.realign(); 
                         local percent = this.removePercent(s.right).tofloat();
                        
                         e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
@@ -281,7 +285,8 @@ class UI  {
                     local isString = typeof s.up == "string";
                     if (isString){
                          local wrapper = e.getWrapper();
-                        
+                        e.resetPosition();
+                        e.realign(); 
                         local percent = this.removePercent(s.up).tofloat();
                         e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
                     } else {
@@ -293,7 +298,8 @@ class UI  {
                    
                      if (isString){
                         local wrapper =  e.getWrapper();
-                                                
+                          e.resetPosition();
+                        e.realign();                         
                         local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
                          e.Position.Y += ( wrapper.Y * percent ).tofloat();
                     } else {

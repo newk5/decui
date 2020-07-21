@@ -3,12 +3,7 @@ dofile("debug.nut")
 
 
 function Script::ScriptLoad(){
-
+   
+   
 } 
-
-
-
-
-
-
 
