@@ -1080,6 +1080,7 @@ class UI  {
       
          if (b.autoResize){
             b.realign();
+            b.resetMoves();
             b.shiftPos();
         }
         
@@ -1235,6 +1236,7 @@ class UI  {
      
          if (b.autoResize){
              b.realign();
+              b.resetMoves();
              b.shiftPos();
         }
         this.postConstruct(b);
@@ -1301,6 +1303,7 @@ class UI  {
         
          if (b.autoResize){
              b.realign();
+              b.resetMoves();
              b.shiftPos();
         }
 
