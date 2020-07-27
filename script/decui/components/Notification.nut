@@ -8,7 +8,7 @@ class UINotification extends Component {
     text = null;
     timer = null; 
     time = null;
-    type = null;  
+    type = null;   
     autoSize = null;
 
     constructor(o) {
@@ -43,7 +43,7 @@ class UINotification extends Component {
        // UI.Cursor("ON")
         local l = UI.Label({
             id = this.id+"_labelTitle"  
-            Text = this.title
+            Text = this.title 
             fontFlags = GUI_FFLAG_BOLD
             FontSize = 15
             align = "top_left" 
@@ -73,7 +73,7 @@ class UINotification extends Component {
         if (autoSize){
             this.Size.X = sizeX;
         }
-        local mup = 4;
+        local mup = 4; 
         if (::UI.openNots > 0){ 
             mup = (::UI.notsHeight +4)+8;
         } 
@@ -85,10 +85,7 @@ class UINotification extends Component {
             autoResize = true
             Colour = this.Colour
             align = "bottom_right"
-            move = {
-                up= mup
-                left = "2%"
-            }
+           
         })
 
         
@@ -105,7 +102,7 @@ class UINotification extends Component {
         c.add(titleHeader);   
         c.add(lText);
         titleHeader.add(l);
-        local sp = UI.Sprite({ 
+        local cl = UI.Sprite({ 
             id=this.id+"_closeBtn"
             file ="decui/closeb.png",
             align = "top_right"
@@ -119,7 +116,7 @@ class UINotification extends Component {
                    ::UI.openNots--; 
                    ::UI.notsHeight -= 12;
                    c.destroy(); 
-                   
+                    
                }
             } 
             Size = VectorScreen(21,21),
@@ -128,12 +125,15 @@ class UINotification extends Component {
                 left = "2%" 
             }
         });
-        titleHeader.add(sp); 
-        
-        local cl = UI.Sprite(this.id+"_closeBtn");
-       
+        titleHeader.add(cl);  
+         
+        cl.resetMoves();
         c.Size.X+= 30;
         titleHeader.Size.X+= 30;
+        c.move = {
+            up= mup
+            left = "2%"
+        };
         cl.realign();
         cl.shiftPos();
         cl.SendToTop();
@@ -147,26 +147,30 @@ class UINotification extends Component {
             align = "bottom_left"     
         }) 
         c.add(bar);  
-      
+        c.shiftPos();
        ::UI.openNots++; 
        local d = (bar.Size.X/time).tofloat();
     
         this.timer= Timer.Create(this, function(text,bar,d) {    
            
-           if (bar.Size.X <= 0){ 
-                ::Timer.Destroy(this.timer); 
-                try {
+           if (bar.Size.X <= 0){
+
+
+              try {
+
+                    ::Timer.Destroy(this.timer); 
+               
+                    local c = UI.Canvas(this.id);
+                   
+                    if (c != null){
+                        c.destroy(); 
+                        ::UI.openNots--;
+                        ::UI.notsHeight -= 12;
+                    }
                     ::GUI.SetFocusedElement(null);
-                } catch (exc){
+                 } catch (exc){
 
                 }  
-                   
-                local c = UI.Canvas(this.id);
-                if (c != null){
-                    c.destroy(); 
-                    ::UI.openNots--;
-                    ::UI.notsHeight -= 12;
-                }
            }
             bar.Size.X -= d; 
         }, 1000, 0, this.id+"_barTimer_"+Script.GetTicks(),bar,d); 

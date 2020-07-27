@@ -108,7 +108,6 @@ class UIGrid extends Component {
             align = this.align,
             context = this,
             Color =this.background
-            move = this.move         
         });
 
         local maxX = 0;
@@ -171,6 +170,7 @@ class UIGrid extends Component {
         wrapper.Size.X = maxX-this.margin;
         wrapper.Size.Y = maxY-this.margin;
         wrapper.realign();
+        wrapper.move = this.move;
         wrapper.shiftPos();
         
     }

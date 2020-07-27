@@ -6,7 +6,7 @@ elements <- [
     function attachProps(props) {
         foreach(p,prop in props ) { 
             foreach(i,e in elements ) { 
-                if (prop == "data" || prop == "elementData") {
+                if (prop == "data" || prop == "elementData" || prop=="metadata") {
                      e[prop] <- { };
                 } else if (prop == "parents" || prop == "childLists") {
                      e[prop] <- [];
@@ -22,7 +22,7 @@ elements <- [
 attachProps([ "UI","wrapOptions", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
-    "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize","lastPos", "flags", "fadeStep", "fadeLow", "elementData"
+    "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize", "flags", "fadeStep", "fadeLow", "elementData"
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
        ]);
@@ -52,7 +52,7 @@ foreach(i,e in elements ) {
 
 
     //addLeftBorder(borderObj)
-    e.rawnewmember("addBorders", function(b) {
+    e.rawnewmember("addBorders", function(b= {}) {
 
        this.addLeftBorder(b);
        this.addRightBorder(b);
@@ -69,7 +69,7 @@ foreach(i,e in elements ) {
     }, null, false);
 
     //addLeftBorder(borderObj)
-    e.rawnewmember("addLeftBorder", function(b) {
+    e.rawnewmember("addLeftBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite"){
@@ -121,7 +121,7 @@ foreach(i,e in elements ) {
     }, null, false);
 
      //addRightBorder(borderObj)
-    e.rawnewmember("addRightBorder", function(b) {
+    e.rawnewmember("addRightBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite"){
@@ -132,7 +132,7 @@ foreach(i,e in elements ) {
     }, null, false);
 
      //addTopBorder(borderObj)
-    e.rawnewmember("addTopBorder", function(b) {
+    e.rawnewmember("addTopBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite"){
@@ -141,8 +141,16 @@ foreach(i,e in elements ) {
        
     }, null, false);
 
+      //resetMoves()
+    e.rawnewmember("resetMoves", function(b= {}) {
+       if (this.metadata.rawin("movedPos")){
+           this.metadata.movedPos.clear();
+       }
+       
+    }, null, false);
+
      //addBottomBorder(borderObj)
-    e.rawnewmember("addBottomBorder", function(b) {
+    e.rawnewmember("addBottomBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
       
@@ -232,33 +240,38 @@ foreach(i,e in elements ) {
     }, null, false);
 
     //fadeIn()
-    e.rawnewmember("fadeIn", function() {
+    e.rawnewmember("fadeIn", function(callback = {}) {
     
         local e = this; 
         local id = e.id;
-        e.show();
+        local alpha = e.metadata.rawin("oldAlpha") ? e.metadata.oldAlpha : e.Alpha;
+        e.show(false);
         if (e.fadeStep == null){
             e.fadeStep = 15;
         }
         if (e.fadeHigh == null){
-            e.fadeHigh = 255;
+            e.fadeHigh = alpha;
         }
        
         
         this.fadeInTimer = Timer.Create(::getroottable(), function(text) {
             if (e.Alpha < e.fadeHigh){ 
-                e.Alpha+=e.fadeStep;
+                e.Alpha+=e.fadeStep; 
             }else {
                 Timer.Destroy(e.fadeInTimer);
+                if (callback.rawin("onFinish")){
+                    callback.onFinish();
+                }
             }
-        }, 1, 0, id+"fadeInTimer"+Script.GetTicks());
+        }, 1, 0, id+"fadeInTimer"+Script.GetTicks());  
     }, null, false);
 
       //fadeOut() 
-    e.rawnewmember("fadeOut", function() { 
+    e.rawnewmember("fadeOut", function(callback = {}) { 
         local e = this;  
         local id = e.id; 
-
+        e.metadata["oldAlpha"] <- e.Alpha;
+       
         if (e.fadeStep == null){
             e.fadeStep = 15;
         }
@@ -272,20 +285,21 @@ foreach(i,e in elements ) {
             }else {
                 e.hide();
                 Timer.Destroy(e.fadeOutTimer);
+                if (callback.rawin("onFinish")){
+                    callback.onFinish();
+                }
             }
         }, 1,0, id+"fadeOutTimer"+Script.GetTicks());
     }, null, false);
 
-    //hide()
+    //hide() 
      e.rawnewmember("hide", function() {
          if (this.Position != null && (this.hidden == null || this.hidden == false) ){
-             this.lastPos = VectorScreen(this.Position.X, this.Position.Y);
-             this.Position = VectorScreen(-999999,-999999);
+         
              this.hidden = true;
              this.RemoveFlags(GUI_FLAG_VISIBLE);
-             //this.Alpha = 0;
              if (this.isWrapped()){
-                foreach (line in this.metadata.lines) {
+                foreach (line in this.metadata.lines) { 
                     UI.Label(line).hide();
                 }
                
@@ -294,24 +308,22 @@ foreach(i,e in elements ) {
     }, null, false);
 
     //show()
-     e.rawnewmember("show", function() {
-         if (this.lastPos != null){
-            this.hidden = false;
-            this.Position = VectorScreen(this.lastPos);
-            this.realign();
-            this.shiftPos();
-            this.lastPos = null; 
-            this.AddFlags(GUI_FLAG_VISIBLE);
-            if (this.Alpha == 0 ){
-                this.Alpha = 255;
+     e.rawnewmember("show", function(restoreAlpha = true) {
+         
+        this.hidden = false;
+       
+        this.AddFlags(GUI_FLAG_VISIBLE);
+        if (this.Alpha == 0  && restoreAlpha){
+            local alpha = this.metadata.rawin("oldAlpha") ? this.metadata.oldAlpha : 255;
+            this.Alpha = alpha;
+        }
+        if (this.isWrapped()){
+            foreach (line in this.metadata.lines) {
+                UI.Label(line).show();
             }
-            if (this.isWrapped()){
-                foreach (line in this.metadata.lines) {
-                    UI.Label(line).show();
-                }
-               
-            }
-         }
+           
+        }
+         
     }, null, false);
 
     //realign()
@@ -390,7 +402,18 @@ foreach(i,e in elements ) {
             return wrapper;
        })
 
-
+        //getParent
+        e.rawnewmember("getParent", function() {
+            if (this.parents.len() == 0){ 
+               return null;
+            }else{ 
+                local lastID = this.parents[this.parents.len()-1];
+            
+                local parent = ::UI.findById(lastID);
+               return parent;
+            }
+            
+       })
       
          //hasWrapOptions()
        e.rawnewmember("hasWrapOptions", function() {

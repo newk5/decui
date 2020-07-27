@@ -246,24 +246,35 @@ class UI  {
                 e.Position.X = wrapper.X - (wrapper.X /20);
             }
            
-            
+             
         }
-        
-    }
+          
+    }      
     
     function shift(e){
         if (e.move != null){
-            local s = e.move;
-            
+            local s = e.move; 
+           
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
                     if (isString){
                         local wrapper =  e.getWrapper();
-                        e.resetPosition();
-                        e.realign();   
+                        if (!e.metadata.rawin("movedPos")){
+                           e.metadata["movedPos"] <- ["left"];
+                        }else{
+                            if (e.metadata.movedPos.find("left") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("left");
+                            }
+                        } 
+                         if (e.metadata.movedPos.len() == 0){
+                            e.realign(); 
+                        }
                         local percent = this.removePercent(s.left).tofloat();
                         e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
+
                     }else{
                         e.Position.X =  e.Position.X - s.left;
                     }
@@ -272,11 +283,21 @@ class UI  {
                     local isString = typeof s.right == "string";
                      if (isString){
                         local wrapper =  e.getWrapper();
-                        e.resetPosition();
-                        e.realign(); 
+                         if (!e.metadata.rawin("movedPos")){
+                            e.metadata["movedPos"] <- ["right"];
+                        }else{
+                            if (e.metadata.movedPos.find("right") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("right");
+                            }
+                        }
+                         if (e.metadata.movedPos.len() == 0){
+                            e.realign(); 
+                        }
                         local percent = this.removePercent(s.right).tofloat();
-                       
                         e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
+
                     } else {
                         e.Position.X =  e.Position.X + s.right;
                     }
@@ -285,10 +306,21 @@ class UI  {
                     local isString = typeof s.up == "string";
                     if (isString){
                          local wrapper = e.getWrapper();
-                        e.resetPosition();
-                        e.realign(); 
+                         if (!e.metadata.rawin("movedPos")){
+                           e.metadata["movedPos"] <- ["up"];
+                        }else{
+                            if (e.metadata.movedPos.find("up") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("up");
+                            }
+                        }
+                        if (e.metadata.movedPos.len() == 0){
+                            e.realign(); 
+                        }
                         local percent = this.removePercent(s.up).tofloat();
                         e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
+
                     } else {
                         e.Position.Y =  e.Position.Y - s.up;
                     }
@@ -298,10 +330,22 @@ class UI  {
                    
                      if (isString){
                         local wrapper =  e.getWrapper();
-                          e.resetPosition();
-                        e.realign();                         
+                         if (!e.metadata.rawin("movedPos")){
+                           e.metadata["movedPos"] <- ["down"];
+                        }else{
+                            if (e.metadata.movedPos.find("down") != null){
+                                return;
+                            } else{
+                                e.metadata.movedPos.push("down");
+                            }
+                        }
+                        if (e.metadata.movedPos.len() == 0){
+                            e.realign();               
+                        }          
                         local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
-                         e.Position.Y += ( wrapper.Y * percent ).tofloat();
+                        e.Position.Y += ( wrapper.Y * percent ).tofloat();
+
+
                     } else {
                         e.Position.Y =  e.Position.Y + s.down;
                     }
@@ -319,9 +363,13 @@ class UI  {
     }      
  
     function addToDeleteQueue(e) { 
-        delete idsMetadata[this.cleanID(e.id)]; 
-        //e = null;                  
-        toDelete.push(e);   
+        local id= this.cleanID(e.id);
+        if (idsMetadata.rawin(id)){
+            delete idsMetadata[id]; 
+            //e = null;                  
+            toDelete.push(e);   
+        }
+      
         
     } 
 
@@ -365,14 +413,14 @@ class UI  {
     }
 
     function removeChildren(parent){
-        if (parent.id != null && parent.id != ""){    
+        if (parent.id != null && parent.id != ""){     
             foreach(i,name in parent.childLists ) {   
                 local list = this.lists[this.names.find(name)];
-                local sizeBefore = list.len();
-               
-                local newList = list.filter(function(idx,e) {
                    
-                   local UI = ::getroottable().UI;
+                local sizeBefore = list.len();
+               local newList = list.filter(function(idx,e) {
+                   
+                   local UI = ::getroottable().UI; 
                    local t = typeof e;
                     if (t == "instance"){
                         return true; 
@@ -387,6 +435,7 @@ class UI  {
                     }
                     return true;
                 }); 
+                
                   local deleted = sizeBefore > newList.len();
                   
                   if (deleted) {
@@ -630,23 +679,25 @@ class UI  {
             return split(p, "%")[0];
         }
         return p;
-    }
+    } 
 
 
     function DeleteByID(id){
        local e = this.findById(id); 
        if (e != null ) {
-           
-           e.removeChildren();
+            e.removeChildren();
        }
-       local listName =this.idsMetadata[this.cleanID(id)].list;
-       local list = this.lists[names.find(listName)]; 
-        
-        local newList =  this.deleteByID(id, list, listName); 
-        if (newList != null){
-            this.lists[names.find(listName)] = newList;
-        }  
-         
+       local newid = this.cleanID(id);
+       if (this.idsMetadata.rawin(newid)) { 
+
+        local listName =this.idsMetadata[newid].list;
+        local list = this.lists[names.find(listName)]; 
+            
+            local newList =  this.deleteByID(id, list, listName); 
+            if (newList != null){
+                this.lists[names.find(listName)] = newList;
+            }  
+        }
     } 
  
 
@@ -736,9 +787,11 @@ class UI  {
                     originalObject = null
                 }; 
                 
+                
                 this.align(element); 
-              
-                this.shift(element);
+                if (obj.rawin("children") ){
+                    this.shift(element);
+                }
                 
             }else{
                 //Console.Print("ID NOT VALID "+ obj.id);
@@ -964,7 +1017,7 @@ class UI  {
     } 
      function Canvas(o){
         if (typeof o == "string") {
-            return this.fetch.canvas(o);
+            return this.fetch.canvas(o); 
         }
        
        
@@ -1008,18 +1061,27 @@ class UI  {
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
+                    if (c.metadata.rawin("posBeforeMove")){
+                        c.Position = c.metadata.posBeforeMove;
+                        if (c.metadata.rawin("movedPos")){
+                            c.metadata.movedPos.clear();
+                        }
+                    }
                     c.realign();
                     c.shiftPos();
                 }
             }
+        }else{
+            if (b.getParent() == null){
+                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
+            }
+            b.shiftPos(); 
         }
-
+      
          if (b.autoResize){
-             b.realign();
-             b.shiftPos();
+            b.realign();
+            b.shiftPos();
         }
-       
-       
         
         this.postConstruct(b);
          
@@ -1151,21 +1213,30 @@ class UI  {
             }
         }
 
-              
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
+                    if (c.metadata.rawin("posBeforeMove")){
+                        c.Position = c.metadata.posBeforeMove;
+                        if (c.metadata.rawin("movedPos")){
+                            c.metadata.movedPos.clear();
+                        }
+                    }
                     c.realign();
                     c.shiftPos();
                 }
             }
+        }else{
+            if (b.getParent() == null){
+                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
+            }
+            b.shiftPos(); 
         }
-
+     
          if (b.autoResize){
              b.realign();
              b.shiftPos();
-        }        
-
+        }
         this.postConstruct(b);
 
         return b;
@@ -1210,13 +1281,25 @@ class UI  {
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
+                    if (c.metadata.rawin("posBeforeMove")){
+                        c.Position = c.metadata.posBeforeMove;
+                        if (c.metadata.rawin("movedPos")){
+                            c.metadata.movedPos.clear();
+                        }
+                    }
                     c.realign();
                     c.shiftPos();
                 }
             }
+        }else{
+            if (b.getParent() == null){
+                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
+            }
+            b.shiftPos(); 
         }
 
-        if (b.autoResize){
+        
+         if (b.autoResize){
              b.realign();
              b.shiftPos();
         }
