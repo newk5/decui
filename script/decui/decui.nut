@@ -15,6 +15,7 @@ dofile("decui/components/Grid.nut");
 dofile("decui/UI/Fetch.nut");
 dofile("decui/UI/Events.nut");
 dofile("decui/UI/UI.nut");
+dofile("decui/UI/Store.nut");
  
 dofile("decui/util/StreamRequest.nut");
 dofile("decui/util/StreamReader.nut");

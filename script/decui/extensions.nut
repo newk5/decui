@@ -192,12 +192,14 @@ foreach(i,e in elements ) {
                         }
                         
                         c.realign();
+                        c.resetMoves();
                         c.shiftPos();
                     }
                 }
-            
+             
             if (this.autoResize){
                 this.realign();
+                this.resetMoves();
                 this.shiftPos();
             }
           
@@ -600,12 +602,14 @@ foreach(i,e in elements ) {
                 } 
                if (adjusted){
                     this.realign(); 
+                    this.resetMoves();
                     this.shiftPos(); 
 
                      foreach (i, c in this.getChildren()) {
                         if (!c.rawin("className")) {
                             c.resetPosition();
                             c.realign();
+                            c.resetMoves();
                             c.shiftPos();
                         }
                     }

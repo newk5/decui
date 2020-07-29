@@ -18,11 +18,14 @@ class UI  {
     listsNumeration = null;
     fetch = null;
     events = null;
+    store = null;
     streamControllers = [];
     lastClickedEl = null;
     openNots = 0;
     notsHeight = 0;
     
+
+
     constructor() {
 
         this.toDelete =[];
@@ -35,9 +38,13 @@ class UI  {
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
-      
+       
         this.fetch = Fetch(this);
         this.events = Events(this);
+    }
+
+    function Data(data) {
+         this.store= Store(data);
     }
  
     function processStream(streamIdentifier, stream){
@@ -994,6 +1001,12 @@ class UI  {
 
         this.postConstruct(b);
 
+        this.postConstruct(b);
+        if (o.rawin("bindTo")){
+             this.store.attachIDAndType(o.bindTo,o.id, "GUILabel");
+             b.setText(this.store.get(o.bindTo));
+        }
+
         return b;
     }
      function Editbox(o){
@@ -1013,8 +1026,22 @@ class UI  {
 
          
         this.postConstruct(b);
+        if (o.rawin("bindTo")){
+             this.store.attachIDAndType(o.bindTo,o.id, "GUIEditbox");
+             b.Text = this.store.get(o.bindTo);
+        }
+       
         return b;
     } 
+
+    function setData(key,val){
+        this.store.set(key,val);
+    }
+
+    function getData(key){
+        this.store.get(key);
+    }
+
      function Canvas(o){
         if (typeof o == "string") {
             return this.fetch.canvas(o); 
@@ -1100,6 +1127,16 @@ class UI  {
         this.listsNumeration.checkboxes++;
         
          this.postConstruct(b);
+
+          if (o.rawin("bindTo")){
+             this.store.attachIDAndType(o.bindTo,o.id, "GUICheckbox");
+            local val = this.store.get(o.bindTo);
+            if (val){
+                b.AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
+            }else{
+                 b.RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
+            }
+        }
         
         return b; 
     }
