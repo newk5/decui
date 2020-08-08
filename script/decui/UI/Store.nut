@@ -24,7 +24,12 @@ class  Store {
     }
 
     function attachIDAndType(key,id, type) {
-        if (this.data.rawin(key)){
+        if (key.find(".")){
+            local fields = split(key,".");
+            local o = this.getEntry(fields[0]);
+             o.elID = id;
+            o.el = type;
+        }else if (this.data.rawin(key)){
             local o = this.getEntry(key);
             o.elID = id;
             o.el = type;
@@ -32,26 +37,61 @@ class  Store {
     }
 
     function set(key, val){
-        if (this.data.rawin(key)){
+         if (key.find(".")){
+            local fields = split(key,".");
+            local o = this.getEntry(fields[0]);
+            local old = o.value;
+           
+            if (o != null){ 
+                  
+                local nestedField = o.value;
+                fields = fields.filter(function(idx,e) {
+                    return e != fields[0];
+                });
+              
+                foreach (idx,field in fields ) {
+                    local oldField = nestedField;
+                    try { 
+                        nestedField = nestedField[field];
+                        if (idx == fields.len()-2){
+                            oldField[field][fields[idx+1]] = val;
+                            this.triggerChange(o, val);
+                        }
+                    }catch(ex) {
+
+                    }
+                }
+               
+            }
+        } else if (this.data.rawin(key)){
             local o = this.data[key];
             local old = o.value;
             o.value = val;
-            if (o.el=="GUIEditbox" ){
+            this.triggerChange(o, val);
+           
+        }
+    }
+
+    function triggerChange(o, val){
+       
+         if (o.el != ""){
+            
+              if (o.el=="GUIEditbox" ){
                 UI.Editbox(o.elID).Text =val+""; 
             } else if (o.el=="GUICheckbox"){
                 if (val == true){
-                     UI.Checkbox(o.elID).AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                    UI.Checkbox(o.elID).AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
                 }else{
-                     UI.Checkbox(o.elID).RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                    UI.Checkbox(o.elID).RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
                 }
-               
+            
             } else if (o.el=="GUILabel"){
                 UI.Label(o.elID).setText(val+""); 
             } 
-            if (o.onChange != null){
-                o.onChange(old, val);
-            }
-           
+         }
+     
+        if (o.onChange != null){
+            o.onChange(old, val);
         }
     }
 
@@ -60,20 +100,19 @@ class  Store {
         if (key.find(".")){
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
-             
             if (o != null){
 
                 local val = o.value;
                 fields = fields.filter(function(idx,e) {
                     return e != fields[0];
                 });
+               
                 foreach (field in fields ) {
                     val = val[field];
                 }
                 return val;
             }
-        }
-        if (this.data.rawin(key)){
+        }else if (this.data.rawin(key)){
             return this.data[key].value;
         }
         return null;

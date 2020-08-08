@@ -842,7 +842,8 @@ class UI  {
         lists[names.find("buttons")].push(b); 
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list , index = this.listsNumeration.buttons };
         this.listsNumeration.buttons++;
-
+        b.shiftPos();
+    
         this.postConstruct(b);
 
         return b; 
@@ -861,6 +862,8 @@ class UI  {
         }         
         local c = Combobox(o);
         this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
         this.postConstruct(o);
         return c;
     }
@@ -876,6 +879,8 @@ class UI  {
         }         
         local c = PopUp(o);
         this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
         this.postConstruct(o);
         return c;
     }
@@ -907,6 +912,8 @@ class UI  {
         }         
         local c = CanvasCircle(o);
         this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
         this.postConstruct(o);
 
         return c;
@@ -922,6 +929,8 @@ class UI  {
         }         
         local c = Table(o);
         this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
         this.postConstruct(o);
 
         return c;
@@ -964,6 +973,8 @@ class UI  {
         }         
         local c = Tabview(o);
         this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
         this.postConstruct(o);
 
         return c;
@@ -998,14 +1009,13 @@ class UI  {
             index = this.listsNumeration.labels
          };
         this.listsNumeration.labels++;
-
         this.postConstruct(b);
 
-        this.postConstruct(b);
         if (o.rawin("bindTo")){
              this.store.attachIDAndType(o.bindTo,o.id, "GUILabel");
              b.setText(this.store.get(o.bindTo));
         }
+        b.shiftPos(); 
 
         return b;
     }
@@ -1030,6 +1040,7 @@ class UI  {
              this.store.attachIDAndType(o.bindTo,o.id, "GUIEditbox");
              b.Text = this.store.get(o.bindTo);
         }
+        b.shiftPos(); 
        
         return b;
     } 
@@ -1039,7 +1050,7 @@ class UI  {
     }
 
     function getData(key){
-        this.store.get(key);
+        return this.store.get(key);
     }
 
      function Canvas(o){
@@ -1137,7 +1148,7 @@ class UI  {
                  b.RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
             }
         }
-        
+        b.shiftPos(); 
         return b; 
     }
       function Listbox(o){
@@ -1159,7 +1170,7 @@ class UI  {
         this.listsNumeration.listboxes++;
         
         this.postConstruct(b);
-
+        b.shiftPos(); 
         return b;
     }
       function Memobox(o){
@@ -1174,7 +1185,7 @@ class UI  {
         this.listsNumeration.memoboxes++;
 
          this.postConstruct(b);
-
+        b.shiftPos(); 
         return b;
     }
        function ProgressBar(o){ 
@@ -1190,7 +1201,7 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.progbars };
         this.listsNumeration.progbars++;
 
-        
+        b.shiftPos(); 
          this.postConstruct(b);
 
         return b;
@@ -1207,6 +1218,7 @@ class UI  {
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.scrollbars };
         this.listsNumeration.scrollbars++;
         
+        b.shiftPos(); 
         this.postConstruct(b);
 
         return b; 

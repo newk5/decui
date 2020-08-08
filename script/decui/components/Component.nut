@@ -54,4 +54,7 @@ class Component  {
       function MoveBackward() {
         UI.Canvas(this.id).MoveBackward();
     }
+      function resetMoves() {
+        UI.Canvas(this.id).resetMoves();
+    }
 }

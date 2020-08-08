@@ -25,12 +25,6 @@ function printCallStacks(){
 }
 
 function Script::ScriptLoad(){
- 
-   // dofile("GridDemo.nut")
-   // dofile("TableDemo.nut")
-    //dofile("NotificationDemo.nut")
-    //dofile("PopupDemo.nut")
-    //dofile("TabviewDemo.nut")
-    
+       
    
 } 
