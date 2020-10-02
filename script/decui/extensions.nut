@@ -434,7 +434,7 @@ foreach(i,e in elements ) {
        })
  
          //set(fieldName, value)
-       e.rawnewmember("set", function(fieldName, value) {
+       e.rawnewmember("set", function(fieldName, value, ignoreWrap = false) {
             local firstText = this.Text;
             this[fieldName] = value;
             if (fieldName == "Text" || fieldName == "FontSize"){
@@ -449,8 +449,8 @@ foreach(i,e in elements ) {
             }
 
             
-       
-           if (this.isWrapped()){
+            // ignoring wrap when inside `wrapText` to avoid heavy recursion followed by stack overflow
+           if (!ignoreWrap && (this.isWrapped() || this.hasWrap())){
                
                 if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontName"){
                     local text = firstText;
@@ -461,17 +461,23 @@ foreach(i,e in elements ) {
                        
                     }
                    
-                    if (fieldName == "FontSize"){ 
+                    if (fieldName == "FontSize" || fieldName == "FontName"){ 
                        this.Text = text;
                     }
                     this.metadata.lines.clear();
-                    local parentID = this.parents[this.parents.len()-1];
-                    if (parentID != null){
-                        local parent = UI.Canvas(parentID);
-                        if (parent == null){
-                            parent = UI.Window(parentID);
+                    if(parents.len() > 0) {
+                        local parentID = this.parents[this.parents.len()-1];
+                        if (parentID != null){
+                            local parent = UI.Canvas(parentID);
+                            if (parent == null) {
+                                parent = UI.Sprite(parentID);
+                            }
+                            if (parent == null){
+                                parent = UI.Window(parentID);
+                            }
+
+                            this.wrapText(parent, this, parent.Size.X-10)
                         }
-                        this.wrapText(parent, this, parent.Size.X-10)
                     }
                 }else{   
                      foreach (line in this.metadata.lines) {
@@ -507,23 +513,43 @@ foreach(i,e in elements ) {
        e.rawnewmember("wrapText",function (parent, firstlabel,  size){ 
        
         local width = size;
+        local wordWrap = false;
         if (this.hasWrapOptions()){
             if (this.wrapOptions.rawin("maxWidth")){
                 width = this.wrapOptions.maxWidth;
             }
-        }   
+
+            if (this.wrapOptions.rawin("wordWrap")){
+                wordWrap = this.wrapOptions.wordWrap;
+            }
+        }  
         local rem = [];
         local resized = false;
+
         while (this.Position.X + this.TextSize.X > width){
+            if(!wordWrap) {
+                local lastLetter =  this.Text.slice( this.Text.len()-1, this.Text.len());
+                local remaining = this.Text.slice(0,this.Text.len()-1)
+                this.set("Text", remaining, true);
             
-        
-            local lastLetter =  this.Text.slice( this.Text.len()-1, this.Text.len());
-            local remaining = this.Text.slice(0,this.Text.len()-1)
-            this.set("Text", remaining);
-        
-            rem.push(lastLetter);
-            resized = true;
-        }  
+                rem.push(lastLetter);
+                resized = true;
+            }
+            else {
+                local words = split(this.Text, " ");
+                local lastWord = words[words.len()-1] + " ";
+                local remaining = "";
+
+                for(local i = 0; i < words.len() - 1; ++i) {
+                    remaining += words[i] + " ";
+                }
+
+                this.set("Text", remaining, true);
+                rem.push(lastWord);
+                resized = true;
+            }
+        }
+
         if (resized){
            
             rem.reverse();
@@ -538,7 +564,7 @@ foreach(i,e in elements ) {
 
             local line = UI.Label(obj);
             
-            line.set("Text", obj.Text);
+            line.set("Text", obj.Text, true);
             local lineSpacing = 0;
             if (firstlabel.hasWrapOptions()){
                 if (firstlabel.wrapOptions.rawin("lineSpacing")){
@@ -551,8 +577,6 @@ foreach(i,e in elements ) {
             firstlabel.metadata.lines.push(line.id);
             line.wrapText(parent,firstlabel,size);
             parent.add(line);
-          
-
         }
         return resized;
     });
