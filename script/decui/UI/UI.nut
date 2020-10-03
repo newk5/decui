@@ -1129,12 +1129,12 @@ class UI  {
                     ccanvas.shiftPos();
                 }
             }
-        }else{
-            if (b.getParent() == null){
-                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
-            }
-            b.shiftPos(); 
         }
+        if (b.getParent() == null){
+            b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
+        }
+        b.shiftPos(); 
+        
       
          if (b.autoResize){
             b.realign();
