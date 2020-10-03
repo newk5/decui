@@ -180,7 +180,7 @@
         }
 
          function onHoverOver(el){ 
-            if (el.rawin("metadata") && el.metadata != null){
+            if (el.rawin("metadata") && el.metadata != null && el.metadata.rawin("list")){
 
            
                 this.UI.hoveredEl= { id =el.id, list = el.metadata.list };
