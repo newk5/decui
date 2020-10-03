@@ -57,4 +57,8 @@ class Component  {
       function resetMoves() {
         UI.Canvas(this.id).resetMoves();
     }
+    function getCanvas(){
+        return  UI.Canvas(this.id);
+    }
+  
 }
