@@ -19,7 +19,7 @@ elements <- [
         }
     }
  
-attachProps([ "UI","wrapOptions", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
+attachProps([ "UI","wrapOptions", "bindTo", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize", "flags", "fadeStep", "fadeLow", "elementData"
@@ -213,6 +213,10 @@ foreach(i,e in elements ) {
             if (this.rawin("preDestroy") && this.preDestroy != null){
                 this.preDestroy();
             }
+            if (this.rawin("bindTo")){
+                ::UI.store.remove(this.bindTo, this.id);
+            }
+          
             if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
                     UI.Label(line).destroy();

@@ -27,6 +27,11 @@ class Combobox extends Component {
         this.isOpen = false;
         this.id = o.id; 
         this.options = o.options; 
+        if (o.rawin("bindTo") && o.bindTo != null){
+            ::UI.store.attachIDAndType(o.bindTo,o.id, "Combobox");
+            local val =  ::UI.store.get(o.bindTo);
+            this.options = val;
+        }
         this.colour = ::Colour(255,255,255);
         this.labelColour = ::Colour(0,0,0);
         this.onOptionSelect = o.onOptionSelect;
@@ -366,7 +371,22 @@ class Combobox extends Component {
             this.options.clear();
         }
     }
+
+    function Clean(){
+        this.clear();
+    }
     
+    function setOptions(options) {
+        local c = ::getroottable().UI.Listbox(this.listboxID);
+        if (c != null) {
+            c.Clean();
+            this.options =options;
+            foreach (i,item in options) {
+                c.AddItem(item);
+            } 
+        }
+              
+    }
 
  
 }

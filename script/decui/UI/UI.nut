@@ -1,4 +1,3 @@
-
 class UI  {
 
     toDelete=null;
@@ -23,7 +22,7 @@ class UI  {
     lastClickedEl = null;
     openNots = 0;
     notsHeight = 0;
-    
+    data = null;
 
 
     constructor() {
@@ -41,10 +40,14 @@ class UI  {
        
         this.fetch = Fetch(this);
         this.events = Events(this);
+        
     }
 
     function Data(data) {
          this.store= Store(data);
+    }
+    function Subscribe(key, obj ={}) {
+        this.store.sub(key, obj.onChange);
     }
  
     function processStream(streamIdentifier, stream){
@@ -1182,7 +1185,13 @@ class UI  {
         b.metadata.list = "listboxes";
         b.metadata.index = this.listsNumeration.listboxes;
 
+        if (o.rawin("bindTo")){
+            this.store.attachIDAndType(o.bindTo,o.id, "Listbox");
+            local val = this.store.get(o.bindTo);
+            o["options"] <- val;
+        }
         if (o.rawin("options") && o.options != null) {
+            
             foreach (i,item in o.options) {
                 b.AddItem(item);
             }
