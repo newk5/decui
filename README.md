@@ -1,6 +1,6 @@
 # DecUI
 DecUI (declarative UI) is a library to create VCMP GUI's in a declarative manner. It also provides many lower level abstractions and some new components and features.
-All of the existing properties and functions will still work so everything listed on the [VCMP wiki](http://wiki.vc-mp.org/wiki/Scripting/Squirrel/Client_Functions#GUI_Functions
+All of the existing properties and functions will still work so everything listed on the [VCMP wiki](http://wiki.adtec.ovh/wiki/Scripting/Squirrel/Client_Functions#GUI_Functions
 ) is still applicable. This library provides new functions and properties in addition to the current ones listed on the VCMP wiki aswell as
 a few new components and a declarative way of creating these components. 
 
