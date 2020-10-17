@@ -16,18 +16,16 @@ class  Store {
     }
       function initDefaults(opts){ 
         
-        if (!opts.rawin("value")){
-            opts["value"] <- null;
-        }
-        if (!opts.rawin("el")){
-            opts["el"] <- [ ]; //element types
-        }
-        if (!opts.rawin("elID")){
-            opts["elID"] <- []; //element ids
-        }
-        if (!opts.rawin("onChange")){
-            opts["onChange"] <- null;
-        }
+        opts["value"] <- null;
+        opts["el"] <- [ ]; //element types
+        opts["elID"] <- []; //element ids
+    
+        //events
+        opts["onChange"] <- null;
+        opts["onPush"] <- null;
+        opts["onPop"] <- null;
+        opts["onDecrement"] <- null;
+        opts["onIncrement"] <- null;
 
        
     }
@@ -78,14 +76,15 @@ class  Store {
         }
     }
 
-    function set(key, val){
+    function set(key, val, op = "set"){
+       
          if (key.find(".")){
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
             local old = o.value;
            
-            if (o != null){ 
-                  
+            if (o != null){  
+                     
                 local nestedField = o.value;
                 fields = fields.filter(function(idx,e) {
                     return e != fields[0];
@@ -100,15 +99,62 @@ class  Store {
 
                             local oldVal=null;
                             if (offset==1){
+
                                 oldVal = oldField[field];
-                                oldField[field] = val;
+                                if (op =="set"){
+                                     oldField[field] = val;
+                                }else if (op=="push"){
+                                    oldField[field].push(val); 
+                                } else if (op=="pop"){
+                                    if (val ==0){
+                                        oldField[field].pop(); 
+                                    }else{
+                                        oldField[field].push(val); 
+                                    }
+                                   
+                                } else if (op=="inc"){
+                                     if (val ==1){
+                                        oldField[field] +=1; 
+                                    }else{
+                                        oldField[field] += val;
+                                    }
+                                } else if (op=="dec"){
+                                    oldField[field].push(val); 
+                                }
+                               
                             }else{
                                 oldVal = oldField[field][fields[idx+1]];
-                                oldField[field][fields[idx+1]] = val;
+                                 if (op =="set"){
+                                      oldField[field][fields[idx+1]] = val;
+                                 } else if (op=="push"){
+                                    oldField[field][fields[idx+1]].push(val);
+                                } else if (op=="pop"){
+                                    if (val ==0){
+                                        oldField[field][fields[idx+1]].pop();
+                                    }else{
+                                        oldField[field][fields[idx+1]].remove(val);
+                                    }
+                                  
+                                } else if (op=="inc"){
+                                    if (val ==1){
+                                        oldField[field][fields[idx+1]] += 1;
+                                    }else{
+                                        oldField[field][fields[idx+1]] += val;
+                                    }
+                                  
+                                } else if (op=="dec"){
+                                    if (val ==1){
+                                        oldField[field][fields[idx+1]] -= 1;
+                                    }else{
+                                        oldField[field][fields[idx+1]] -= val;
+                                    }
+                                  
+                                }
+                               
                             }
                            
                             
-                            this.triggerChange(o, val,oldVal);
+                            this.triggerChange(o, val,oldVal,op);
                         }
                     }catch(ex) {
 
@@ -117,26 +163,60 @@ class  Store {
                
             }
         } else if (this.data.rawin(key)){
+           
             local o = this.data[key];
             local old = o.value;
-            o.value = val;
-            this.triggerChange(o, val, old);
+            if (op =="set"){
+                 o.value = val;
+            } else if (op=="push") {
+                o.value.push(val);
+            } else if (op=="pop") {
+                if (val ==0){
+                    o.value.pop();
+                }else{
+                    o.value.remove(val);
+                }
+            } else if (op=="inc") {
+                if (val ==1){
+                    o.value +=1;
+                }else{
+                    o.value +=val;
+                }
+            } else if (op=="dec") {
+                if (val ==1){
+                    o.value -=1;
+                }else{
+                    o.value -=val;
+                }
+            }
+           
+            this.triggerChange(o, val, old, op);
            
         }
     }
 
-    function sub(key, callback) {
-        if (key.find(".")){
-            local fields = split(key,".");
-            local o = this.getEntry(fields[0]);
-            o.onChange = callback;
-        }else{
-            local o = this.data[key];
-            o.onChange = callback;
+    function sub(key, obj) {
+        local o =this.getEntry(key);
+      
+        if (obj.onChange != null){
+            o.onChange = obj.onChange;
         }
+        if (obj.onPush != null){
+            o.onPush = obj.onPush;
+        }
+        if (obj.onPop != null){
+            o.onPop = obj.onPop;
+        }
+        if (obj.onDecrement != null){
+            o.onDecrement = obj.onDecrement;
+        }
+         if (obj.onIncrement != null){
+            o.onIncrement = obj.onIncrement;
+        }
+        
     }
 
-    function triggerChange(o, newValue, oldValue){
+    function triggerChange(o, newValue, oldValue, op = "set"){
        
          if (o.el.len() >0){
             
@@ -189,6 +269,18 @@ class  Store {
      
         if (o.onChange != null){
             o.onChange(oldValue, newValue);
+        }
+        if (o.onPush != null && op =="push"){
+            o.onPush(newValue)
+        }
+        if (o.onPop != null && op =="pop"){
+            o.onPop(newValue)
+        }
+        if (o.onIncrement != null && op =="inc"){
+            o.onIncrement(newValue)
+        }
+         if (o.onDecrement != null && op =="dec"){
+            o.onDecrement(newValue)
         }
     }
 

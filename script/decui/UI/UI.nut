@@ -46,8 +46,27 @@ class UI  {
     function Data(data) {
          this.store= Store(data);
     }
-    function Subscribe(key, obj ={}) {
-        this.store.sub(key, obj.onChange);
+    function Subscribe(key, obj ={ }) {
+        if (!obj.rawin("onChange")){
+            obj["onChange"] <- null;
+        }
+        if (!obj.rawin("onPush")){
+            obj["onPush"] <- null;
+        }
+        if (!obj.rawin("onChange")){
+            obj["onChange"] <- null;
+        }
+        if (!obj.rawin("onPop")){
+            obj["onPop"] <- null;
+        }
+        if (!obj.rawin("onDecrement")){
+            obj["onDecrement"] <- null;
+        }
+        if (!obj.rawin("onIncrement")){
+            obj["onIncrement"] <- null;
+        }
+        
+        this.store.sub(key, obj);
     }
  
     function processStream(streamIdentifier, stream){
@@ -1058,8 +1077,24 @@ class UI  {
         return b;
     } 
 
-    function setData(key,val){
-        this.store.set(key,val);
+    function pushData(key, value) {
+        this.setData(key, value, "push");
+    }
+     function popData(key, value = 0) {
+        this.setData(key, value, "pop");
+    }
+
+    function incData(key, value = 1) {
+        this.setData(key, value, "inc");
+    }
+
+    function decData(key, value = 1) {
+        this.setData(key, value, "dec");
+    }
+
+    function setData(key,val, op = "set"){
+
+        this.store.set(key,val,op);
     }
 
     function getData(key){
