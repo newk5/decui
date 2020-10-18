@@ -20,6 +20,7 @@ class Combobox extends Component {
     height =  null;
     border =null;
     align = null;
+    bindTo=null;
     
 
     constructor(o) {
@@ -31,6 +32,7 @@ class Combobox extends Component {
             ::UI.store.attachIDAndType(o.bindTo,o.id, "Combobox");
             local val =  ::UI.store.get(o.bindTo);
             this.options = val;
+            this.bindTo = o.bindTo;
         }
         this.colour = ::Colour(255,255,255);
         this.labelColour = ::Colour(0,0,0);
@@ -342,19 +344,25 @@ class Combobox extends Component {
         return this.options.len();
     } 
 
-    function addItem(item){
-       
-        
+    function addItem(item, triggerBind = true){
+
+
         local c = ::getroottable().UI.Listbox(this.listboxID);
         if (c != null){
            
             c.AddItem(item);
             this.options.push(item);
+            
+             if (this.bindTo != null && triggerBind){
+                ::getroottable().UI.pushData(this.bindTo, item , true);
+            }
+            
+           
         }
         
     }
 
-     function removeItem(item){ 
+     function removeItem(item, triggerBind = true){ 
         local idx = this.options.find(item);
         local c = ::getroottable().UI.Listbox(this.listboxID);
         if (c != null){ 
@@ -363,16 +371,22 @@ class Combobox extends Component {
             if (idx != null) {
                 
                 this.options.remove(idx); 
+                 if (this.bindTo != null && triggerBind){
+                    UI.popData(this.bindTo, idx, true);
+                }
             }
         }
         
     }
 
-    function clear(){
+    function clear( triggerBind = true){
         local c = ::getroottable().UI.Listbox(this.listboxID);
         if (c != null) {
             c.Clean();
             this.options.clear();
+             if (this.bindTo != null && triggerBind){
+                UI.setData(this.bindTo, options, true);
+            }
         }
     }
 
@@ -380,7 +394,7 @@ class Combobox extends Component {
         this.clear();
     }
     
-    function setOptions(options) {
+    function setOptions(options, triggerBind = true) {
         local c = ::getroottable().UI.Listbox(this.listboxID);
         if (c != null) {
             c.Clean();
@@ -388,6 +402,9 @@ class Combobox extends Component {
             foreach (i,item in options) {
                 c.AddItem(item);
             } 
+            if (this.bindTo != null && triggerBind){
+                UI.setData(this.bindTo, options, true);
+            }
         }
               
     }

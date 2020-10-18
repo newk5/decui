@@ -76,7 +76,7 @@ class  Store {
         }
     }
 
-    function set(key, val, op = "set"){
+    function set(key, val, op = "set",dataUpdateOnly = false){
 
          if (key.find(".")){
             local fields = split(key,".");
@@ -154,7 +154,7 @@ class  Store {
                             }
                            
                            
-                            this.triggerChange(o, val,oldVal, op);
+                            this.triggerChange(o, val,oldVal, op,dataUpdateOnly);
                         }
                     }catch(ex) {
 
@@ -190,7 +190,7 @@ class  Store {
                 }
             }
            
-            this.triggerChange(o, val, old, op);
+            this.triggerChange(o, val, old, op,dataUpdateOnly);
            
         }
     }
@@ -216,9 +216,9 @@ class  Store {
         
     }
 
-    function triggerChange(o, newValue, oldValue, op = "set"){
-       
-         if (o.el.len() >0){
+    function triggerChange(o, newValue, oldValue, op = "set", dataUpdateOnly=false){
+        local triggerChange = !dataUpdateOnly;
+         if (triggerChange){
             
             foreach (idx,id in o.elID) {
                 local elt = o.el[idx];
@@ -312,16 +312,16 @@ class  Store {
                          
                         if (op == "set"){
                             lst.Clean();
-                            lst.setOptions(newValue);
+                            lst.setOptions(newValue, false);
                         }  else if (op == "pop") {
 
                             local itemToRemove = lst.options[newValue];
                             if (itemToRemove != null){
-                                lst.removeItem(itemToRemove);
+                                lst.removeItem(itemToRemove,false);
                             }
                         }  else if (op == "push"){
                            
-                            lst.addItem(newValue);
+                            lst.addItem(newValue,false);
                         }
                         
                     }
@@ -345,11 +345,11 @@ class  Store {
                             local itemToRemove = tbl.data[newValue];
                             if (itemToRemove != null){
                                
-                                tbl.removeRow(itemToRemove);
+                                tbl.removeRow(itemToRemove,false);
                             }
                         }  else if (op == "push"){
                            
-                            tbl.addRow(newValue);
+                            tbl.addRow(newValue,false);
                         }
                         
                     }

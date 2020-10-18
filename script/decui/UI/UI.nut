@@ -1082,24 +1082,24 @@ class UI  {
         return b;
     } 
 
-    function pushData(key, value) {
-        this.setData(key, value, "push");
+    function pushData(key, value, dataUpdateOnly=false) {
+        this.setData(key, value, "push", dataUpdateOnly);
     }
-     function popData(key, value = 0) {
-        this.setData(key, value, "pop");
-    }
-
-    function incData(key, value = 1) {
-        this.setData(key, value, "inc");
+     function popData(key, value = 0, dataUpdateOnly=false) {
+        this.setData(key, value, "pop", dataUpdateOnly);
     }
 
-    function decData(key, value = 1) {
-        this.setData(key, value, "dec");
+    function incData(key, value = 1, dataUpdateOnly=false) {
+        this.setData(key, value, "inc", dataUpdateOnly);
     }
 
-    function setData(key,val, op = "set"){
+    function decData(key, value = 1, dataUpdateOnly=false) {
+        this.setData(key, value, "dec", dataUpdateOnly);
+    }
 
-        this.store.set(key,val,op);
+    function setData(key,val, op = "set", dataUpdateOnly=false){
+
+        this.store.set(key,val,op, dataUpdateOnly);
     }
 
     function indexOfData(key, item) {

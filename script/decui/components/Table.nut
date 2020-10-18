@@ -33,7 +33,7 @@ class Table extends Component {
     rowModel = null;
     beforePageChange = null;
     afterPageChange = null;
-
+    bindTo = null;
     awatingResponse = null;
 
     constructor(o) {
@@ -55,7 +55,10 @@ class Table extends Component {
             this.afterPageChange = o.afterPageChange;
         }
         
-        if (o.rawin("streamID")){
+        if (o.rawin("bindTo")){
+            this.bindTo = o.bindTo;
+        }
+         if (o.rawin("streamID")){
             this.streamID = o.streamID;
         }
          if (o.rawin("dataSize")){
@@ -597,7 +600,7 @@ class Table extends Component {
  
 
 
-    function addRow(o){ 
+    function addRow(o, triggerBind = true){ 
         if (this.awatingResponse){
             return;
         }
@@ -621,7 +624,9 @@ class Table extends Component {
             }     
         }
          this.data.push(o); 
-         
+        if (this.bindTo != null && triggerBind){
+            UI.pushData(this.bindTo, o, true);
+        }
         if (!validPage) { //new page added  
 
             local newPage = this.addHeaderRows([]);
@@ -716,7 +721,7 @@ class Table extends Component {
         }
     }
 
-    function removeRow(o){
+    function removeRow(o, triggerBind = true){
         if (!this.isEmpty && !this.awatingResponse) { 
             local isLastRow = this.totalRows == 1;
             if (isLastRow){
@@ -747,6 +752,9 @@ class Table extends Component {
 
                     }else {
                         this.dataPages[idx].remove(item);
+                         if (this.bindTo != null && triggerBind){
+                            UI.popData(this.bindTo, idx, true);
+                        }
                         UI.Canvas( this.id+"::table::row"+item ).data.selected = false;
                         local index = this.data.find(o);
                        
@@ -760,6 +768,7 @@ class Table extends Component {
 
             } 
             if (found && !this.lazy){
+               
                 this.totalRows--;
 
                 this.dataPages.clear();
