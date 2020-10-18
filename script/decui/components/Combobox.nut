@@ -340,24 +340,28 @@ class Combobox extends Component {
     }
     function size(){
         return this.options.len();
-    }
+    } 
 
     function addItem(item){
-        if (this.options.find(item)== null){
-            local c = ::getroottable().UI.Listbox(this.listboxID);
-            if (c != null){
-                c.AddItem(item);
-                this.options.push(item);
-            }
-        }
-    }
-
-     function removeItem(item){
-        local idx = this.options.find(item);
+       
+        
         local c = ::getroottable().UI.Listbox(this.listboxID);
         if (c != null){
+           
+            c.AddItem(item);
+            this.options.push(item);
+        }
+        
+    }
+
+     function removeItem(item){ 
+        local idx = this.options.find(item);
+        local c = ::getroottable().UI.Listbox(this.listboxID);
+        if (c != null){ 
+            
             c.RemoveItem(item);
             if (idx != null) {
+                
                 this.options.remove(idx); 
             }
         }

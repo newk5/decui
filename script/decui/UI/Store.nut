@@ -77,7 +77,7 @@ class  Store {
     }
 
     function set(key, val, op = "set"){
-       
+
          if (key.find(".")){
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
@@ -153,8 +153,8 @@ class  Store {
                                
                             }
                            
-                            
-                            this.triggerChange(o, val,oldVal,op);
+                           
+                            this.triggerChange(o, val,oldVal, op);
                         }
                     }catch(ex) {
 
@@ -245,20 +245,85 @@ class  Store {
                         l.setText(newValue+""); 
                     }
                     
-                } else if (elt=="Listbox"){
-                    local lst =  UI.Listbox(id);
-                    if (lst != null){
-                         lst.Clean();
-                        foreach (i,item in newValue) {
-                            lst.AddItem(item);
+                } else if (elt=="GUIButton"){
+                    local l =UI.Button(id);
+                    if (l != null){
+                        l.Text= newValue; 
+                    }
+                    
+                } else if (elt=="GUIMemobox"){
+                    local lst =UI.Memobox(id);
+                    if (op == "push") {
+                        lst.AddLine(newValue);
+                    } else if (op == "pop") {
+                       /*
+                        local itemToRemove = lst.Items[newValue];
+                        
+                        if (itemToRemove != null){
+                            lst.RemoveItem(itemToRemove);
                         }
+                        */
+                    }  else if (op == "set"){
+                        lst.Clear();
+                        foreach (i,item in newValue) {
+                            lst.AddLine(item);
+                        } 
+                    }
+                    
+                }  else if (elt=="GUIProgressBar"){
+                    local l = UI.ProgressBar(id)
+                    if (l != null){
+                        if (op =="set"){
+                            l.Value=newValue;
+                        } else if (op =="inc"){
+                            l.Value +=newValue;
+                        } else if (op =="dec"){
+                            l.Value -=newValue;
+                        }
+                        
+                    }
+                    
+                }  else if (elt=="Listbox"){
+                    local lst =  UI.Listbox(id);
+                      
+                    if (lst != null){
+                        if (op == "push") {
+                             lst.AddItem(newValue);
+                        } else if (op == "pop") {
+                           
+                            local itemToRemove = lst.Items[newValue];
+                            
+                            if (itemToRemove != null){
+                                lst.RemoveItem(itemToRemove);
+                            }
+                            
+                        }  else if (op == "set"){
+                            lst.Clean();
+                            foreach (i,item in newValue) {
+                                lst.AddItem(item);
+                            } 
+                        }
+                        
                     }
                    
                 } else if (elt=="Combobox"){
                     local lst =  UI.ComboBox(id);
                     if (lst != null){
-                        lst.Clean();
-                        lst.setOptions(newValue);
+                        
+                        if (op == "set"){
+                            lst.Clean();
+                            lst.setOptions(newValue);
+                        }  else if (op == "pop") {
+
+                            local itemToRemove = lst.options[newValue];
+                            if (itemToRemove != null){
+                                lst.removeItem(itemToRemove);
+                            }
+                        }  else if (op == "push"){
+                           
+                            lst.addItem(newValue);
+                        }
+                        
                     }
                    
                 } 

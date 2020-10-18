@@ -864,6 +864,11 @@ class UI  {
         lists[names.find("buttons")].push(b); 
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list , index = this.listsNumeration.buttons };
         this.listsNumeration.buttons++;
+         if (o.rawin("bindTo")){
+            this.store.attachIDAndType(o.bindTo,o.id, "GUIButton");
+            local val = this.store.get(o.bindTo);
+            b.Text = val;
+        }
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
@@ -1248,6 +1253,17 @@ class UI  {
             return this.fetch.memobox(o);
         }          
         local b = this.applyElementProps(GUIMemobox(), o);
+        if (o.rawin("bindTo")){
+            this.store.attachIDAndType(o.bindTo,o.id, "GUIMemobox");
+            local val = this.store.get(o.bindTo);
+            foreach (line in val) {
+                b.AddLine(line)
+            }
+        }else if (o.rawin("lines")){
+            foreach (line in o.lines) {
+                b.AddLine(line)
+            }
+        }
         b.metadata.list = "memoboxes";
         b.metadata.index = this.listsNumeration.memoboxes;
         lists[names.find("memoboxes")].push(b);
@@ -1273,6 +1289,12 @@ class UI  {
         lists[names.find("progbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.progbars };
         this.listsNumeration.progbars++;
+
+        if (o.rawin("bindTo")){
+            this.store.attachIDAndType(o.bindTo,o.id, "GUIProgressBar");
+            local val = this.store.get(o.bindTo);
+            b.Value = val;
+        }
 
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
