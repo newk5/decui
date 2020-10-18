@@ -309,7 +309,7 @@ class  Store {
                 } else if (elt=="Combobox"){
                     local lst =  UI.ComboBox(id);
                     if (lst != null){
-                        
+                         
                         if (op == "set"){
                             lst.Clean();
                             lst.setOptions(newValue);
@@ -322,6 +322,34 @@ class  Store {
                         }  else if (op == "push"){
                            
                             lst.addItem(newValue);
+                        }
+                        
+                    }
+                   
+                } else if (elt=="DataTable"){
+                    local tbl =  UI.DataTable(id);
+                    if (tbl != null){
+                           
+                        if (op == "set"){
+                            tbl.clear();
+                          
+                            tbl.data = newValue;
+                            tbl.totalRows = newValue.len();
+                            tbl.pages  = ceil(tbl.totalRows.tofloat() / (tbl.rows == null ? 10 : tbl.rows ).tofloat());
+                            tbl.dataPages.clear();
+                            tbl.populatePages();
+                            tbl.build(true);
+
+                        }  else if (op == "pop") {
+                            
+                            local itemToRemove = tbl.data[newValue];
+                            if (itemToRemove != null){
+                               
+                                tbl.removeRow(itemToRemove);
+                            }
+                        }  else if (op == "push"){
+                           
+                            tbl.addRow(newValue);
                         }
                         
                     }

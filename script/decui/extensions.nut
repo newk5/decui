@@ -213,7 +213,7 @@ foreach(i,e in elements ) {
             if (this.rawin("preDestroy") && this.preDestroy != null){
                 this.preDestroy();
             }
-            if (this.rawin("bindTo")){
+            if (this.rawin("bindTo") && this.bindTo != null){
                 ::UI.store.remove(this.bindTo, this.id);
             }
           

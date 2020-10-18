@@ -506,7 +506,7 @@ class UI  {
            
           
         }catch (ex){
-            Console.Print(ex);
+           // Console.Print(ex);
            //Console.Print("FAILED TO FIND "+newid);
             return null;
         }
@@ -1100,6 +1100,24 @@ class UI  {
     function setData(key,val, op = "set"){
 
         this.store.set(key,val,op);
+    }
+
+    function indexOfData(key, item) {
+        local arr = this.store.get(key);
+        local t = typeof arr;
+        if (arr != null && t == "array"){
+            return arr.find(item);
+        }
+    }
+
+    function eachData(key,callback) {
+        local arr = this.store.get(key);
+        local t = typeof arr;
+        if (arr != null && t == "array"){
+            foreach (item in arr) {
+                callback(item);
+            }
+        }
     }
 
     function getData(key){

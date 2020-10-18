@@ -169,13 +169,18 @@ class Table extends Component {
 
             
         } else {
-
+            
             if (o.rawin("data")){
-
+                 if (o.rawin("bindTo")){
+                    UI.store.attachIDAndType(o.bindTo,o.id, "DataTable");
+                    local val = UI.store.get(o.bindTo);
+                    o.data = val;
+                }
                 this.isEmpty = o.data.len() == 0;   
                 if (isEmpty){ 
                     o.data.push(this.getEmptyRow());
                 }
+               
             
                 foreach (i, d in o.data ) {
                     local render = this.renderRow == null ? true : this.renderRow(d);
@@ -554,13 +559,16 @@ class Table extends Component {
     }
 
     function clear(){
-        
+      
          foreach (i, c in this.columns) { 
+             
              local colCanvID = this.id+"::table::column::canvas"+i;
              local column = UI.Canvas(colCanvID);
+             
              column.removeBorders();
              column.destroy();
          } 
+         
     }
 
     function getDataRange(s, e, arr){ 
