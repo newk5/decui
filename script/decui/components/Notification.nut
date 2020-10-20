@@ -99,9 +99,9 @@ class UINotification extends Component {
         });
  
 
-        c.add(titleHeader);   
-        c.add(lText);
-        titleHeader.add(l);
+        c.add(titleHeader, false);   
+        c.add(lText, false);
+        titleHeader.add(l, false);
         local cl = UI.Sprite({ 
             id=this.id+"_closeBtn"
             file ="decui/closeb.png",
@@ -125,7 +125,7 @@ class UINotification extends Component {
                 left = "2%" 
             }
         });
-        titleHeader.add(cl);  
+        titleHeader.add(cl, false);  
          
         cl.resetMoves();
         c.Size.X+= 30;
@@ -146,7 +146,7 @@ class UINotification extends Component {
             Colour = titleHeader.Colour 
             align = "bottom_left"     
         }) 
-        c.add(bar);  
+        c.add(bar, false);  
         c.shiftPos();
        ::UI.openNots++; 
        local d = (bar.Size.X/time).tofloat();

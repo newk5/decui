@@ -25,7 +25,7 @@ class Combobox extends Component {
 
     constructor(o) {
         this.className = "Combobox"; 
-        this.isOpen = false;
+        this.isOpen = false; 
         this.id = o.id; 
         this.options = o.options; 
         if (o.rawin("bindTo") && o.bindTo != null){
@@ -328,9 +328,9 @@ class Combobox extends Component {
       
 
      
-        c.add(label);
-        c.add(sprite);
-        c.add(listbox);  
+        c.add(labe, false);
+        c.add(sprite, false);
+        c.add(listbox, false);  
 
         sprite.realign();
         sprite.shiftPos();

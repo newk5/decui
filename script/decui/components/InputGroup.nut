@@ -75,10 +75,10 @@ class InputGroup {
         l.move = {right = 0}; 
         l.shiftPos();
 
-        c.add(l);
-        c.add(e);
+        c.add(l, false);
+        c.add(e, false);
         
-        parent.add(c);
+        parent.add(c, false);
         //«c.addBorders({})
         if (this.move != null){
             c.move = this.move;

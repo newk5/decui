@@ -8,46 +8,64 @@
 
             } 
     
+        function alignChildren(e){
+            ::UI.applyRelativeSize(e); 
+            e.resetPosition();
+            e.realign();
+            if (e.rawin("shiftPos") && e.shiftPos != null){
+                e.resetMoves();
+                e.shiftPos(); 
+            } 
+            e.updateBorders();
+            foreach (idx, child in e.getChildren() ){
+                alignChildren(child);
+            } 
+        }
+
         function onGameResize(){
-            
+             
             foreach(i,list in this.UI.lists ) {  
                foreach(c,e in list ) { 
                    if (e.rawin("parents") && e.parents.len() == 0){
-                 
+                      
                         local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResizeAutoAdjust  == null || !e.ignoreGameResizeAutoAdjust )) ||  !e.rawin("ignoreGameResizeAutoAdjust");
                         if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
 
-                            if ( doesNotIgnoreEvent ){
+                            if ( doesNotIgnoreEvent && e.rawin("align") && e.align != null ){
                            
                                 ::UI.applyRelativeSize(e); 
                                 e.resetPosition();
                                 e.realign();
+                               
                                 if (e.rawin("shiftPos") && e.shiftPos != null){
+                                    e.resetMoves();
                                     e.shiftPos(); 
                                 } 
                                 e.updateBorders();
                             }
                            
                         }else{
-                            if ( doesNotIgnoreEvent ){
+
+                            if ( doesNotIgnoreEvent  && e.rawin("align") && e.align != null ){
                                 e.resetPosition();
                                 e.realign();  
                                 if (e.rawin("shiftPos") && e.shiftPos != null){
+                                    e.resetMoves();
                                     e.shiftPos(); 
                                 }
                             }    
-                        }
+                        }  
 
                         foreach (idx, child in e.getChildren() ){
-                            if (doesNotIgnoreEvent){
+                            if (doesNotIgnoreEvent && child.rawin("align") && child.align != null ){
+                                ::UI.applyRelativeSize(child); 
                                 child.resetPosition();
                                 child.realign();  
                                 if (child.rawin("shiftPos") && child.shiftPos != null){
+                                    child.resetMoves();
                                     child.shiftPos(); 
                                 }
-                            
-                           
-                              
+                                                          
                                 if (child.hidden){
                                     child.hide();
                                 }
@@ -59,6 +77,12 @@
                             if (child.rawin("onGameResize") && child.onGameResize != null){
                                 child.onGameResize();
                             }
+                              child.updateBorders();      
+                            
+                            foreach (subChild in child.getChildren() ){ 
+                                if ( subChild.rawin("align") && subChild.align != null )
+                                    alignChildren(subChild);
+                            }
                         }
                         if (e.rawin("onGameResize") && e.onGameResize != null){
                             e.onGameResize();
@@ -69,7 +93,7 @@
                             e.hide(); 
                         }
                         
-                    }
+                    } 
          
                 }
             }

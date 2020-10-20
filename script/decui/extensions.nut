@@ -233,6 +233,10 @@ foreach(i,e in elements ) {
      
         this.UI.showTooltip(this);
     }, null, false);
+     //focus()
+      e.rawnewmember("focus", function() {
+        this.UI.Focus(this);
+    }, null, false);
 
     //clearTooltip()
      e.rawnewmember("clearTooltip", function() {
@@ -580,7 +584,7 @@ foreach(i,e in elements ) {
             line.Position.Y += this.TextSize.Y+5 + lineSpacing;
             firstlabel.metadata.lines.push(line.id);
             line.wrapText(parent,firstlabel,size);
-            parent.add(line);
+            parent.add(line, false);
         }
         return resized;
     });
@@ -591,7 +595,7 @@ foreach(i,e in elements ) {
        });
 
      //attachChild(p)
-     e.rawnewmember("attachChild", function(p) {
+     e.rawnewmember("attachChild", function(p, processChildren = true) {
         local t = typeof this;
         local ct = typeof p;
 
@@ -609,9 +613,10 @@ foreach(i,e in elements ) {
             } 
             p.metadata["parentID"] <- this.id; 
             p.parents = list;
+          
             this.AddChild(p);
-            if (p.rawin("RelativeSize") && p.RelativeSize != null) {
-                 ::UI.applyRelativeSize(p); 
+            if (p.rawin("RelativeSize") && p.RelativeSize != null) { 
+                 ::UI.applyRelativeSize(p);   
             }
             if (p.rawin("align") && p.align != null && !p.isBorder()){
                 p.realign();
@@ -644,6 +649,17 @@ foreach(i,e in elements ) {
                 }
            
             }
+            if (processChildren){
+                 foreach (i, c in p.getChildren()) {
+                    if (!c.rawin("className")) {
+                        c.resetPosition();
+                        c.realign();
+                        c.resetMoves();
+                        c.shiftPos();
+                    }
+                }
+            }
+            
             if (p.rawin("shiftPos") && p.shiftPos != null){
                 p.shiftPos(); 
             }
@@ -656,11 +672,11 @@ foreach(i,e in elements ) {
  
 
     //add(e)
-     e.rawnewmember("add", function(p) {
+     e.rawnewmember("add", function(p, processChildren = true) {
         
         if ( p.rawin("className")){ 
             if (p.className == "InputGroup"){ 
-                p.attachParent(this,0);
+                p.attachParent(this,0); 
             } else if (p.className == "GroupRow"){   
                p.parentID = this.id;
                p.calculatePositions(); 
@@ -674,7 +690,8 @@ foreach(i,e in elements ) {
         }else{ 
            
            p.parentSize = this.Size;
-           this.attachChild(p);
+           this.attachChild(p, processChildren);
+
         }
         
     }, null, false);

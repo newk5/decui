@@ -105,7 +105,7 @@ class Table extends Component {
         }
          if (o.rawin("move")){
             this.move = o.move;
-        }else{
+        }else{ 
             move = {};
         }
          if (o.rawin("columns")){
@@ -161,6 +161,7 @@ class Table extends Component {
                         id =context.id+"::table::pagesLabel",
                         Text = "Page 1 of "+context.pages,
                         align = "bottom_center",
+                        ignoreGameResizeAutoAdjust = true
                         TextColour = Colour(255,255,255)
                     })
                   
@@ -204,6 +205,7 @@ class Table extends Component {
                 id =this.id+"::table::pagesLabel",
                 Text = "Page 1 of "+this.pages,
                 align = "bottom_center",
+                ignoreGameResizeAutoAdjust = true
                 TextColour = Colour(255,255,255)
             })
            
@@ -840,7 +842,7 @@ class Table extends Component {
             });
 
             pagesLabel.move = {up = 8};
-            canv.add(pagesLabel);
+            canv.add(pagesLabel, false);
             pagesLabel.realign();
             pagesLabel.shiftPos();
 
@@ -848,6 +850,7 @@ class Table extends Component {
                 id= this.id+"::table::prevBtn",
                 file ="decui/left.png",
                 align = "bottom_center",
+                ignoreGameResizeAutoAdjust = true
                 Size = VectorScreen(21,21),
                 move = { up = 8, left = 50 },
                 context = this,
@@ -875,6 +878,7 @@ class Table extends Component {
                 id= this.id+"::table::nextBtn",
                 file ="decui/right.png",
                 align = "bottom_center", 
+                ignoreGameResizeAutoAdjust = true
                 Size = VectorScreen(21,21),
                 move = { up = 8, right = 50 },
                 context = this,
@@ -897,11 +901,11 @@ class Table extends Component {
                 }
             }); 
   
-            canv.add(prevBtn); 
+            canv.add(prevBtn, false); 
             prevBtn.realign();
             prevBtn.shiftPos(); 
 
-            canv.add(nextBtn);
+            canv.add(nextBtn, false);
             nextBtn.realign();
             nextBtn.shiftPos();
         }else{
@@ -1084,6 +1088,7 @@ class Table extends Component {
                     Text =value,
                     metadata =  { labelConstructor = labelConstructor },
                     Position = VectorScreen(0, rowY)
+                    ignoreGameResizeAutoAdjust = true
                     //FontName = "Arial"
                 });
                  
@@ -1103,6 +1108,7 @@ class Table extends Component {
             local l = UI.Label({
                 id = this.id+"::table::cell"+rowIdx+"-"+columnIndex,
                 Text ="",
+                 ignoreGameResizeAutoAdjust = true
                  metadata =  { labelConstructor = labelConstructor },
                 Position = VectorScreen(0, rowY)
             });
@@ -1251,7 +1257,7 @@ class Table extends Component {
                     colCanv.Size.X =content.Size.X+5;
                 } 
             
-                colCanv.add(content);
+                colCanv.add(content, false);
             }
 
             colCanv.addRightBorder({
@@ -1261,7 +1267,7 @@ class Table extends Component {
             if (column.rawin("style") && column.style.rawin("background")){
                 colCanv.Colour = column.style.background;
             }
-            canv.add(colCanv); 
+            canv.add(colCanv, false); 
 
             //if this column canvas' height is higher than previous' column canvas, increase their heights 
             if (columnIdx > 0){
@@ -1325,7 +1331,7 @@ class Table extends Component {
                     color =borderStyle.borderColor,
                     size = borderStyle.borderSize
                 });
-                canv.add(row);
+                canv.add(row, false);
                
                 if (idx == this.rows){
                    this.drawHline(canv, cellX, idx, rowPos.ypos+rowPos.height);
@@ -1369,7 +1375,7 @@ class Table extends Component {
                     Position = VectorScreen(0,y),
                     Size = VectorScreen(size,1),
                     Colour = Colour(0,0,0,150)
-                })
+                }), false
             );
         }
        

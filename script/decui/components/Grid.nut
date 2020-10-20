@@ -143,10 +143,10 @@ class UIGrid extends Component {
                 });
                 this.cellIDs.push(cellCanvas.id);
                  cellCanvas.addBorders(this.borderStyle == null ? {} : this.borderStyle);
-                 wrapper.add(cellCanvas);
+                 wrapper.add(cellCanvas, false);
                 if (this.data.len() > globalIt){
                     local content = this.data[globalIt].content;
-                    cellCanvas.add(content);
+                    cellCanvas.add(content, false);
                 }else{
                     if (this.nextEmptySlot == null){
                         this.nextEmptySlot = this.cellIDs.len()-1;
@@ -179,7 +179,7 @@ class UIGrid extends Component {
         local cellCanvas = UI.Canvas(this.cellIDs[this.nextEmptySlot]);
         component.Size.X = this.cellWidth;
         component.Size.Y = this.cellHeight;
-        cellCanvas.add(component);
+        cellCanvas.add(component, false);
         this.filledSlots++;
         this.nextEmptySlot++;
     }
@@ -189,7 +189,7 @@ class UIGrid extends Component {
         if (cellCanvas !=null){
             component.Size.X = this.cellWidth;
             component.Size.Y = this.cellHeight;
-            cellCanvas.add(component);
+            cellCanvas.add(component, false);
             this.filledSlots++;
         }
          

@@ -351,13 +351,13 @@ class Tabview  extends Component {
                         child.parentID = tabContentCanvas.id;
                         child.calculatePositions();
                     } else {
-                        tabContentCanvas.add(UI.Canvas(child.id)); 
+                        tabContentCanvas.add(UI.Canvas(child.id), false); 
                     }
                 }else{ 
                     if (child.hasWrap()){
                         child.delayWrap=true;
                     }
-                    tabContentCanvas.add(child); 
+                    tabContentCanvas.add(child, false); 
                    
                 }
             }
@@ -378,6 +378,7 @@ class Tabview  extends Component {
             ignoreGameResizeAutoAdjust = true
             onGameResize = function(){
                 this.realign(); 
+                this.resetMoves();
                 this.shiftPos(); 
                  
             }
@@ -418,8 +419,8 @@ class Tabview  extends Component {
             }
             headerBg.Size = VectorScreen(this.Size.X-this.x-2, this.tabsHeight-2);
            
-            wrapper.add(tab.headerCanvas);
-            wrapper.add(tab.contentCanvas);
+            wrapper.add(tab.headerCanvas, false);
+            wrapper.add(tab.contentCanvas, false);
             tab.contentCanvas.Position.Y += this.tabsHeight;
             tab.contentCanvas.Position.X +=2;
 
@@ -450,7 +451,7 @@ class Tabview  extends Component {
 
         } 
        
-        wrapper.add(headerBg);
+        wrapper.add(headerBg, false);
         headerBg.Position.Y +=2;
         headerBg.Position.X -=2;
         headerBg.addBottomBorder({});
@@ -508,8 +509,8 @@ class Tabview  extends Component {
         headerBg.Position.X += tab.headerCanvas.Size.X;
         headerBg.updateBorders();
 
-        wrapper.add(tab.headerCanvas);  
-        wrapper.add(tab.contentCanvas);
+        wrapper.add(tab.headerCanvas, false);  
+        wrapper.add(tab.contentCanvas, false);
 
         tab.contentCanvas.Position.Y += this.tabsHeight;
         tab.contentCanvas.Position.X +=2;
@@ -629,7 +630,7 @@ class Tabview  extends Component {
             if (this.activeContentCanvasID == this.id+"::tab"+this.tabs[idx].data.id+"::tabContent") {
                 this.changeTab(0);
             }
-
+ 
              this.tabs.remove(idx);  
         }
         
@@ -648,6 +649,8 @@ class Tabview  extends Component {
             wrapper.updateBorders();
             headerBg.updateBorders();
             wrapper.realign();
+            wrapper.resetMoves();
+            wrapper.shiftPos();
         }
     }
 

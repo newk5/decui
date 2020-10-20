@@ -168,22 +168,29 @@ class UI  {
         }
 
        
-        e.add(border);
+        e.add(border, false);
        // border.realign(); 
         //border.shiftPos();
     }
 
     function applyRelativeSize(e) {
+        local hasRelativeSize = e != null && e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
+        if (!hasRelativeSize) {
+            return;
+        }
         local w = (this.removePercent(e.RelativeSize[0]).tofloat() / 100).tofloat();
         local h = (this.removePercent(e.RelativeSize[1]).tofloat() / 100).tofloat();
       
         local wrapper = null; 
+       
         if (e.parents.len() == 0){ 
             wrapper = GUI.GetScreenSize(); 
         }else{ 
+            
             local lastID = e.parents[e.parents.len()-1];
            
             local parent = findById(lastID);
+             
             wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
         }
       
@@ -200,7 +207,7 @@ class UI  {
             local t = typeof this;
             local isLabel = t == "GUILabel";
             local sizeX = isLabel ? e.TextSize.X : e.Size.X;
-            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y;
+            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y; 
             local wrapper = null; 
             local offset = 0;
 
@@ -210,10 +217,10 @@ class UI  {
             if (e.parents.len() == 0){  
                 wrapper = GUI.GetScreenSize(); 
             }else{ 
-               
+                
                 local lastID = e.parents[e.parents.len()-1];
                 local parent = findById(lastID);
-
+                
                 wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size; 
             }
    
@@ -651,14 +658,14 @@ class UI  {
                      
                     
                     if (l != null){ 
-                        c.add(l);
+                        c.add(l, false);
                     }
                      el.tooltipVisible = true;
                     if (el.tooltip.rawin("extraLabels")){
                         foreach(i,ce in el.tooltip.extraLabels ) {
                             local cid = Script.GetTicks()+""+i;
                             ce["id"] <- cid;
-                            c.add(UI.Label(ce));  
+                            c.add(UI.Label(ce), false);  
                         }
                     }
                      
@@ -1008,9 +1015,9 @@ class UI  {
         c.shiftPos();
         this.postConstruct(o);
 
-        return c;
-    }
-
+        return c; 
+    } 
+ 
 
     function Label(o){ 
        
@@ -1120,6 +1127,10 @@ class UI  {
         }
     }
 
+    function Focus(e) {
+        GUI.SetFocusedElement(e);
+    }
+
     function getData(key){
         return this.store.get(key);
     }
@@ -1129,7 +1140,7 @@ class UI  {
             return this.fetch.canvas(o); 
         }
        
-       
+
         local b = this.applyElementProps(GUICanvas(), o);
         
         b.metadata.list = "canvas";
@@ -1151,20 +1162,20 @@ class UI  {
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
                        c.index = i;
-                       b.add(c.build(b));
+                       b.add(c.build(b), false);
                     } else if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id));
+                        b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
                         b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
                     }
-
+ 
                 }else {
-                    b.add(c);
-                  
+                    b.add(c, false); 
+
                 }
             }
-        }
+        } 
 
               
          if (o.rawin("children")  && o.children != null){
@@ -1201,7 +1212,7 @@ class UI  {
             b.realign();
             b.resetMoves();
             b.shiftPos();
-        }
+        }          
         
         this.postConstruct(b);
          
@@ -1366,16 +1377,16 @@ class UI  {
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
                        c.index = i;
-                       b.add(c.build(b));
+                       b.add(c.build(b), false);
                     } else if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id));
+                        b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
                         b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
                     }
 
                 }else {
-                    b.add(c);
+                    b.add(c, false);
                   
                 }
             }
@@ -1441,16 +1452,16 @@ class UI  {
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
                        c.index = i;
-                       b.add(c.build(b));
+                       b.add(c.build(b), false);
                     } else if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id));
+                        b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
                         b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
                     }
 
                 }else {
-                    b.add(c);
+                    b.add(c, false);
                   
                 }
             }
