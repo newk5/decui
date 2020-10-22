@@ -197,7 +197,7 @@ class UI  {
         
         e.Size.X = (w*wrapper.X);
         e.Size.Y = (h*wrapper.Y);
-      
+        e.updateBorders();
 
     }
 
@@ -1135,6 +1135,23 @@ class UI  {
         return this.store.get(key);
     }
 
+    function applyBorder(b,e) {
+        if (b != null){
+            if (b.rawin("left")) {
+                e.addLeftBorder(b.left);
+            }
+            if (b.rawin("right")) {
+                e.addRightBorder(b.right);
+            }
+            if (b.rawin("top")) {
+                e.addTopBorder(b.top);
+            }
+            if (b.rawin("bottom")) {
+                e.addBottomBorder(b.bottom);
+            }
+        }
+    }
+
      function Canvas(o){
         if (typeof o == "string") {
             return this.fetch.canvas(o); 
@@ -1189,7 +1206,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                }else{
+                }else if (c.className != "InputGroup" && c.className != "GroupRow"){
                     local ccanvas = c.getCanvas();
                      if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;
@@ -1214,6 +1231,9 @@ class UI  {
             b.shiftPos();
         }          
         
+        if (o.rawin("border") ){
+            this.applyBorder(o.border, b);
+        }
         this.postConstruct(b);
          
         return b;
@@ -1403,7 +1423,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                }else{
+                }else if (c.className != "InputGroup" && c.className != "GroupRow"){
                     local ccanvas = c.getCanvas();
                     if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;
@@ -1479,7 +1499,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                } else{
+                } else if (c.className != "InputGroup" && c.className != "GroupRow"){
                     local ccanvas = c.getCanvas();
                     if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;

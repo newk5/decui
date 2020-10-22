@@ -23,7 +23,7 @@ attachProps([ "UI","wrapOptions", "bindTo", "file","remove","autoResize", "Relat
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize", "flags", "fadeStep", "fadeLow", "elementData"
-    "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists",
+    "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists","border"
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
        ]);
  

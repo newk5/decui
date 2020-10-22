@@ -9,16 +9,30 @@
             } 
     
         function alignChildren(e){
-            ::UI.applyRelativeSize(e); 
-            e.resetPosition();
-            e.realign();
+            local hasAlign = e.rawin("align") && e.align != null;
+            local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
+                       
+            if ( hasRelativeSize ){
+                ::UI.applyRelativeSize(e); 
+            }
+            if (hasAlign){
+                e.resetPosition();
+                e.realign();
+            }
+            
             if (e.rawin("shiftPos") && e.shiftPos != null){
                 e.resetMoves();
                 e.shiftPos(); 
             } 
-            e.updateBorders();
+            if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null ){
+                e.updateBorders();
+            }
+            if (e.rawin("onGameResize") && e.onGameResize != null){
+                e.onGameResize();
+            }
+           
             foreach (idx, child in e.getChildren() ){
-                alignChildren(child);
+                 this.alignChildren(child);
             } 
         }
 
@@ -28,70 +42,37 @@
                foreach(c,e in list ) { 
                    if (e.rawin("parents") && e.parents.len() == 0){
                       
+                        local hasAlign = e.rawin("align") && e.align != null;
+                        local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
                         local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResizeAutoAdjust  == null || !e.ignoreGameResizeAutoAdjust )) ||  !e.rawin("ignoreGameResizeAutoAdjust");
-                        if (e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0){
+                        if (doesNotIgnoreEvent){
 
-                            if ( doesNotIgnoreEvent && e.rawin("align") && e.align != null ){
-                           
+                            if ( hasRelativeSize ){
                                 ::UI.applyRelativeSize(e); 
+                            }
+                            if (hasAlign){
                                 e.resetPosition();
                                 e.realign();
-                               
-                                if (e.rawin("shiftPos") && e.shiftPos != null){
-                                    e.resetMoves();
-                                    e.shiftPos(); 
-                                } 
+                            }
+                            
+                            
+                            if (e.rawin("shiftPos") && e.shiftPos != null){
+                                e.resetMoves();
+                                e.shiftPos(); 
+                            } 
+                            if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null ){
                                 e.updateBorders();
                             }
-                           
-                        }else{
-
-                            if ( doesNotIgnoreEvent  && e.rawin("align") && e.align != null ){
-                                e.resetPosition();
-                                e.realign();  
-                                if (e.rawin("shiftPos") && e.shiftPos != null){
-                                    e.resetMoves();
-                                    e.shiftPos(); 
-                                }
-                            }    
-                        }  
-
-                        foreach (idx, child in e.getChildren() ){
-                            if (doesNotIgnoreEvent && child.rawin("align") && child.align != null ){
-                                ::UI.applyRelativeSize(child); 
-                                child.resetPosition();
-                                child.realign();  
-                                if (child.rawin("shiftPos") && child.shiftPos != null){
-                                    child.resetMoves();
-                                    child.shiftPos(); 
-                                }
-                                                          
-                                if (child.hidden){
-                                    child.hide();
-                                }
-                                if (child.hidden){
-                                    child.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
-                                    child.hide(); 
-                                }
-                            }
-                            if (child.rawin("onGameResize") && child.onGameResize != null){
-                                child.onGameResize();
-                            }
-                              child.updateBorders();      
                             
-                            foreach (subChild in child.getChildren() ){ 
-                                if ( subChild.rawin("align") && subChild.align != null )
-                                    alignChildren(subChild);
-                            }
+                           
                         }
+
+                        this.alignChildren(e);
+
                         if (e.rawin("onGameResize") && e.onGameResize != null){
                             e.onGameResize();
                         }
 
-                        if (e.hidden && doesNotIgnoreEvent){
-                            e.hidden = false; //after being realigned, the GUIElement is no longer hidden so we need to re-apply the hidden 'state'
-                            e.hide(); 
-                        }
                         
                     } 
          
