@@ -23,7 +23,9 @@ class UI  {
     openNots = 0;
     notsHeight = 0;
     data = null;
-
+    defaultTableProps = [ "data" ,"elementData", "metadata"];
+    defaultBooleanProps = [ "autoResize" ,"delayWrap"];
+    defaultArrayProps = [ "parents" ,"childLists"];
 
     constructor() {
 
@@ -32,8 +34,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids" ];
+        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [], [], [], [] ];
+        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -89,15 +91,19 @@ class UI  {
                
             }
         }
-    } 
+    }  
     
 
     function removeBorders(e){
-        foreach (idx, c in this.lists[this.names.find("canvas")]) {
-            if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
-                c.destroy();
+        if (e.rawin("data") && e.data != null && e.data.rawin("borderIDs") && e.data.borderIDs != null){
+            e.data.borderIDs.clear();
+       
+            foreach (idx, c in this.lists[this.names.find("canvas")]) {
+                if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
+                    c.destroy();
+                }
+                
             }
-             
         }
     }
 
@@ -117,7 +123,14 @@ class UI  {
         }
     }
 
+    function hasAllBorders(e){
+        return e.rawin("data") && e.data != null && e.data.rawin("borderIDs") && e.data.borderIDs != null && e.data.borderIDs.len()==4;
+    }
+
     function addBorder(e, b, align) { 
+        if (this.hasAllBorders(e)){
+            return;
+        }
         local id = e.id == null ? Script.GetTicks() : e.id;
         local size = null;   
         local borderPos = null;
@@ -791,8 +804,18 @@ class UI  {
 
             element.UI = ::getroottable().UI; 
             if (this.idIsValid(obj)){  
+                foreach (prop in this.defaultTableProps) {
+                    element[prop] =  {};
+                } 
+                foreach (prop in this.defaultBooleanProps) {
+                    element[prop] =  false;
+                }
+                foreach (prop in this.defaultArrayProps) {
+                    element[prop] =  [];
+                }
+              
                 //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
-               if (obj.rawin("flags")){
+                if (obj.rawin("flags")){
                     element.AddFlags(obj.flags); 
                 }
                 foreach(i,e in obj ) {
@@ -886,7 +909,22 @@ class UI  {
         return b; 
     } 
 
-  
+    function Menu(o){  
+        if (typeof o == "string") {
+            local menu = this.fetch.canvas(o);
+            if (menu != null) {
+                return menu.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = OptionsMenu(o);
+        this.addToListAndIncNumeration(c);
+        c.resetMoves();
+        c.shiftPos();
+        this.postConstruct(o);
+        return c;
+    }
 
     function ComboBox(o){  
         if (typeof o == "string") {
@@ -1137,6 +1175,10 @@ class UI  {
 
     function applyBorder(b,e) {
         if (b != null){
+            local hasLeft = b.rawin("left");
+            local hasRight = b.rawin("right");
+            local hasTop = b.rawin("top");
+            local hasBottom = b.rawin("bottom");
             if (b.rawin("left")) {
                 e.addLeftBorder(b.left);
             }
@@ -1148,6 +1190,9 @@ class UI  {
             }
             if (b.rawin("bottom")) {
                 e.addBottomBorder(b.bottom);
+            }
+            if (!hasLeft && !hasRight && !hasTop && !hasBottom ){
+                e.addBorders(b);
             }
         }
     }

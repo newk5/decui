@@ -6,15 +6,7 @@ elements <- [
     function attachProps(props) {
         foreach(p,prop in props ) { 
             foreach(i,e in elements ) { 
-                if (prop == "data" || prop == "elementData" || prop=="metadata") {
-                     e[prop] <- { };
-                } else if (prop == "parents" || prop == "childLists") {
-                     e[prop] <- [];
-                }  else if (prop == "autoResize" || prop == "delayWrap") {
-                     e[prop] <- false;
-                } else {
-                    e[prop] <- null;
-                }
+                e[prop] <- null;
             }
         }
     }

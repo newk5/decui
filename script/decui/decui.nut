@@ -10,7 +10,7 @@ dofile("decui/components/Tabview.nut");
 dofile("decui/components/Circle.nut");
 dofile("decui/components/Notification.nut");
 dofile("decui/components/Grid.nut");
-
+dofile("decui/components/Menu.nut");
 
 dofile("decui/UI/Fetch.nut");
 dofile("decui/UI/Events.nut");
