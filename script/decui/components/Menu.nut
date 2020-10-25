@@ -163,12 +163,10 @@ class OptionsMenu extends Component {
                 if (style.rawin(prop)) {
                      label[prop] =  style[prop];
                 }else{
-                    try {
-                         local val =this.labelStyle[prop];
-                     label[prop] = val;
-                    } catch (ex){
-                        printTable(this.labelStyle)
-                    }
+                    
+                    local val =this.labelStyle[prop];
+                    label[prop] = val;
+                    
                    
                 }
             }
