@@ -16,14 +16,14 @@ class Table extends Component {
 
     onRowClick = null;
     style = null;
-    tableHeight = 0;
+    tableHeight = null;
     lastSelectedRowID = null;
     prevPage = 1;
     renderRow = null;
     rowStyle = null;
     contextMenu = null;
     parentSize = null;
-    tableWidth = 0;
+    tableWidth = null;
     isEmpty = false;
     noDataText = "";
     realRows = null;
@@ -38,6 +38,8 @@ class Table extends Component {
 
     constructor(o) {
         this.dataSize = 0;
+        this.tableHeight = 0;
+        this.tableWidth =0;
         this.dataPages = [];
         this.data = [];
         this.awatingResponse = false;
@@ -825,7 +827,6 @@ class Table extends Component {
         }else{
             canv = UI.Canvas(this.id);
         }  
-        
         local lastHeaderPos = this.drawTable(canv, rebuild);   
         canv.Size.X = lastHeaderPos.X ;
         canv.Size.Y = lastHeaderPos.Y +35 ; 
@@ -925,7 +926,8 @@ class Table extends Component {
             UI.Sprite(this.id+"::table::nextBtn").Alpha = 100;
         }
        // canv.realign();
-        UI.Canvas(this.id).Size.X = tableWidth;
+        canv.Size.X = tableWidth;
+      //  canv.Size.Y = tableWidth;
         local end = Script.GetTicks();
     } 
 
@@ -1073,7 +1075,7 @@ class Table extends Component {
                 }  
             },
             contextMenu = this.contextMenu                    
-        }); 
+        });  
         return row;
     } 
    
@@ -1169,7 +1171,6 @@ class Table extends Component {
 
     function drawTable(canv, rebuild){
     
-       
         local rowY = 0;
         local cellX = 0;
         local colCanv  = null;
@@ -1250,8 +1251,7 @@ class Table extends Component {
               
                 //increase the column canvas height and width
                 if (colCanv.Size.Y < rowY){
-                    colCanv.Size.Y = rebuild ? this.tableHeight : rowY;
-                    // colCanv.Size.Y +=5; 
+                    colCanv.Size.Y =  rowY;
                 } 
                 if (colCanv.Size.X < content.Size.X){ 
                     colCanv.Size.X =content.Size.X+5;
@@ -1288,6 +1288,7 @@ class Table extends Component {
             }
 
             cellX += colCanv.Size.X; 
+        //    canv.Size.Y = rowY;
             rowY = 0;
           
             tableWidth = cellX;

@@ -18,6 +18,7 @@ class CanvasCircle extends Component {
 
     plusDrawnFlag = null;
     crossDrawnFlag = null;
+    label = null;
 
 
     constructor(o) {
@@ -33,7 +34,7 @@ class CanvasCircle extends Component {
         crossDrawnFlag = false;
         
         this.border = 2;
-        this.color = ::Colour(255,0,0);
+        this.color = ::Colour(255,255,255);
 
         if (o.rawin("Position")){
             this.xcenter = o.Position.X;
@@ -41,6 +42,9 @@ class CanvasCircle extends Component {
              this.Position = o.Position;
         }
 
+        if (o.rawin("label")){
+            this.label = o.label;
+        }
         
         if (o.rawin("radius")){
             this.radius = o.radius;
@@ -94,6 +98,23 @@ class CanvasCircle extends Component {
         this.drawCircle(radius,radius, this.radius,c);
         if (o.rawin("crossed") && o.crossed){
             this.cross(c);
+        }
+        if (this.label != null){
+            if (typeof this.label == "string"){
+                local l = UI.Label({
+                    id = this.id+"::label"  
+                    Text = this.label
+                    align = "center"
+                    move = {up = 3, left = 3}
+                    TextColour = Colour(255,255,255)
+                    FontSize = 35
+                });
+                c.add(l);
+               
+            }else{
+                this.label["id"] <- this.id+"::label";
+                c.add(UI.Label(this.label));
+            }
         }
         
     

@@ -851,6 +851,9 @@ class UI  {
                 if (obj.rawin("children") ){
                     this.shift(element);
                 }
+                if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
+                    element.RemoveFlags(obj.RemoveFlags); 
+                }
                 
             }else{
                 //Console.Print("ID NOT VALID "+ obj.id);

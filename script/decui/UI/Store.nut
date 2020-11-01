@@ -337,7 +337,9 @@ class  Store {
                             tbl.totalRows = newValue.len();
                             tbl.pages  = ceil(tbl.totalRows.tofloat() / (tbl.rows == null ? 10 : tbl.rows ).tofloat());
                             tbl.dataPages.clear();
+                          
                             tbl.populatePages();
+                            tbl.tableHeight = 0;
                             tbl.build(true);
 
                         }  else if (op == "pop") {
