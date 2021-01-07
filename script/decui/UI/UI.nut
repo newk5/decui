@@ -303,25 +303,28 @@ class UI  {
     function shift(e){
         if (e.move != null){
             local s = e.move; 
-           
+          
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
                     if (isString){
+                            
                         local wrapper =  e.getWrapper();
                         if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- ["left"];
-                        }else{
-                            if (e.metadata.movedPos.find("left") != null){
-                                return;
-                            }else{
-                                e.metadata.movedPos.push("left");
-                                local percent = this.removePercent(s.left).tofloat();
-                                e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
-                            }
-                        } 
-                         if (e.metadata.movedPos.len() == 0){
-                            e.realign(); 
+                           e.metadata["movedPos"] <- [];
+                        }
+                        if (e.metadata.movedPos.find("left") != null){
+                            return;
+                        } else{
+                            e.metadata.movedPos.push("left");
+                            local percent = this.removePercent(s.left).tofloat();
+                            e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
+                            
+                        }
+                         
+                     
+                        if (e.metadata.movedPos.len() == 0){
+                           e.realign(); 
                         }
                        
 
@@ -336,17 +339,17 @@ class UI  {
                          
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                            e.metadata["movedPos"] <- ["right"];
-                        }else{ 
-                            if (e.metadata.movedPos.find("right") != null){
-                                return;
-                            }else{
-                                e.metadata.movedPos.push("right");
-                                local percent = this.removePercent(s.right).tofloat();
-                                e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
-                                
-                            }
+                            e.metadata["movedPos"] <- [];
+                        } 
+                        if (e.metadata.movedPos.find("right") != null){
+                            return;
+                        }else{
+                            e.metadata.movedPos.push("right");
+                            local percent = this.removePercent(s.right).tofloat();
+                            e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
+                            
                         }
+                        
                          if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
@@ -361,16 +364,16 @@ class UI  {
                     if (isString){
                          local wrapper = e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- ["up"];
-                        }else{
-                            if (e.metadata.movedPos.find("up") != null){
-                                return;
-                            }else{
-                                e.metadata.movedPos.push("up");
-                                local percent = this.removePercent(s.up).tofloat();
-                                e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
-                            }
+                           e.metadata["movedPos"] <- [];
                         }
+                        if (e.metadata.movedPos.find("up") != null){
+                            return;
+                        }else{
+                            e.metadata.movedPos.push("up");
+                            local percent = this.removePercent(s.up).tofloat();
+                            e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
+                        }
+                        
                         if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
@@ -386,16 +389,16 @@ class UI  {
                      if (isString){
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- ["down"];
-                        }else{
-                            if (e.metadata.movedPos.find("down") != null){
-                                return;
-                            } else{
-                                e.metadata.movedPos.push("down");
-                                local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
-                                e.Position.Y += ( wrapper.Y * percent ).tofloat();
-                            }
+                           e.metadata["movedPos"] <- [];
                         }
+                        if (e.metadata.movedPos.find("down") != null){
+                            return;
+                        } else{
+                            e.metadata.movedPos.push("down");
+                            local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
+                            e.Position.Y += ( wrapper.Y * percent ).tofloat();
+                        }
+                        
                         if (e.metadata.movedPos.len() == 0){
                             e.realign();               
                         }          

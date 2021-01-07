@@ -132,7 +132,7 @@ class UINotification extends Component {
         titleHeader.Size.X+= 30;
         c.move = {
             up= mup
-            left = "2%"
+            left = "2%" 
         };
         cl.realign();
         cl.shiftPos();
