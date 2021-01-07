@@ -11,7 +11,12 @@
         function alignChildren(e){
             local hasAlign = e.rawin("align") && e.align != null;
             local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
-                       
+            local ignoresEvent = e.ignoreGameResizeAutoAdjust;         
+
+            if (ignoresEvent){
+                return;
+            }
+
             if ( hasRelativeSize ){
                 ::UI.applyRelativeSize(e); 
             }
@@ -44,9 +49,8 @@
                       
                         local hasAlign = e.rawin("align") && e.align != null;
                         local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
-                        local doesNotIgnoreEvent =(e.rawin("ignoreGameResizeAutoAdjust") && (e.ignoreGameResizeAutoAdjust  == null || !e.ignoreGameResizeAutoAdjust )) ||  !e.rawin("ignoreGameResizeAutoAdjust");
+                        local doesNotIgnoreEvent = !e.ignoreGameResizeAutoAdjust;
                         if (doesNotIgnoreEvent){
-
                             if ( hasRelativeSize ){
                                 ::UI.applyRelativeSize(e); 
                             }
@@ -64,10 +68,10 @@
                                 e.updateBorders();
                             }
                             
-                           
+                            this.alignChildren(e);
                         }
 
-                        this.alignChildren(e);
+                        
 
                         if (e.rawin("onGameResize") && e.onGameResize != null){
                             e.onGameResize();
@@ -143,7 +147,7 @@
         function onFocus(el){
             try {
                 if (el.tooltip.rawin("event") && el.tooltip.event == "focus"){
-                    el.showTooltip();
+                   el.showTooltip();
                 }   
             } catch(e){
 
@@ -160,7 +164,11 @@
                 }   
             } catch(e){
 
-            }  
+            } 
+            local t = typeof el;
+            if (t =="GUIEditbox" && el.rawin("bindTo") && el.bindTo != null){
+                UI.setData(el.bindTo, el.Text);
+            }
             if(el.onBlur!=null){
                 el.onBlur();
             }                           

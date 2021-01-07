@@ -316,36 +316,41 @@ class UI  {
                                 return;
                             }else{
                                 e.metadata.movedPos.push("left");
+                                local percent = this.removePercent(s.left).tofloat();
+                                e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
                             }
                         } 
                          if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
-                        local percent = this.removePercent(s.left).tofloat();
-                        e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
+                       
 
                     }else{
                         e.Position.X =  e.Position.X - s.left;
                     }
                 }
                 if (s.rawin("right")){
+                      
                     local isString = typeof s.right == "string";
                      if (isString){
+                         
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
                             e.metadata["movedPos"] <- ["right"];
-                        }else{
+                        }else{ 
                             if (e.metadata.movedPos.find("right") != null){
                                 return;
                             }else{
                                 e.metadata.movedPos.push("right");
+                                local percent = this.removePercent(s.right).tofloat();
+                                e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
+                                
                             }
                         }
                          if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
-                        local percent = this.removePercent(s.right).tofloat();
-                        e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
+                       
 
                     } else {
                         e.Position.X =  e.Position.X + s.right;
@@ -362,13 +367,14 @@ class UI  {
                                 return;
                             }else{
                                 e.metadata.movedPos.push("up");
+                                local percent = this.removePercent(s.up).tofloat();
+                                e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
                             }
                         }
                         if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
-                        local percent = this.removePercent(s.up).tofloat();
-                        e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
+                       
 
                     } else {
                         e.Position.Y =  e.Position.Y - s.up;
@@ -386,13 +392,14 @@ class UI  {
                                 return;
                             } else{
                                 e.metadata.movedPos.push("down");
+                                local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
+                                e.Position.Y += ( wrapper.Y * percent ).tofloat();
                             }
                         }
                         if (e.metadata.movedPos.len() == 0){
                             e.realign();               
                         }          
-                        local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
-                        e.Position.Y += ( wrapper.Y * percent ).tofloat();
+                        
 
 
                     } else {
@@ -601,7 +608,7 @@ class UI  {
                  local initialPos = VectorScreen(x,y);
 
                 if (el.hasParents()){
-                   
+                    
                       local parent = UI.Canvas(el.getFirstParent());
                    
                     el.Detach(); 
@@ -613,11 +620,10 @@ class UI  {
                     }
                    
                    
-                     parent.AddChild(el);
-                      el.Position = initialPos;
+                    parent.AddChild(el);
+                    el.Position = initialPos; 
                     
-                    el.realign();
-                    el.shiftPos();
+             
                 }
 
                 if (mousePos != null) {
@@ -662,10 +668,10 @@ class UI  {
                     }else {
                         c = UI.Canvas({ 
                             id = el.id+"::tooltip",
-                            Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
+                            Size = el.tooltip.rawin("Size") ? el.tooltip.Size : VectorScreen(l.Size.X+8, l.Size.Y+8),
                             Color= col  
                             Position = pos
-                            autoResize = true
+                            autoResize = el.tooltip.rawin("Size") ? false: true
                         }); 
                     }
                      
@@ -674,12 +680,17 @@ class UI  {
                         c.add(l, false);
                     }
                      el.tooltipVisible = true;
+                    
                     if (el.tooltip.rawin("extraLabels")){
+                        local addY=0;
                         foreach(i,ce in el.tooltip.extraLabels ) {
                             local cid = Script.GetTicks()+""+i;
                             ce["id"] <- cid;
-                            c.add(UI.Label(ce), false);  
+                            local exl =UI.Label(ce);
+                            c.add(exl, false);  
+                            addY += exl.TextSize.Y;
                         }
+                        c.Size.Y += addY;
                     }
                      
                     if (el.tooltip.rawin("border")){
@@ -818,9 +829,14 @@ class UI  {
                 if (obj.rawin("flags")){
                     element.AddFlags(obj.flags); 
                 }
+                //set text first to prevent mgui bug with .Text reseting font size
+                 if (obj.rawin("Text")){
+                    element.Text = obj.Text; 
+                }
                 foreach(i,e in obj ) {
                     try {  
-                        if (i != "flags" && i != "Flags"){
+                      
+                        if (i != "flags" && i != "Flags" && i != "Text"){
                             if (i == "fontFlags"){
                                 element.FontFlags = obj[i];
                             } else {
@@ -1232,7 +1248,11 @@ class UI  {
                         b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
-                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
+                          local comp =  ["TabView", "Grid", "DataTable"]
+                         local processChildren = comp.find(className) == null;
+                        
+                        b.attachChild(el, processChildren); 
                     }
  
                 }else {
@@ -1525,7 +1545,10 @@ class UI  {
                         b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
-                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
+                         local comp =  ["TabView", "Grid", "DataTable"]
+                         local processChildren = comp.find(className) == null;;
+                        b.attachChild(el, processChildren); 
                     }
 
                 }else {

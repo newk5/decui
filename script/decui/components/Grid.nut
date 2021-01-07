@@ -107,6 +107,7 @@ class UIGrid extends Component {
             id = this.id,
             align = this.align,
             context = this,
+            move = this.move
             Color =this.background
         });
 
@@ -123,6 +124,7 @@ class UIGrid extends Component {
                 local cellCanvas = UI.Canvas({
                     id = this.id+"::"+rowIdx+"_"+colIdx 
                     context = this
+                     ignoreGameResizeAutoAdjust =true
                     Size = VectorScreen(this.cellWidth, this.cellHeight)
                     Position = VectorScreen(drawX, drawY)
                     onHoverOver = function(){
@@ -171,6 +173,7 @@ class UIGrid extends Component {
         wrapper.Size.Y = maxY-this.margin;
         wrapper.realign();
         wrapper.move = this.move;
+        wrapper.resetMoves();
         wrapper.shiftPos();
         
     }

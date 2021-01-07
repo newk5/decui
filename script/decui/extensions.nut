@@ -497,7 +497,17 @@ foreach(i,e in elements ) {
        e.rawnewmember("hasWrap", function() {
             return this.rawin("wrap") && this.wrap != null && this.wrap == true;
        });
+
+       //enable()
+       e.rawnewmember("enable", function() {
+          this.RemoveFlags(GUI_FLAG_DISABLED);
+       });
        
+     //disable()
+       e.rawnewmember("disable", function() {
+          this.AddFlags(GUI_FLAG_DISABLED);
+       });
+
        //forceWrap()
        e.rawnewmember("forceWrap", function() {
              local lastID = this.parents[this.parents.len()-1];
@@ -652,7 +662,8 @@ foreach(i,e in elements ) {
                 }
             }
             
-            if (p.rawin("shiftPos") && p.shiftPos != null){
+            if (p.rawin("shiftPos") && p.shiftPos != null && p.rawin("move") && p.move != null){
+                p.resetMoves();
                 p.shiftPos(); 
             }
             if (p.hasWrap() && !p.delayWrap){
@@ -674,13 +685,21 @@ foreach(i,e in elements ) {
                p.calculatePositions(); 
             } else { 
                
-                 p = ::UI.Canvas(p.id); 
-                this.attachChild(p);
+                p = ::UI.Canvas(p.id); 
+                local comp =  ["TabView", "Grid", "DataTable"]
+                if (p.rawin("context") && p.context != null){
+                    processChildren = comp.find(p.context.className) == null;
+                }
+                this.attachChild(p, processChildren);
             }
            
 
         }else{ 
            
+            local comp =  ["TabView", "Grid", "DataTable"]
+            if (p.rawin("context") && p.context != null){
+                processChildren = comp.find(p.context.className) == null;
+            }
            p.parentSize = this.Size;
            this.attachChild(p, processChildren);
 
@@ -745,7 +764,7 @@ foreach(i,e in elements ) {
         }
     }, null, false);
 
-     //hasParents()
+     //hasParents() 
      e.rawnewmember("hasParents", function() {
        return this.parents.len() > 0;
     }, null, false);

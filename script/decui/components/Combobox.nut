@@ -21,19 +21,21 @@ class Combobox extends Component {
     border =null;
     align = null;
     bindTo=null;
+    bindToValue= null;
     
 
     constructor(o) {
         this.className = "Combobox"; 
         this.isOpen = false; 
         this.id = o.id; 
-        this.options = o.options; 
+        this.options = o.rawin("options") ? o.options : []; 
         if (o.rawin("bindTo") && o.bindTo != null){
             ::UI.store.attachIDAndType(o.bindTo,o.id, "Combobox");
             local val =  ::UI.store.get(o.bindTo);
             this.options = val;
             this.bindTo = o.bindTo;
         }
+       
         this.colour = ::Colour(255,255,255);
         this.labelColour = ::Colour(0,0,0);
         this.onOptionSelect = o.onOptionSelect;
@@ -42,6 +44,14 @@ class Combobox extends Component {
         }else{
              this.value = "Select";
         }
+
+          if (o.rawin("bindToValue") && o.bindToValue != null){
+            this.bindToValue = o.bindToValue;
+            ::UI.store.attachIDAndType(o.bindToValue,o.id, "Combobox", true);
+            local val =  ::UI.store.get(o.bindToValue);
+            this.value = val;
+        }
+
         if (o.rawin("size") && o.size != null){
             this.size =o.size;
         }
@@ -181,9 +191,9 @@ class Combobox extends Component {
     }
  
 
-    function setText(text){
+    function setText(text, triggerEvent = true){
         UI.Label(this.labelID).set("Text",text); 
-        if (this.onOptionSelect != null){
+        if (this.onOptionSelect != null && triggerEvent){
             this.onOptionSelect(text);
             
         }
@@ -239,9 +249,9 @@ class Combobox extends Component {
                     file ="decui/down.png", 
                     context = this,  
                     Size =VectorScreen(16,16),
-                    align="top_right",
+                   align="top_right",
                     parents = childParents,
-                    move = {down = "17%", left = 3 },
+                    move = {down = "22%", left=3 },
                     onClick = function(){
                          
                         if (context.isOpen){
@@ -258,7 +268,7 @@ class Combobox extends Component {
                        
                     }
         });
-
+      
         local listbox =  UI.Listbox({
                     id=this.listboxID,
                     context = this,
@@ -274,7 +284,7 @@ class Combobox extends Component {
                         ::getroottable().UI.Canvas(context.id).Size.Y = context.canvasSize.Y;
                         local label = ::getroottable().UI.Label(context.labelID);
                         label.set("Text", option) ;
-                        label.Position.Y = 0;
+                        label.Position.Y = 2;
                       
                         context.value = option;
                         if (optionSelect != null){
@@ -328,10 +338,11 @@ class Combobox extends Component {
       
 
      
-        c.add(labe, false);
+        c.add(label, false);
         c.add(sprite, false);
         c.add(listbox, false);  
 
+        sprite.resetMoves();
         sprite.realign();
         sprite.shiftPos();
         c.realign();

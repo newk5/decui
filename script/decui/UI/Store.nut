@@ -19,6 +19,7 @@ class  Store {
         opts["value"] <- null;
         opts["el"] <- [ ]; //element types
         opts["elID"] <- []; //element ids
+        opts["selectedValues"] <- [];
     
         //events
         opts["onChange"] <- null;
@@ -61,28 +62,41 @@ class  Store {
         }
     }
 
-    function attachIDAndType(key,id, type) {
+    function attachIDAndType(key,id, type, isSelectedValue=false) {
      
      
         if (key.find(".")){
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
-            o.elID.push(id);
-            o.el.push(type);
+            if (o != null){
+                o.elID.push(id);
+                o.el.push(type); 
+                if (isSelectedValue){
+                    o.selectedValues.push(id);
+                }
+                    
+                    
+            }
+           
         }else if (this.data.rawin(key)){
             local o = this.getEntry(key);
-            o.elID.push(id);
-             o.el.push(type);
+            if (o != null){
+                o.elID.push(id);
+                o.el.push(type);
+                if (isSelectedValue)
+                    o.selectedValues.push(id);
+            }
+           
         }
     }
 
     function set(key, val, op = "set",dataUpdateOnly = false){
-
+         
          if (key.find(".")){
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
             local old = o.value;
-           
+
             if (o != null){  
                      
                 local nestedField = o.value;
@@ -217,7 +231,9 @@ class  Store {
     }
 
     function triggerChange(o, newValue, oldValue, op = "set", dataUpdateOnly=false){
+       
         local triggerChange = !dataUpdateOnly;
+         local vt = typeof newValue;
          if (triggerChange){
             
             foreach (idx,id in o.elID) {
@@ -225,16 +241,36 @@ class  Store {
                  if (elt=="GUIEditbox" ){
                     local c = UI.Editbox(id);
                     if (c!=null){
-                        c.Text =newValue+""; 
+                       
+                        if (vt == "table" && c.bindTo.find(".")){
+                            c.Text = UI.getData(c.bindTo);
+                        }else{
+                            c.Text =newValue+"";  
+                        }
+                        
                     }
                    
                 } else if (elt=="GUICheckbox"){
                     local chk = UI.Checkbox(id);
                     if (chk != null){
-                         if (newValue == true){
-                            UI.Checkbox(o.elID).AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
+
+                        if (vt == "table" && c.bindTo.find(".")){
+                            local v = UI.getData(chk.bindTo);
+                            local chkt = typeof v;
+                            if (chkt == "bool"){
+                                if (v){
+                                     UI.Checkbox(o.elID).AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                                }else{
+                                     UI.Checkbox(o.elID).RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);    
+                                }
+                            }
                         }else{
-                            UI.Checkbox(o.elID).RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                           
+                            if (newValue == true){
+                                UI.Checkbox(o.elID).AddFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                            }else{
+                                UI.Checkbox(o.elID).RemoveFlags(GUI_FLAG_CHECKBOX_CHECKED);
+                            }
                         }
                     }
                    
@@ -242,13 +278,22 @@ class  Store {
                 } else if (elt=="GUILabel"){
                     local l =UI.Label(id);
                     if (l != null){
-                        l.setText(newValue+""); 
+                        if (vt == "table" && l.bindTo.find(".")){
+                            l.Text = UI.getData(l.bindTo);
+                        }else{
+                            l.Text =newValue+"";  
+                        }
+
                     }
                     
                 } else if (elt=="GUIButton"){
                     local l =UI.Button(id);
                     if (l != null){
-                        l.Text= newValue; 
+                        if (vt == "table" && l.bindTo.find(".")){
+                            l.Text = UI.getData(l.bindTo);
+                        }else{
+                            l.Text =newValue+"";  
+                        }
                     }
                     
                 } else if (elt=="GUIMemobox"){
@@ -264,17 +309,33 @@ class  Store {
                         }
                         */
                     }  else if (op == "set"){
-                        lst.Clear();
-                        foreach (i,item in newValue) {
-                            lst.AddLine(item);
-                        } 
+                        if (lst != null){
+                            if (vt == "table" && lst.bindTo.find(".")){
+                                local arr = UI.getData(lst.bindTo);
+                                lst.Clear();
+                                foreach (i,item in arr) {
+                                    lst.AddLine(item);
+                                } 
+                            }else{
+                                lst.Clear();
+                                foreach (i,item in newValue) {
+                                    lst.AddLine(item);
+                                } 
+                            }
+                        }
+                       
                     }
                     
                 }  else if (elt=="GUIProgressBar"){
                     local l = UI.ProgressBar(id)
                     if (l != null){
                         if (op =="set"){
-                            l.Value=newValue;
+                            if (vt == "table" && l.bindTo.find(".")){
+                                l.Value = UI.getData(l.bindTo);
+                            }else{
+                                l.Value =newValue;  
+                            }
+                           
                         } else if (op =="inc"){
                             l.Value +=newValue;
                         } else if (op =="dec"){
@@ -298,21 +359,62 @@ class  Store {
                             }
                             
                         }  else if (op == "set"){
-                            lst.Clean();
-                            foreach (i,item in newValue) {
-                                lst.AddItem(item);
-                            } 
+                             if (vt == "table" && lst.bindTo.find(".")){
+                                local arr = UI.getData(lst.bindTo);
+                                lst.Clean();
+                                foreach (i,item in arr) {
+                                    lst.AddItem(item);
+                                } 
+                            }else{
+                                lst.Clean();
+                                foreach (i,item in newValue) {
+                                    lst.AddItem(item);
+                                } 
+                            }
+                          
                         }
                         
                     }
                    
                 } else if (elt=="Combobox"){
                     local lst =  UI.ComboBox(id);
-                    if (lst != null){
-                         
+                    if (lst != null){ 
+                        
                         if (op == "set"){
-                            lst.Clean();
-                            lst.setOptions(newValue, false);
+                            if (o.selectedValues.find(lst.id)==null){
+                               
+                                 if (vt == "table" && lst.bindTo != null && lst.bindTo.find(".")){
+                                     
+                                    local arr = UI.getData(lst.bindTo);
+                                    lst.Clean();
+                                    lst.setOptions(arr, false);
+                                } else  if (vt == "string" && lst.bindToValue != null && lst.bindToValue.find(".")){
+                                    
+                                    local v = UI.getData(lst.bindToValue);
+                                    lst.setText(v,false);
+                                    lst.value= v;
+                                } else{
+                                    lst.Clean();
+                                    lst.setOptions(newValue, false);
+                                }
+                            }else{
+                                
+                                  if (vt == "table" && lst.bindToValue.find(".")){
+                                     
+                                    local v = UI.getData(lst.bindToValue);
+                                    lst.setText(v,false);
+                                    lst.value= v;
+                                } else if (vt == "string" && lst.bindToValue.find(".")){
+                                    local v = UI.getData(lst.bindToValue);
+                                    lst.setText(v,false);
+                                    lst.value= v;
+                                }else{
+                                     lst.setText(newValue,false);
+                                    lst.value= newValue;
+                                }
+                            }
+                           
+                           
                         }  else if (op == "pop") {
 
                             local itemToRemove = lst.options[newValue];
@@ -331,10 +433,16 @@ class  Store {
                     if (tbl != null){
                            
                         if (op == "set"){
+                            local arr = newValue;
+                            if (vt == "table" && tbl.bindTo.find(".")){
+                                arr = UI.getData(tbl.bindTo);
+                            }
+
+
                             tbl.clear();
                           
-                            tbl.data = newValue;
-                            tbl.totalRows = newValue.len();
+                            tbl.data = arr;
+                            tbl.totalRows = arr.len();
                             tbl.pages  = ceil(tbl.totalRows.tofloat() / (tbl.rows == null ? 10 : tbl.rows ).tofloat());
                             tbl.dataPages.clear();
                           
