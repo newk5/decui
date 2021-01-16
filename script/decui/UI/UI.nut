@@ -925,7 +925,9 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos();
-    
+        if (o.rawin("border") ){
+            this.applyBorder(o.border, b);
+        }
         this.postConstruct(b);
 
         return b; 
@@ -1447,7 +1449,8 @@ class UI  {
         if (typeof o == "string") {
             return this.fetch.sprite(o);
         }
-        local b = this.applyElementProps(GUISprite(), o);
+        local s = o.rawin("file") ? GUISprite(o.file, o.rawin("Position") ? o.Position : VectorScreen(0,0 )) : GUISprite();
+        local b = this.applyElementProps(s, o);
 
            b.metadata.list = "sprites";
         b.metadata.index = this.listsNumeration.sprites;
@@ -1517,6 +1520,9 @@ class UI  {
              b.realign();
               b.resetMoves();
              b.shiftPos();
+        }
+        if (o.rawin("border") ){
+            this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
 

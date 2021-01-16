@@ -26,7 +26,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("removeBorders", function() {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.removeBorders(this);
         }
        
@@ -36,7 +36,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("updateBorders", function() {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.updateBorders(this);
         }
        
@@ -64,7 +64,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addLeftBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "top_left");
         }
        
@@ -74,7 +74,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("setBorderColor", function(border, colour) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
             if (this.rawin("data") && this.data != null){
                 
                 if (this.data.rawin("borderIDs") && this.data.borderIDs != null){ 
@@ -96,7 +96,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("setBorderSize", function(border, size) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
             if (this.rawin("data") && this.data != null){
                 if (this.data.rawin("borderIDs") && this.data.borderIDs != null){
                     foreach (idx, borderPos in this.data.borderIDs) {
@@ -116,7 +116,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addRightBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton" ){
          
            ui.addBorder(this, b, "top_right");
         }
@@ -127,7 +127,7 @@ foreach(i,e in elements ) {
     e.rawnewmember("addTopBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "top_center");
         }
        
@@ -146,7 +146,7 @@ foreach(i,e in elements ) {
         local t = typeof this;
         local ui = this.UI;
       
-        if (t == "GUICanvas" || t == "GUISprite"){
+        if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "bottom_left");
         }
        
