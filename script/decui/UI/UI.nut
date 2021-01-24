@@ -747,19 +747,35 @@ class UI  {
 
     function DeleteByID(id){
        local e = this.findById(id); 
-       if (e != null ) {
-            e.removeChildren();
-       }
+    
        local newid = this.cleanID(id);
        if (this.idsMetadata.rawin(newid)) { 
+            local childIndexesAndLists = e.getNestedIndexes();
+            foreach (listName, indexes in childIndexesAndLists) {
+               
+               
 
-        local listName =this.idsMetadata[newid].list;
-        local list = this.lists[names.find(listName)]; 
-            
-            local newList =  this.deleteByID(id, list, listName); 
-            if (newList != null){
-                this.lists[names.find(listName)] = newList;
-            }  
+                local list = this.lists[names.find(listName)];  
+                foreach (index in indexes) {
+
+                    local child = list[index];
+                    local ncid= this.cleanID(child.id);
+                    if (idsMetadata.rawin(ncid)){
+                        delete idsMetadata[ncid]; 
+                    }
+                    list[index]=null;
+                    list.remove(index);
+                }
+       
+                
+            }
+            local list = this.lists[names.find(e.metadata.list)];
+            list.remove(list.find(e)); 
+            if (idsMetadata.rawin(newid)){
+                delete idsMetadata[newid]; 
+            }
+            e=null;
+          
         }
     } 
  

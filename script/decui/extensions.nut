@@ -719,6 +719,54 @@ foreach(i,e in elements ) {
         }
     }, null, false);
 
+     //getNestedIndexes()
+    e.rawnewmember("getNestedIndexes", function() {
+       
+        local list = this.getChildrenIndexes();
+        local map = {};
+
+        foreach (e in list) {
+            if (map.rawin(e.list)){
+                map[e.list].push(e.index);
+            }else{
+                map[e.list] <- [e.index];
+            }
+        }
+
+        //sort all arrays from highest to lowest to avoid them being re-indexed later when the items are being removed
+        foreach (list,indexes in map ) {
+            indexes.sort().reverse();
+        }
+        return map;
+
+    }, null, false);
+    
+
+     //getChildrenIndexes()
+    e.rawnewmember("getChildrenIndexes", function() {
+        local arr = [];
+        local children = this.getChildren();
+
+        foreach (c in children){
+            arr.push({list=c.metadata.list, index = c.getIndex()});
+            local subChildren = c.getChildrenIndexes();
+            if (subChildren.len()>0){
+                foreach (sc in subChildren) {
+                  arr.push(sc);
+                }
+            }
+        }
+
+        return arr;
+    }, null, false);
+   
+
+
+    //getIndex()
+    e.rawnewmember("getIndex", function() {
+        return this.metadata.index;
+    }, null, false);
+
     //removeChildren()
      e.rawnewmember("removeChildren", function() {
         this.UI.removeChildren(this);
