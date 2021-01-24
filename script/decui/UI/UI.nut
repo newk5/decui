@@ -744,7 +744,7 @@ class UI  {
         return p;
     } 
 
-
+/*
     function DeleteByID(id){
        local e = this.findById(id); 
     
@@ -757,7 +757,9 @@ class UI  {
 
                 local list = this.lists[names.find(listName)];  
                 foreach (index in indexes) {
+                    try {
 
+                   
                     local child = list[index];
                     local ncid= this.cleanID(child.id);
                     if (idsMetadata.rawin(ncid)){
@@ -765,6 +767,9 @@ class UI  {
                     }
                     list[index]=null;
                     list.remove(index);
+                     } catch (ex){
+                         Console.Print(ex);
+                     }
                 }
        
                 
@@ -777,7 +782,27 @@ class UI  {
             e=null;
           
         }
-    } 
+    } */
+
+
+      function DeleteByID(id){
+        local e = this.findById(id); 
+        if (e != null ) {
+                e.removeChildren();
+        }
+        local newid = this.cleanID(id);
+        if (this.idsMetadata.rawin(newid)) { 
+
+            local listName =this.idsMetadata[newid].list;
+            local list = this.lists[names.find(listName)]; 
+                
+                local newList =  this.deleteByID(id, list, listName); 
+                if (newList != null){
+                    this.lists[names.find(listName)] = newList;
+                }  
+            }
+        } 
+ 
  
 
     function mergeArray(firstArray, newElement) {

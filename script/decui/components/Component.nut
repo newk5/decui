@@ -60,5 +60,9 @@ class Component  {
     function getCanvas(){
         return  UI.Canvas(this.id);
     }
+
+    function getNestedIndexes(){
+          return  UI.Canvas(this.id).getNestedIndexes();
+    }
   
 }

@@ -748,7 +748,7 @@ foreach(i,e in elements ) {
         local children = this.getChildren();
 
         foreach (c in children){
-            arr.push({list=c.metadata.list, index = c.getIndex()});
+            arr.push({list=c.metadata.list, index = c.getIndex(), id = c.id});
             local subChildren = c.getChildrenIndexes();
             if (subChildren.len()>0){
                 foreach (sc in subChildren) {
