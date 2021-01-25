@@ -769,6 +769,16 @@ foreach(i,e in elements ) {
 
     //removeChildren()
      e.rawnewmember("removeChildren", function() {
+        if (this.rawin("preDestroy") && this.preDestroy != null){
+            try {
+                this.preDestroy();
+            }
+            catch(e) {
+                Console.Print(this.id)
+                Console.Print(e);
+            }
+        }
+
         this.UI.removeChildren(this);
     }, null, false);
 
