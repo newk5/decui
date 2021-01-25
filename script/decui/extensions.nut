@@ -768,7 +768,7 @@ foreach(i,e in elements ) {
     }, null, false);
 
     //removeChildren()
-     e.rawnewmember("removeChildren", function() {
+     e.rawnewmember("removeChildren", function(recursiveCall = false, toBeRemoved = null) {
         if (this.rawin("preDestroy") && this.preDestroy != null){
             try {
                 this.preDestroy();
@@ -779,7 +779,20 @@ foreach(i,e in elements ) {
             }
         }
 
-        this.UI.removeChildren(this);
+        if(toBeRemoved == null) {
+            toBeRemoved = {};
+        }
+
+        this.UI.removeChildren(this, toBeRemoved);
+
+        if(!recursiveCall) {
+            foreach(listIdx, indicesArray in toBeRemoved) {
+                indicesArray.sort().reverse();
+                foreach(idx in indicesArray) {
+                    UI.lists[listIdx].remove(idx);
+                }
+            }
+        }
     }, null, false);
 
 
