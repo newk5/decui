@@ -249,6 +249,9 @@
             Timer.Process();
             if (this.UI.toDelete != null && this.UI.toDelete.len() > 0 ) {
                 this.UI.toDelete= this.UI.toDelete.filter(function(idx,e) {
+                    if(this.UI.hoveredEl != null && this.UI.hoveredEl.id == e.id) {
+                        this.UI.hoveredEl = null;
+                    }
                     e = null;
                     return false;
                 }); 
