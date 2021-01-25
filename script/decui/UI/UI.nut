@@ -471,7 +471,7 @@ class UI  {
        
     }
 
-    function removeChildren(parent){
+    /*function removeChildren(parent){
         if (parent.id != null && parent.id != ""){     
             foreach(i,name in parent.childLists ) {   
                 local list = this.lists[this.names.find(name)];
@@ -503,6 +503,34 @@ class UI  {
             }
         }
      
+    }*/
+
+    function removeChildren(parent, toBeRemoved){
+        if (parent.id != null && parent.id != ""){     
+            foreach(i,name in parent.childLists ) {
+                local listIdx = this.names.find(name);
+                local list = this.lists[listIdx];
+                   
+                foreach(idx, e in list) {
+                    local UI = ::getroottable().UI; 
+                    local t = typeof e;
+
+                    if (t == "instance"){
+                        continue;
+                    }
+                    
+                    local isChildren =  e.parents.find(parent.id) != null;
+                    
+                    if (isChildren){
+                        e.removeChildren(true, toBeRemoved);
+                        UI.addToDeleteQueue(e);
+                        toBeRemoved.rawin(listIdx) ?
+                            (toBeRemoved[listIdx].find(idx) == null ? toBeRemoved[listIdx].push(idx) : null) :
+                            toBeRemoved.rawset(listIdx, [idx]);
+                    }
+                }
+            }
+        }
     }
 
     function findByID(id, list)    {

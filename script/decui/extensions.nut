@@ -768,8 +768,31 @@ foreach(i,e in elements ) {
     }, null, false);
 
     //removeChildren()
-     e.rawnewmember("removeChildren", function() {
-        this.UI.removeChildren(this);
+     e.rawnewmember("removeChildren", function(recursiveCall = false, toBeRemoved = null) {
+        if (this.rawin("preDestroy") && this.preDestroy != null){
+            try {
+                this.preDestroy();
+            }
+            catch(e) {
+                Console.Print(this.id)
+                Console.Print(e);
+            }
+        }
+
+        if(toBeRemoved == null) {
+            toBeRemoved = {};
+        }
+
+        this.UI.removeChildren(this, toBeRemoved);
+
+        if(!recursiveCall) {
+            foreach(listIdx, indicesArray in toBeRemoved) {
+                indicesArray.sort().reverse();
+                foreach(idx in indicesArray) {
+                    UI.lists[listIdx].remove(idx);
+                }
+            }
+        }
     }, null, false);
 
 
