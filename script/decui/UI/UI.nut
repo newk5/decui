@@ -26,6 +26,8 @@ class UI  {
     defaultTableProps = [ "data" ,"elementData", "metadata"];
     defaultBooleanProps = [ "autoResize" ,"delayWrap"];
     defaultArrayProps = [ "parents" ,"childLists"];
+    showDebugInfo = false;
+    excludeDebugIds =false;
 
     constructor() {
 
@@ -43,6 +45,18 @@ class UI  {
         this.fetch = Fetch(this);
         this.events = Events(this);
         
+    }
+
+    function getList(name){
+        return lists[names.find(name)];
+    }
+
+    function newData(key, value){
+        if (this.store==null){
+            this.store= Store({});
+         
+        }
+        this.store.put(key,value);
     }
 
     function Data(data) {
@@ -772,45 +786,6 @@ class UI  {
         return p;
     } 
 
-/*
-    function DeleteByID(id){
-       local e = this.findById(id); 
-    
-       local newid = this.cleanID(id);
-       if (this.idsMetadata.rawin(newid)) { 
-            local childIndexesAndLists = e.getNestedIndexes();
-            foreach (listName, indexes in childIndexesAndLists) {
-               
-               
-
-                local list = this.lists[names.find(listName)];  
-                foreach (index in indexes) {
-                    try {
-
-                   
-                    local child = list[index];
-                    local ncid= this.cleanID(child.id);
-                    if (idsMetadata.rawin(ncid)){
-                        delete idsMetadata[ncid]; 
-                    }
-                    list[index]=null;
-                    list.remove(index);
-                     } catch (ex){
-                         Console.Print(ex);
-                     }
-                }
-       
-                
-            }
-            local list = this.lists[names.find(e.metadata.list)];
-            list.remove(list.find(e)); 
-            if (idsMetadata.rawin(newid)){
-                delete idsMetadata[newid]; 
-            }
-            e=null;
-          
-        }
-    } */
 
 
       function DeleteByID(id){
@@ -998,9 +973,20 @@ class UI  {
             this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
-
+        debug(b);
         return b; 
     } 
+
+    function debug(b){
+         if (showDebugInfo){
+            if (!this.excludeDebugIds){
+                UI.incData(b.metadata.list);
+            }else if (b.id.find("decui:debug")==null){
+                UI.incData(b.metadata.list);
+            }
+            
+        }
+    }
 
     function Menu(o){  
         if (typeof o == "string") {
@@ -1126,8 +1112,17 @@ class UI  {
         local list = c.metadata.list;
         c.metadata.index = this.listsNumeration[list];
         lists[names.find(list)].push(c);
-
+       
         this.listsNumeration[list]++;  
+         if (showDebugInfo){
+             if (!excludeDebugIds){
+                 UI.incData(list);
+             }else if (c.id.find("decui:debug")==null) {
+                  UI.incData(list);
+                 
+             }
+            
+        }
     }
 
     function TabView(o){   
@@ -1188,8 +1183,10 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
+        debug(b);
 
-        return b;
+        
+        return b; 
     }
      function Editbox(o){
         if (typeof o == "string") {
@@ -1216,7 +1213,7 @@ class UI  {
              b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-       
+        debug(b);
         return b;
     } 
 
@@ -1236,7 +1233,9 @@ class UI  {
     }
 
     function setData(key,val, op = "set", dataUpdateOnly=false){
-
+        if (this.store == null){
+            this.store = Store({});
+        }
         this.store.set(key,val,op, dataUpdateOnly);
     }
 
@@ -1260,6 +1259,10 @@ class UI  {
 
     function Focus(e) {
         GUI.SetFocusedElement(e);
+    }
+
+     function Unfocus() {
+        GUI.SetFocusedElement(null);
     }
 
     function getData(key){
@@ -1377,7 +1380,7 @@ class UI  {
             this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
-         
+        debug(b);
         return b;
     }
     function Checkbox(o){
@@ -1406,6 +1409,7 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
+        debug(b);
         return b; 
     }
       function Listbox(o){
@@ -1437,6 +1441,7 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
+        debug(b);
         return b;
     }
       function Memobox(o){
@@ -1466,6 +1471,7 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
+        debug(b);
         return b;
     }
        function ProgressBar(o){ 
@@ -1492,6 +1498,7 @@ class UI  {
         }
         b.shiftPos(); 
          this.postConstruct(b);
+        debug(b);
 
         return b;
     }
@@ -1511,6 +1518,8 @@ class UI  {
         }
         b.shiftPos(); 
         this.postConstruct(b);
+
+       debug(b);
 
         return b; 
     }
@@ -1594,6 +1603,7 @@ class UI  {
             this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
+        debug(b);
 
         return b;
     }
@@ -1684,6 +1694,7 @@ class UI  {
         }
 
         this.postConstruct(b);
+        debug(b);
         return b;
     }
    

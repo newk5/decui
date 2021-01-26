@@ -96,9 +96,9 @@ class  Store {
             local fields = split(key,".");
             local o = this.getEntry(fields[0]);
             local old = o.value;
-
+            
             if (o != null){  
-                     
+                local newVal=val;      
                 local nestedField = o.value;
                 fields = fields.filter(function(idx,e) {
                     return e != fields[0];
@@ -155,6 +155,7 @@ class  Store {
                                     }else{
                                         oldField[field][fields[idx+1]] += val;
                                     }
+                                    newVal = oldField[field][fields[idx+1]];
                                   
                                 } else if (op=="dec"){
                                     if (val ==1){
@@ -162,13 +163,13 @@ class  Store {
                                     }else{
                                         oldField[field][fields[idx+1]] -= val;
                                     }
-                                  
+                                    newVal = oldField[field][fields[idx+1]];
                                 }
                                
                             }
                            
                            
-                            this.triggerChange(o, val,oldVal, op,dataUpdateOnly);
+                            this.triggerChange(o, newVal,oldVal, op,dataUpdateOnly);
                         }
                     }catch(ex) {
 
@@ -203,8 +204,11 @@ class  Store {
                     o.value -=val;
                 }
             }
-           
-            this.triggerChange(o, val, old, op,dataUpdateOnly);
+            local newVal = val;
+            if (op=="dec" || op=="inc"){
+                newVal=o.value;
+            }
+            this.triggerChange(o, newVal, old, op,dataUpdateOnly);
            
         }
     }
@@ -276,12 +280,14 @@ class  Store {
                    
                 
                 } else if (elt=="GUILabel"){
+                     
                     local l =UI.Label(id);
                     if (l != null){
+                       
                         if (vt == "table" && l.bindTo.find(".")){
-                            l.Text = UI.getData(l.bindTo);
+                            l.setText(UI.getData(l.bindTo));
                         }else{
-                            l.Text =newValue+"";  
+                            l.setText(newValue+"");  
                         }
 
                     }

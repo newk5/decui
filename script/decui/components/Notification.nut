@@ -116,6 +116,7 @@ class UINotification extends Component {
                    ::UI.openNots--; 
                    ::UI.notsHeight -= 12;
                    c.destroy(); 
+                  
                     
                }
             } 
@@ -164,6 +165,9 @@ class UINotification extends Component {
                    
                     if (c != null){
                         c.destroy(); 
+                        if (UI.showDebugInfo){
+                            UI.decData("notifications");
+                        }
                         ::UI.openNots--;
                         ::UI.notsHeight -= 12;
                     }

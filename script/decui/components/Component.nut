@@ -23,6 +23,16 @@ class Component  {
             this.removeRowBorders();
         } 
         UI.DeleteByID(this.id);
+        if (UI.showDebugInfo){
+             if (!UI.excludeDebugIds){
+               UI.decData(this.metadata.list);
+            }else{
+                if (this.id.find("decui:debug")==null){
+                   UI.decData(this.metadata.list);
+                }
+            }
+           
+        }
     }
     function show() {
         UI.Canvas(this.id).show();
@@ -63,6 +73,10 @@ class Component  {
 
     function getNestedIndexes(){
           return  UI.Canvas(this.id).getNestedIndexes();
+    }
+
+    function getParent(){
+        return getCanvas().getParent();
     }
   
 }

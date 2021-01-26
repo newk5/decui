@@ -25,6 +25,9 @@ function printCallStacks(){
 }
 
 function Script::ScriptLoad(){
-       
+     showDebugUI();
+     dofile("GridDemo.nut");
+  
+    
    
 } 

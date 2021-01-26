@@ -252,6 +252,15 @@
                     if(this.UI.hoveredEl != null && this.UI.hoveredEl.id == e.id) {
                         this.UI.hoveredEl = null;
                     }
+                    if (UI.showDebugInfo){
+                        if (!UI.excludeDebugIds){
+                            UI.decData(e.metadata.list);
+                        }else{
+                            if (e.id.find("decui:debug")==null){
+                                UI.decData(e.metadata.list);
+                            }
+                        }
+                    }
                     e = null;
                     return false;
                 }); 
