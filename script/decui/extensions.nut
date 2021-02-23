@@ -102,7 +102,11 @@ foreach(i,e in elements ) {
                     foreach (idx, borderPos in this.data.borderIDs) {
                         local b = ui.Canvas(borderPos);
                         if (b != null && b.data.borderPos == border){
-                            b.size = size;
+                            if (border=="left" || border == "right"){
+                                b.Size.X = size;
+                            }else{
+                                b.Size.Y = size;
+                            }
                             break;
                         }
                     }
