@@ -735,7 +735,8 @@ foreach(i,e in elements ) {
 
         //sort all arrays from highest to lowest to avoid them being re-indexed later when the items are being removed
         foreach (list,indexes in map ) {
-            indexes.sort().reverse();
+            indexes.sort();
+            indexes.reverse();
         }
         return map;
 
@@ -787,7 +788,8 @@ foreach(i,e in elements ) {
 
         if(!recursiveCall) {
             foreach(listIdx, indicesArray in toBeRemoved) {
-                indicesArray.sort().reverse();
+                indicesArray.sort();
+                indicesArray.reverse();
                 foreach(idx in indicesArray) {
                     UI.lists[listIdx].remove(idx);
                 }
