@@ -34,8 +34,8 @@ class Component  {
            
         }
     }
-    function show() {
-        UI.Canvas(this.id).show();
+    function show(restoreAlpha = true) {
+        UI.Canvas(this.id).show(restoreAlpha);
     }
     function hide() {
         UI.Canvas(this.id).hide();

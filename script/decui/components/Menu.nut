@@ -97,7 +97,7 @@ class OptionsMenu extends Component {
            this.alwaysKeepBorders = o.alwaysKeepBorders;
         }
 
-        if (o.rawin("optionsSyle")){
+        if (o.rawin("optionsStyle")){
             local opt = o.optionsStyle;
             local props = ["RelativeSize","Size", "Colour", "onHover", "border"];
             foreach (prop in props) {
