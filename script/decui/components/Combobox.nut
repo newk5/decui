@@ -22,7 +22,9 @@ class Combobox extends Component {
     align = null;
     bindTo=null;
     bindToValue= null;
-    
+
+    FontSize = null;
+    onClick = null;
 
     constructor(o) {
         this.className = "Combobox"; 
@@ -51,7 +53,12 @@ class Combobox extends Component {
             local val =  ::UI.store.get(o.bindToValue);
             this.value = val;
         }
-
+        if (o.rawin("onClick")){
+            this.onClick= o.onClick;
+        }
+        if (o.rawin("FontSize") && o.FontSize != null){
+            this.FontSize =o.FontSize;
+        }
         if (o.rawin("size") && o.size != null){
             this.size =o.size;
         }
@@ -98,21 +105,19 @@ class Combobox extends Component {
         this.listboxID = this.id+"::ComboBox::lstBox";
         this.labelID = this.id+"::ComboBox::label";
         
-        this.canvasSize = VectorScreen(this.size == null ? 90: this.size,this.height == null ? 20: this.height); 
+        this.canvasSize = this.size; 
 
-        base.constructor(this.id,o);
+        base.constructor(this.id,o); 
         this.metadata.list = "comboboxes";
         this.build(null,  this.onOptionSelect);
         
     } 
- 
 
-
-   function addBorders(o) {
-       UI.Canvas(this.id).addBorders({})
-   }
+    function addBorders(o) {
+        UI.Canvas(this.id).addBorders({})
+    }
  
-   function calculateListHeight() {
+    function calculateListHeight() {
         calcHeigh =  (21 * this.options.len()) +20 ; 
         return calcHeigh; 
     }
@@ -148,7 +153,6 @@ class Combobox extends Component {
     }
 
     function showPanel(){
-      
         ::getroottable().UI.Listbox(this.listboxID).show();
         ::getroottable().UI.openCombo =  { id =this.id, list = "canvas" };
           this.isOpen=true;
@@ -216,23 +220,22 @@ class Combobox extends Component {
             childParents.push(p);
         }
 
-
         local label = UI.Label({
                 id =this.labelID,
                 context = this,
                 Text = this.value, 
                 TextColour = labelColour
-                align = "mid_left"
-                move = { right = 5}
+                align = "center_left"
+                FontSize = this.FontSize
                 parents = childParents,  
                 onClick = function(){ 
-                    
+                    if (this.onClick != null) context.onClick();
                     if (context.isOpen){
                         context.hidePanel();
                            
                     }else{
                          local listbox = UI.Listbox(context.listboxID); 
-                        listbox.Size.Y =90;
+                        listbox.Size.Y = 100;
                         local c = UI.Canvas(context.id);
                         c.Size.Y = 118;
                         context.showPanel(); 
@@ -243,67 +246,69 @@ class Combobox extends Component {
                     }
                 }         
         });
-
+        
         local sprite =  UI.Sprite({
-                    id=this.arrowSpriteID,
-                    file ="decui/down.png", 
-                    context = this,  
-                    Size =VectorScreen(16,16),
-                   align="top_right",
-                    parents = childParents,
-                    move = {down = "22%", left=3 },
-                    onClick = function(){
-                         
-                        if (context.isOpen){
-                            context.hidePanel();
-                           
-                        }else{
-                             local listbox = UI.Listbox(context.listboxID);
-                            listbox.Size.Y =90;
-                            local c = UI.Canvas(context.id);
-                            c.Size.Y = 118; 
-                            context.showPanel(); 
-                          
-                        }
-                       
-                    }
-        });
-      
-        local listbox =  UI.Listbox({
-                    id=this.listboxID,
-                    context = this,
-                    Alpha = 150,  
-                    parents = childParents, 
-                    Position = VectorScreen(0, this.height== null ? 20: this.height),
-                    Colour = this.colour
-                    TextColour = this.labelColour
-                    Size = VectorScreen(90,42), 
-                    options = this.options,
-                    onOptionSelect = function(option){
+                id=this.arrowSpriteID,
+                file ="decui/down.png", 
+                context = this,  
+                Size =VectorScreen(16,16),
+                align="top_right",
+                parents = childParents,
+                move = {down = "22%", left=3 },
+                onClick = function(){
+                    if (this.onClick != null) context.onClick()    
+                    if (context.isOpen){
                         context.hidePanel();
-                        ::getroottable().UI.Canvas(context.id).Size.Y = context.canvasSize.Y;
-                        local label = ::getroottable().UI.Label(context.labelID);
-                        label.set("Text", option) ;
-                        label.Position.Y = 2;
-                      
-                        context.value = option;
-                        if (optionSelect != null){
-                            context.isOpen = false;
-                            optionSelect(option);
-                            
-                        }
-                    },
-                    postConstruct = function() {
-                        this.Size.X= context.canvasSize.X;
-                        this.hide(); 
+                        
+                    }else{
+                            local listbox = UI.Listbox(context.listboxID);
+                        listbox.Size.Y =90;
+                        local c = UI.Canvas(context.id);
+                        c.Size.Y = 118; 
+                        context.showPanel(); 
+                        
                     }
-                }); 
+                    
+                }
+        });
+
+        local listbox =  UI.Listbox({
+            id=this.listboxID,
+            context = this,
+            Alpha = 150,  
+            parents = childParents, 
+            Position = VectorScreen(0, this.height== null ? 20: this.height),
+            Colour = this.colour
+            TextColour = this.labelColour
+            Size = VectorScreen(90,42), 
+            FontSize = this.FontSize
+            options = this.options,
+            onOptionSelect = function(option){
+                context.hidePanel();
+                ::getroottable().UI.Canvas(context.id).Size.Y = context.canvasSize.Y;
+                local label = ::getroottable().UI.Label(context.labelID);
+                label.set("Text", option) ;
+                label.Position.Y = 2;
+                
+                context.value = option;
+                if (optionSelect != null){
+                    context.isOpen = false;
+                    optionSelect(option);
+                    
+                }
+            },
+            postConstruct = function() {
+            
+                this.Size.X= context.canvasSize.X;
+                this.hide(); 
+            }
+        }); 
         listbox.AddFlags(GUI_FLAG_SCROLLABLE );
         childParents.push(this.id);
         local c = UI.Canvas({
-            id=this.id,
+            id=this.id, 
             context = this,
-            align = this.align
+            align = this.align 
             Size = this.canvasSize ,
             Color= this.colour,   
             Position = this.Position, 
@@ -313,13 +318,13 @@ class Combobox extends Component {
             parents =parentsList,
             elementData = this.elementData
             onClick = function(){
-                
+                if (this.onClick != null) context.onClick()
                 if (context.isOpen){
                     context.hidePanel();
                            
                 }else{
                      local listbox = UI.Listbox(context.listboxID);
-                    listbox.Size.Y =90;
+                    listbox.Size.Y =100;
                     local c = UI.Canvas(context.id);
                     c.Size.Y = 118;
                     //listbox.Position.Y = c.Size.Y+15;
@@ -330,11 +335,12 @@ class Combobox extends Component {
             },
             
         });
-        //;
+        
+
         if (this.border != null) {
             c.addBorders(this.border) 
         }
-        //
+        
       
 
      
@@ -345,10 +351,7 @@ class Combobox extends Component {
         sprite.resetMoves();
         sprite.realign();
         sprite.shiftPos();
-        c.realign();
         return c;
-
-       
         
     }
     function size(){
