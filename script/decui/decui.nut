@@ -4,6 +4,7 @@ dofile("decui/components/Component.nut");
 dofile("decui/components/InputGroup.nut");
 dofile("decui/components/GroupRow.nut");
 dofile("decui/components/Combobox.nut");
+dofile("decui/components/Sliders.nut");
 dofile("decui/components/Popup.nut"); 
 dofile("decui/components/Table.nut");
 dofile("decui/components/Tabview.nut");
