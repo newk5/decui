@@ -26,8 +26,6 @@ class UI  {
     defaultTableProps = [ "data" ,"elementData", "metadata"];
     defaultBooleanProps = [ "autoResize" ,"delayWrap"];
     defaultArrayProps = [ "parents" ,"childLists"];
-    showDebugInfo = false;
-    excludeDebugIds =false;
 
     constructor() {
 
@@ -36,8 +34,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus" ];
+        lists = [ [], [], [], [], [], [], [], [], [], [], [],  [], [], [], [], [], [], [], [], [] ];
+        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -45,18 +43,6 @@ class UI  {
         this.fetch = Fetch(this);
         this.events = Events(this);
         
-    }
-
-    function getList(name){
-        return lists[names.find(name)];
-    }
-
-    function newData(key, value){
-        if (this.store==null){
-            this.store= Store({});
-         
-        }
-        this.store.put(key,value);
     }
 
     function Data(data) {
@@ -317,57 +303,49 @@ class UI  {
     function shift(e){
         if (e.move != null){
             local s = e.move; 
-          
+           
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
                     if (isString){
-                            
                         local wrapper =  e.getWrapper();
                         if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- [];
+                           e.metadata["movedPos"] <- ["left"];
+                        }else{
+                            if (e.metadata.movedPos.find("left") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("left");
+                            }
+                        } 
+                         if (e.metadata.movedPos.len() == 0){
+                            e.realign(); 
                         }
-                        if (e.metadata.movedPos.find("left") != null){
-                            return;
-                        } else{
-                            e.metadata.movedPos.push("left");
-                            local percent = this.removePercent(s.left).tofloat();
-                            e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
-                            
-                        }
-                         
-                     
-                        if (e.metadata.movedPos.len() == 0){
-                           e.realign(); 
-                        }
-                       
+                        local percent = this.removePercent(s.left).tofloat();
+                        e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
 
                     }else{
                         e.Position.X =  e.Position.X - s.left;
                     }
                 }
                 if (s.rawin("right")){
-                      
                     local isString = typeof s.right == "string";
                      if (isString){
-                         
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                            e.metadata["movedPos"] <- [];
-                        } 
-                        if (e.metadata.movedPos.find("right") != null){
-                            return;
+                            e.metadata["movedPos"] <- ["right"];
                         }else{
-                            e.metadata.movedPos.push("right");
-                            local percent = this.removePercent(s.right).tofloat();
-                            e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
-                            
+                            if (e.metadata.movedPos.find("right") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("right");
+                            }
                         }
-                        
                          if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
-                       
+                        local percent = this.removePercent(s.right).tofloat();
+                        e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
 
                     } else {
                         e.Position.X =  e.Position.X + s.right;
@@ -378,20 +356,19 @@ class UI  {
                     if (isString){
                          local wrapper = e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- [];
-                        }
-                        if (e.metadata.movedPos.find("up") != null){
-                            return;
+                           e.metadata["movedPos"] <- ["up"];
                         }else{
-                            e.metadata.movedPos.push("up");
-                            local percent = this.removePercent(s.up).tofloat();
-                            e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
+                            if (e.metadata.movedPos.find("up") != null){
+                                return;
+                            }else{
+                                e.metadata.movedPos.push("up");
+                            }
                         }
-                        
                         if (e.metadata.movedPos.len() == 0){
                             e.realign(); 
                         }
-                       
+                        local percent = this.removePercent(s.up).tofloat();
+                        e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
 
                     } else {
                         e.Position.Y =  e.Position.Y - s.up;
@@ -403,20 +380,19 @@ class UI  {
                      if (isString){
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
-                           e.metadata["movedPos"] <- [];
+                           e.metadata["movedPos"] <- ["down"];
+                        }else{
+                            if (e.metadata.movedPos.find("down") != null){
+                                return;
+                            } else{
+                                e.metadata.movedPos.push("down");
+                            }
                         }
-                        if (e.metadata.movedPos.find("down") != null){
-                            return;
-                        } else{
-                            e.metadata.movedPos.push("down");
-                            local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
-                            e.Position.Y += ( wrapper.Y * percent ).tofloat();
-                        }
-                        
                         if (e.metadata.movedPos.len() == 0){
                             e.realign();               
                         }          
-                        
+                        local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
+                        e.Position.Y += ( wrapper.Y * percent ).tofloat();
 
 
                     } else {
@@ -485,7 +461,7 @@ class UI  {
        
     }
 
-    /*function removeChildren(parent){
+    function removeChildren(parent){
         if (parent.id != null && parent.id != ""){     
             foreach(i,name in parent.childLists ) {   
                 local list = this.lists[this.names.find(name)];
@@ -517,34 +493,6 @@ class UI  {
             }
         }
      
-    }*/
-
-    function removeChildren(parent, toBeRemoved){
-        if (parent.id != null && parent.id != ""){     
-            foreach(i,name in parent.childLists ) {
-                local listIdx = this.names.find(name);
-                local list = this.lists[listIdx];
-                   
-                foreach(idx, e in list) {
-                    local UI = ::getroottable().UI; 
-                    local t = typeof e;
-
-                    if (t == "instance"){
-                        continue;
-                    }
-                    
-                    local isChildren =  e.parents.find(parent.id) != null;
-                    
-                    if (isChildren){
-                        e.removeChildren(true, toBeRemoved);
-                        UI.addToDeleteQueue(e);
-                        toBeRemoved.rawin(listIdx) ?
-                            (toBeRemoved[listIdx].find(idx) == null ? toBeRemoved[listIdx].push(idx) : null) :
-                            toBeRemoved.rawset(listIdx, [idx]);
-                    }
-                }
-            }
-        }
     }
 
     function findByID(id, list)    {
@@ -653,7 +601,7 @@ class UI  {
                  local initialPos = VectorScreen(x,y);
 
                 if (el.hasParents()){
-                    
+                   
                       local parent = UI.Canvas(el.getFirstParent());
                    
                     el.Detach(); 
@@ -665,10 +613,11 @@ class UI  {
                     }
                    
                    
-                    parent.AddChild(el);
-                    el.Position = initialPos; 
+                     parent.AddChild(el);
+                      el.Position = initialPos;
                     
-             
+                    el.realign();
+                    el.shiftPos();
                 }
 
                 if (mousePos != null) {
@@ -713,10 +662,10 @@ class UI  {
                     }else {
                         c = UI.Canvas({ 
                             id = el.id+"::tooltip",
-                            Size = el.tooltip.rawin("Size") ? el.tooltip.Size : VectorScreen(l.Size.X+8, l.Size.Y+8),
+                            Size = VectorScreen(l.Size.X+8, l.Size.Y+8),
                             Color= col  
                             Position = pos
-                            autoResize = el.tooltip.rawin("Size") ? false: true
+                            autoResize = true
                         }); 
                     }
                      
@@ -725,17 +674,12 @@ class UI  {
                         c.add(l, false);
                     }
                      el.tooltipVisible = true;
-                    
                     if (el.tooltip.rawin("extraLabels")){
-                        local addY=0;
                         foreach(i,ce in el.tooltip.extraLabels ) {
                             local cid = Script.GetTicks()+""+i;
                             ce["id"] <- cid;
-                            local exl =UI.Label(ce);
-                            c.add(exl, false);  
-                            addY += exl.TextSize.Y;
+                            c.add(UI.Label(ce), false);  
                         }
-                        c.Size.Y += addY;
                     }
                      
                     if (el.tooltip.rawin("border")){
@@ -787,25 +731,23 @@ class UI  {
     } 
 
 
+    function DeleteByID(id){
+       local e = this.findById(id); 
+       if (e != null ) {
+            e.removeChildren();
+       }
+       local newid = this.cleanID(id);
+       if (this.idsMetadata.rawin(newid)) { 
 
-      function DeleteByID(id){
-        local e = this.findById(id); 
-        if (e != null ) {
-                e.removeChildren();
+        local listName =this.idsMetadata[newid].list;
+        local list = this.lists[names.find(listName)]; 
+            
+            local newList =  this.deleteByID(id, list, listName); 
+            if (newList != null){
+                this.lists[names.find(listName)] = newList;
+            }  
         }
-        local newid = this.cleanID(id);
-        if (this.idsMetadata.rawin(newid)) { 
-
-            local listName =this.idsMetadata[newid].list;
-            local list = this.lists[names.find(listName)]; 
-                
-                local newList =  this.deleteByID(id, list, listName); 
-                if (newList != null){
-                    this.lists[names.find(listName)] = newList;
-                }  
-            }
-        } 
- 
+    } 
  
 
     function mergeArray(firstArray, newElement) {
@@ -876,14 +818,9 @@ class UI  {
                 if (obj.rawin("flags")){
                     element.AddFlags(obj.flags); 
                 }
-                //set text first to prevent mgui bug with .Text reseting font size
-                 if (obj.rawin("Text")){
-                    element.Text = obj.Text; 
-                }
                 foreach(i,e in obj ) {
                     try {  
-                      
-                        if (i != "flags" && i != "Flags" && i != "Text"){
+                        if (i != "flags" && i != "Flags"){
                             if (i == "fontFlags"){
                                 element.FontFlags = obj[i];
                             } else {
@@ -913,9 +850,6 @@ class UI  {
                 this.align(element); 
                 if (obj.rawin("children") ){
                     this.shift(element);
-                }
-                if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
-                    element.RemoveFlags(obj.RemoveFlags); 
                 }
                 
             }else{
@@ -969,24 +903,11 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos();
-        if (o.rawin("border") ){
-            this.applyBorder(o.border, b);
-        }
+    
         this.postConstruct(b);
-        debug(b);
+
         return b; 
     } 
-
-    function debug(b){
-         if (showDebugInfo){
-            if (!this.excludeDebugIds){
-                UI.incData(b.metadata.list);
-            }else if (b.id.find("decui:debug")==null){
-                UI.incData(b.metadata.list);
-            }
-            
-        }
-    }
 
     function Menu(o){  
         if (typeof o == "string") {
@@ -1000,6 +921,22 @@ class UI  {
         local c = OptionsMenu(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
+        c.shiftPos();
+        this.postConstruct(o);
+        return c;
+    }
+
+    function Slider (o){  
+        if (typeof o == "string") {
+            local slider = this.fetch.canvas(o);
+            if (slider != null) {
+                return slider.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = Sliders (o);
+        this.addToListAndIncNumeration(c);
         c.shiftPos();
         this.postConstruct(o);
         return c;
@@ -1112,17 +1049,8 @@ class UI  {
         local list = c.metadata.list;
         c.metadata.index = this.listsNumeration[list];
         lists[names.find(list)].push(c);
-       
+
         this.listsNumeration[list]++;  
-         if (showDebugInfo){
-             if (!excludeDebugIds){
-                 UI.incData(list);
-             }else if (c.id.find("decui:debug")==null) {
-                  UI.incData(list);
-                 
-             }
-            
-        }
     }
 
     function TabView(o){   
@@ -1183,10 +1111,8 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-        debug(b);
 
-        
-        return b; 
+        return b;
     }
      function Editbox(o){
         if (typeof o == "string") {
@@ -1213,7 +1139,7 @@ class UI  {
              b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-        debug(b);
+       
         return b;
     } 
 
@@ -1233,9 +1159,7 @@ class UI  {
     }
 
     function setData(key,val, op = "set", dataUpdateOnly=false){
-        if (this.store == null){
-            this.store = Store({});
-        }
+
         this.store.set(key,val,op, dataUpdateOnly);
     }
 
@@ -1259,10 +1183,6 @@ class UI  {
 
     function Focus(e) {
         GUI.SetFocusedElement(e);
-    }
-
-     function Unfocus() {
-        GUI.SetFocusedElement(null);
     }
 
     function getData(key){
@@ -1325,11 +1245,7 @@ class UI  {
                         b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
-                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
-                          local comp =  ["TabView", "Grid", "DataTable"]
-                         local processChildren = comp.find(className) == null;
-                        
-                        b.attachChild(el, processChildren); 
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
                     }
  
                 }else {
@@ -1380,7 +1296,7 @@ class UI  {
             this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
-        debug(b);
+         
         return b;
     }
     function Checkbox(o){
@@ -1409,7 +1325,6 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-        debug(b);
         return b; 
     }
       function Listbox(o){
@@ -1441,7 +1356,6 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-        debug(b);
         return b;
     }
       function Memobox(o){
@@ -1471,7 +1385,6 @@ class UI  {
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
         b.shiftPos(); 
-        debug(b);
         return b;
     }
        function ProgressBar(o){ 
@@ -1498,7 +1411,6 @@ class UI  {
         }
         b.shiftPos(); 
          this.postConstruct(b);
-        debug(b);
 
         return b;
     }
@@ -1519,16 +1431,13 @@ class UI  {
         b.shiftPos(); 
         this.postConstruct(b);
 
-       debug(b);
-
         return b; 
     }
     function Sprite(o){
         if (typeof o == "string") {
             return this.fetch.sprite(o);
         }
-        local s = o.rawin("file") ? GUISprite(o.file, o.rawin("Position") ? o.Position : VectorScreen(0,0 )) : GUISprite();
-        local b = this.applyElementProps(s, o);
+        local b = this.applyElementProps(GUISprite(), o);
 
            b.metadata.list = "sprites";
         b.metadata.index = this.listsNumeration.sprites;
@@ -1599,11 +1508,7 @@ class UI  {
               b.resetMoves();
              b.shiftPos();
         }
-        if (o.rawin("border") ){
-            this.applyBorder(o.border, b);
-        }
         this.postConstruct(b);
-        debug(b);
 
         return b;
     }
@@ -1633,10 +1538,7 @@ class UI  {
                         b.add(UI.Canvas(c.id), false);
                     } else{ 
                         local t= typeof c;
-                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
-                         local comp =  ["TabView", "Grid", "DataTable"]
-                         local processChildren = comp.find(className) == null;;
-                        b.attachChild(el, processChildren); 
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
                     }
 
                 }else {
@@ -1694,7 +1596,6 @@ class UI  {
         }
 
         this.postConstruct(b);
-        debug(b);
         return b;
     }
    
