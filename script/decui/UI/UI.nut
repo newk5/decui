@@ -36,8 +36,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [],[],  [], [], [], [], [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus" ];
+        lists = [ [], [], [], [], [], [], [], [], [], [],  [], [], [], [], [], [], [], [], [], [] ];
+        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -1017,6 +1017,22 @@ class UI  {
         local c = Combobox(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
+        c.shiftPos();
+        this.postConstruct(o);
+        return c;
+    }
+
+    function Slider (o){  
+        if (typeof o == "string") {
+            local slider = this.fetch.canvas(o);
+            if (slider != null) {
+                return slider.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = Sliders (o);
+        this.addToListAndIncNumeration(c);
         c.shiftPos();
         this.postConstruct(o);
         return c;
