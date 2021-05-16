@@ -42,7 +42,7 @@ local pg = UI.Pagination({
     align = "center"
     pages = 7
     onPageClicked = function (page) {
-        Console.Print(a4)
+       tv.changeTab(page);
     }
 });
 
