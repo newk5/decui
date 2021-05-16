@@ -11,7 +11,6 @@ class Paginations extends Component {
     move = null;
     border =null;
     align = null;
-    bindTo =null;
     Size = null;
 
     pages = 2;
@@ -21,12 +20,6 @@ class Paginations extends Component {
 constructor(o) {
         this.className = "Pagination"; 
         this.id = o.id; 
-        if (o.rawin("bindTo") && o.bindTo != null){
-            ::UI.store.attachIDAndType(o.bindTo,o.id, "Pagination");
-            local val =  ::UI.store.get(o.bindTo);
-            this.options = val;
-            this.bindTo = o.bindTo;
-        }
 
         if (o.rawin ( "onPageClicked" )) this.onPageClicked = o.onPageClicked;
         if (o.rawin ( "pages" )) this.pages = o.pages
@@ -102,8 +95,6 @@ constructor(o) {
             Size = this.Size == null ? VectorScreen(400,50) : this.Size
             move = this.move,
         });
-
-
         c.shiftPos ();
          
         local debug;

@@ -9,7 +9,6 @@ class Sliders extends Component {
     move = null;
     border =null;
     align = null;
-    bindTo =null;
     direction = null;
     buttonAlign = null;
     buttonColour = null;
@@ -25,12 +24,6 @@ class Sliders extends Component {
 constructor(o) {
         this.className = "Slider"; 
         this.id = o.id; 
-        if (o.rawin("bindTo") && o.bindTo != null){
-            ::UI.store.attachIDAndType(o.bindTo,o.id, "Slider");
-            local val =  ::UI.store.get(o.bindTo);
-            this.options = val;
-            this.bindTo = o.bindTo;
-        }
 
         if (o.rawin ("buttonWidth")) this.buttonWidth = o.buttonWidth;
         if (o.rawin ("buttonColour")) this.buttonColour = o.buttonColour;
@@ -77,25 +70,11 @@ constructor(o) {
         
         base.constructor(this.id,o);
         this.metadata.list = "sliders";
-        this.build(null);
+        this.build();
     }     
 
     
-    function build(parent){
-        if (parent != null){
-            this.parentSize = parent.Size;
-        } else{
-            this.parentSize = GUI.GetScreenSize();
-        }
-        local parentsList = parent == null ? [] : parent.parents;
-        if (parent != null) {
-            parentsList.push(parent.id);
-        }
-        local childParents = [];
-        foreach (idx, p in parentsList) { 
-            childParents.push(p);
-        }
-
+    function build(){
         local b = UI.Canvas({
             id= this.squareID,
             context = this,
@@ -111,7 +90,6 @@ constructor(o) {
             }
         });
 
-        childParents.push(this.id);
         local c = UI.Canvas({
             id=this.id,
             context = this,
