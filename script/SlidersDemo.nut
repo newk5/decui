@@ -1,4 +1,4 @@
-        UI.Slider({
+        local e = UI.Slider({
             id = "sliderDemoID"
             direction = "vertical"  //
             align = "center"
@@ -10,8 +10,9 @@
             onValue = function (value) {
               Console.Print(value)
             }    
-        }) 
-
-        // value - function (integer 0 - 100);
-        // shadow - function
-        // drag - place this on scriptprocess  
+        })
+        
+       // e.attachToMouse - function () 
+       // e.attachToShadow - function ()
+       // e.setValue - funtion (0-100) percentage
+       // e.detachFromMouse - function ()
