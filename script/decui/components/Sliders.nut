@@ -20,6 +20,7 @@ class Sliders extends Component {
     buttonWidth = 20;
     onValue = null;
     onSliderClicked = null;
+    mouseTimer = null;
 
 constructor(o) {
         this.className = "Slider"; 
@@ -172,9 +173,9 @@ constructor(o) {
 
     attachShadow = function (w=null,h=null,debug=null) {
         local context = this;
-        local s = ::getroottable().UI.Canvas(context.shadowID);
-        local c = ::getroottable().UI.Canvas(this.id);
-        local b = ::getroottable().UI.Canvas(this.squareID);
+        local s = ::UI.Canvas(context.shadowID);
+        local c = ::UI.Canvas(this.id);
+        local b = ::UI.Canvas(this.squareID);
 
         if (context.direction == "horizontal") {
             local percent;
@@ -229,11 +230,11 @@ constructor(o) {
         return this;
     }
 
-    value = function (value,debug=null) {
+    setValue = function (value,debug=null) {
         local w,h;
         if (value != null) {
-            local c = ::getroottable().UI.Canvas(this.id);
-            local b = ::getroottable().UI.Canvas(this.squareID);
+            local c = ::UI.Canvas(this.id);
+            local b = ::UI.Canvas(this.squareID);
              
             if (this.direction == "horizontal") { 
                 local percent = c.Size.X.tofloat () / 100 * value;
@@ -264,37 +265,47 @@ constructor(o) {
         return this;
     }
 
-    shadow = function () {
+    attachToShadow = function () {
         this.setshadow = true; 
         return this;
     }
 
-    drag = function () {
-        local b = ::getroottable().UI.Canvas(this.squareID);
-        local c = ::getroottable().UI.Canvas(this.id);
-        local s = ::getroottable().UI.Canvas(this.shadowID);
-        
-        if (this.onSliderClicked == true) {
-            if (this.direction == "horizontal") { 
-                local percent = (b.Pos.X.tofloat () / this.Size.X.tofloat () * 100).tointeger ();
-                if (this.setshadow != null) this.value(percent,true); //adding shadow if activate
-                if (GUI.GetMousePos () != null) {
-                    b.Pos.X = GUI.GetMousePos ().X-c.Pos.X;
-                    if (b.Pos.X <= 0) b.Pos.X = 0;
-                    if (b.Pos.X >= c.Size.X - b.Size.X) b.Pos.X = c.Size.X - b.Size.X;
-                }
-                if (this.onValue != null) this.onValue (percent);                   
-            }
-            else { 
-                local percent = (b.Pos.Y.tofloat () / this.Size.X.tofloat () * 100).tointeger ();
-                if (this.setshadow != null) this.value(percent,true); //adding shadow if activate
-                if (GUI.GetMousePos () != null) {
-                    b.Pos.Y = GUI.GetMousePos ().Y-c.Pos.Y;
-                    if (b.Pos.Y <= 0) b.Pos.Y = 0;
-                    if (b.Pos.Y >= c.Size.Y - b.Size.Y) b.Pos.Y = c.Size.Y - b.Size.Y;
-                }
-               if (this.onValue != null) this.onValue (percent);              
-            } 
+    attachToMouse = function () {
+        if (this.mouseTimer == null ) {
+            this.mouseTimer = Timer.Create (::UI, function (squareId,Id,shadowId) {
+                local b = ::UI.Canvas(squareId);
+                local c = ::UI.Canvas(Id);
+                local s = ::UI.Canvas(shadowId);
+                local context = ::UI.Slider(Id)
+
+                if (context.onSliderClicked == true) {
+                    if (context.direction == "horizontal") { 
+                        local percent = (b.Pos.X.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
+                        if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
+                        if (GUI.GetMousePos () != null) {
+                            b.Pos.X = GUI.GetMousePos ().X-c.Pos.X;
+                            if (b.Pos.X <= 0) b.Pos.X = 0;
+                            if (b.Pos.X >= c.Size.X - b.Size.X) b.Pos.X = c.Size.X - b.Size.X;
+                        }
+                        if (context.onValue != null) context.onValue (percent);                   
+                    }
+                    else { 
+                        local percent = (b.Pos.Y.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
+                        if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
+                        if (GUI.GetMousePos () != null) {
+                            b.Pos.Y = GUI.GetMousePos ().Y-c.Pos.Y;
+                            if (b.Pos.Y <= 0) b.Pos.Y = 0;
+                            if (b.Pos.Y >= c.Size.Y - b.Size.Y) b.Pos.Y = c.Size.Y - b.Size.Y;
+                        }
+                        if (context.onValue != null) context.onValue (percent);              
+                    }    
+                }             
+            }, 1, 0, this.squareID, this.id, this.shadowID)
         }
     }
+
+    function detachFromMouse(){
+        if (Timer.Exists (this.mouseTimer)) Timer.Destroy(this.mouseTimer);
+        this.mouseTimer = null;
+    }    
 } 
