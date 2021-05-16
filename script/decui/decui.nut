@@ -5,6 +5,7 @@ dofile("decui/components/InputGroup.nut");
 dofile("decui/components/GroupRow.nut");
 dofile("decui/components/Combobox.nut");
 dofile("decui/components/Sliders.nut");
+dofile("decui/components/Pagination.nut");
 dofile("decui/components/Popup.nut"); 
 dofile("decui/components/Table.nut");
 dofile("decui/components/Tabview.nut");
@@ -21,6 +22,8 @@ dofile("decui/UI/Store.nut");
 dofile("decui/util/StreamRequest.nut");
 dofile("decui/util/StreamReader.nut");
  
+
+
 UI <- UI();  
 
 function Script::ScriptProcess(){
