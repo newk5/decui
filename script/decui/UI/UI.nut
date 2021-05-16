@@ -36,8 +36,8 @@ class UI  {
         idsMetadata = {}; 
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [], [],  [], [], [], [], [], [], [], [], [], [] ];
-        names = [ "labels"   ,    "buttons",    "sprites",    "windows",    "progbars",     "canvas",   "scrollbars",    "memoboxes",     "editboxes",   "listboxes" ,  "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders" ];
+        lists = [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ];
+        names = [ "labels", "buttons", "sprites", "windows", "progbars", "canvas", "scrollbars", "memoboxes", "editboxes", "listboxes" , "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders", "paginations" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
         } 
@@ -1017,6 +1017,22 @@ class UI  {
         local c = Combobox(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
+        c.shiftPos();
+        this.postConstruct(o);
+        return c;
+    }
+
+    function Pagination (o){  
+        if (typeof o == "string") {
+            local pagination = this.fetch.canvas(o);
+            if (slider != null) {
+                return pagination.context;
+            } else{
+                return null;
+            }
+        }         
+        local c = Paginations (o);
+        this.addToListAndIncNumeration(c);
         c.shiftPos();
         this.postConstruct(o);
         return c;
