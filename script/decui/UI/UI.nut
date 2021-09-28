@@ -1,18 +1,18 @@
 class UI  {
 
     toDelete=null;
-   
+
     kps = null;
     res = null;
-   
+
     hoveredEl=null;
-    
+
     openContextID = null;
     debug = true;
-    lists = null; 
+    lists = null;
     names = null;
-    openCombo = null; 
-    comboClick = 0; 
+    openCombo = null;
+    comboClick = 0;
     idsMetadata = null;
     listsNumeration = null;
     fetch = null;
@@ -32,19 +32,19 @@ class UI  {
     constructor() {
 
         this.toDelete =[];
-        this.kps  = []; 
-        idsMetadata = {}; 
+        this.kps  = [];
+        idsMetadata = {};
         listsNumeration = {};
 
         lists = [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ];
         names = [ "labels", "buttons", "sprites", "windows", "progbars", "canvas", "scrollbars", "memoboxes", "editboxes", "listboxes" , "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders", "paginations" ];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
-        } 
-       
+        }
+
         this.fetch = Fetch(this);
         this.events = Events(this);
-        
+
     }
 
     function getList(name){
@@ -54,7 +54,7 @@ class UI  {
     function newData(key, value){
         if (this.store==null){
             this.store= Store({});
-         
+
         }
         this.store.put(key,value);
     }
@@ -81,15 +81,15 @@ class UI  {
         if (!obj.rawin("onIncrement")){
             obj["onIncrement"] <- null;
         }
-        
+
         this.store.sub(key, obj);
     }
- 
+
     function processStream(streamIdentifier, stream){
         foreach(i, sc in this.streamControllers) {
-          
+
             if (streamIdentifier == sc.identifier) {
-                
+
                 sc.readResponse(stream);
                 break;
             }
@@ -98,25 +98,25 @@ class UI  {
 
     function removeStream(streamIdentifier){
          foreach(i, sc in this.streamControllers) {
-          
+
             if (streamIdentifier == sc.identifier) {
-                
+
                 streamControllers.remove(i);
-               
+
             }
         }
-    }  
-    
+    }
+
 
     function removeBorders(e){
         if (e.rawin("data") && e.data != null && e.data.rawin("borderIDs") && e.data.borderIDs != null){
             e.data.borderIDs.clear();
-       
+
             foreach (idx, c in this.lists[this.names.find("canvas")]) {
                 if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
                     c.destroy();
                 }
-                
+
             }
         }
     }
@@ -124,16 +124,16 @@ class UI  {
      function updateBorders(e){
         foreach (idx, c in this.lists[this.names.find("canvas")]) {
             if (c.parents.find(e.id) != null && c.rawin("data") && c.data.rawin("isBorder") && c.data.isBorder != null && c.data.isBorder){
-               
+
                 if (c.id.find("top_center") != null || c.id.find("bottom_left") != null) {
                     c.Size.X = e.Size.X;
                 }else{
                      c.Size.Y = e.Size.Y;
                 }
-             
+
                 c.realign();
             }
-            
+
         }
     }
 
@@ -141,18 +141,18 @@ class UI  {
         return e.rawin("data") && e.data != null && e.data.rawin("borderIDs") && e.data.borderIDs != null && e.data.borderIDs.len()==4;
     }
 
-    function addBorder(e, b, align) { 
+    function addBorder(e, b, align) {
         if (this.hasAllBorders(e)){
             return;
         }
         local id = e.id == null ? Script.GetTicks() : e.id;
-        local size = null;   
+        local size = null;
         local borderPos = null;
         local parentsList =   e.id == null ? e.parents : mergeArray(e.parents, e.id);
         local move = {};
         local offset = b.rawin("offset") ? b.offset:0;
-       
- 
+
+
         if (align == "top_left"){
             borderPos = "left";
         }else if (align =="top_right"){
@@ -163,7 +163,7 @@ class UI  {
             borderPos = "bottom";
         }
         if (b.rawin("move")){
-            move = b.move; 
+            move = b.move;
         }
 
         if (align == "top_left" || align == "top_right"){
@@ -171,17 +171,17 @@ class UI  {
         }else{
             size = VectorScreen(e.Size.X, b.rawin("size") ? b.size : 2);
         }
-           
-        local border = this.Canvas({ 
-                id = id+"::"+align+"::border", 
+
+        local border = this.Canvas({
+                id = id+"::"+align+"::border",
                 data = { isBorder = true, borderPos = borderPos, offset = offset},
-                Colour = b.rawin("color") ? b.color : Colour(255,255,255), 
-                align  = align, 
+                Colour = b.rawin("color") ? b.color : Colour(255,255,255),
+                align  = align,
                 Size = size,
                 parents = parentsList,
                 move = move
         });
-        
+
         if (e.rawin("data") && e.data != null){
             if (e.data.rawin("borderIDs")){
                 if (e.data.borderIDs.find(border.id)==null){
@@ -194,9 +194,9 @@ class UI  {
             e.data["borderIDs"] <- [border.id];
         }
 
-       
+
         e.add(border, false);
-       // border.realign(); 
+       // border.realign();
         //border.shiftPos();
     }
 
@@ -207,57 +207,57 @@ class UI  {
         }
         local w = (this.removePercent(e.RelativeSize[0]).tofloat() / 100).tofloat();
         local h = (this.removePercent(e.RelativeSize[1]).tofloat() / 100).tofloat();
-      
-        local wrapper = null; 
-       
-        if (e.parents.len() == 0){ 
-            wrapper = GUI.GetScreenSize(); 
-        }else{ 
-            
+
+        local wrapper = null;
+
+        if (e.parents.len() == 0){
+            wrapper = GUI.GetScreenSize();
+        }else{
+
             local lastID = e.parents[e.parents.len()-1];
-           
+
             local parent = findById(lastID);
-             
+
             wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
         }
-      
-        
+
+
         e.Size.X = (w*wrapper.X);
         e.Size.Y = (h*wrapper.Y);
         e.updateBorders();
 
     }
 
-    function align(e) { 
+    function align(e) {
         if (e.align != null){
             local a = e.align.tolower();
             local t = typeof this;
             local isLabel = t == "GUILabel";
             local sizeX = isLabel ? e.TextSize.X : e.Size.X;
-            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y; 
-            local wrapper = null; 
+            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y;
+            local wrapper = null;
             local offset = 0;
 
              if (e.rawin("data") && e.data.rawin("offset")){
                 offset = e.data.offset;
             }
-            if (e.parents.len() == 0){  
-                wrapper = GUI.GetScreenSize(); 
-            }else{ 
-                
+            if (e.parents.len() == 0){
+                wrapper = GUI.GetScreenSize();
+            }else{
+
                 local lastID = e.parents[e.parents.len()-1];
                 local parent = findById(lastID);
-                
-                wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size; 
+
+                wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
             }
-   
-         
+
+
             if (a == "top_right"){
-                
+
                 e.Position.Y = 0;
                 e.Position.X = wrapper.X - sizeX;
                 e.Position.X += offset;
-               
+
             } else if (a == "top_left"){
                 e.Position.Y = 0;
                 e.Position.X = 0;
@@ -269,7 +269,7 @@ class UI  {
             } else if (a == "bottom_right"){
                 e.Position.Y = wrapper.Y - sizeY;
                 e.Position.X = wrapper.X - sizeX;
-               
+
             } else if (a == "bottom_left"){
                 e.Position.Y =  wrapper.Y - sizeY;
                 e.Position.X = 0;
@@ -300,7 +300,7 @@ class UI  {
                 e.Position.X = (wrapper.X /25);
             } else if (a == "hud_bottom"){
                 e.Position.Y =  wrapper.Y -(wrapper.Y / 1.26);
-                e.Position.X =(wrapper.X /1.18); 
+                e.Position.X =(wrapper.X /1.18);
             }  else if (a == "hud_top"){
                 e.Position.Y =  wrapper.Y -(wrapper.Y / 1.0290);
                 e.Position.X =(wrapper.X /1.18);
@@ -308,21 +308,21 @@ class UI  {
                 e.Position.Y =  wrapper.Y -(wrapper.Y / 1.0712);
                 e.Position.X = wrapper.X - (wrapper.X /20);
             }
-           
-             
+
+
         }
-          
-    }      
-    
+
+    }
+
     function shift(e){
         if (e.move != null){
-            local s = e.move; 
-          
+            local s = e.move;
+
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
                     if (isString){
-                            
+
                         local wrapper =  e.getWrapper();
                         if (!e.metadata.rawin("movedPos")){
                            e.metadata["movedPos"] <- [];
@@ -333,41 +333,41 @@ class UI  {
                             e.metadata.movedPos.push("left");
                             local percent = this.removePercent(s.left).tofloat();
                             e.Position.X -= ( wrapper.X * percent / 100 ).tofloat();
-                            
+
                         }
-                         
-                     
+
+
                         if (e.metadata.movedPos.len() == 0){
-                           e.realign(); 
+                           e.realign();
                         }
-                       
+
 
                     }else{
                         e.Position.X =  e.Position.X - s.left;
                     }
                 }
                 if (s.rawin("right")){
-                      
+
                     local isString = typeof s.right == "string";
                      if (isString){
-                         
+
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
                             e.metadata["movedPos"] <- [];
-                        } 
+                        }
                         if (e.metadata.movedPos.find("right") != null){
                             return;
                         }else{
                             e.metadata.movedPos.push("right");
                             local percent = this.removePercent(s.right).tofloat();
                             e.Position.X += ( wrapper.X * percent / 100 ).tofloat();
-                            
+
                         }
-                        
+
                          if (e.metadata.movedPos.len() == 0){
-                            e.realign(); 
+                            e.realign();
                         }
-                       
+
 
                     } else {
                         e.Position.X =  e.Position.X + s.right;
@@ -387,11 +387,11 @@ class UI  {
                             local percent = this.removePercent(s.up).tofloat();
                             e.Position.Y -= ( wrapper.Y * percent / 100 ).tofloat();
                         }
-                        
+
                         if (e.metadata.movedPos.len() == 0){
-                            e.realign(); 
+                            e.realign();
                         }
-                       
+
 
                     } else {
                         e.Position.Y =  e.Position.Y - s.up;
@@ -399,7 +399,7 @@ class UI  {
                 }
                 if (s.rawin("down")){
                     local isString = typeof s.down == "string";
-                   
+
                      if (isString){
                         local wrapper =  e.getWrapper();
                          if (!e.metadata.rawin("movedPos")){
@@ -412,11 +412,11 @@ class UI  {
                             local percent = (this.removePercent(s.down).tofloat() / 100).tofloat();
                             e.Position.Y += ( wrapper.Y * percent ).tofloat();
                         }
-                        
+
                         if (e.metadata.movedPos.len() == 0){
-                            e.realign();               
-                        }          
-                        
+                            e.realign();
+                        }
+
 
 
                     } else {
@@ -430,45 +430,45 @@ class UI  {
     function Cursor(status) {
         if (status=="on" || status =="ON"){
             GUI.SetMouseEnabled(true);
-        }else{ 
-            GUI.SetMouseEnabled(false); 
+        }else{
+            GUI.SetMouseEnabled(false);
         }
-    }      
- 
-    function addToDeleteQueue(e) { 
+    }
+
+    function addToDeleteQueue(e) {
         local id= this.cleanID(e.id);
         if (idsMetadata.rawin(id)){
-            delete idsMetadata[id]; 
-            //e = null;                  
-            toDelete.push(e);   
+            delete idsMetadata[id];
+            //e = null;
+            toDelete.push(e);
         }
-      
-        
-    } 
 
- 
+
+    }
+
+
     function getChildren(parent){
-        if (parent.id != null && parent.id != ""){ 
-          
+        if (parent.id != null && parent.id != ""){
+
             local arr = [];
-            foreach(i,name in parent.childLists ) {   
+            foreach(i,name in parent.childLists ) {
                 local list = this.lists[this.names.find(name)];
-                
+
                 foreach (el in list) {
                     if (el.parents.find(parent.id) !=null){
-                          
-                        arr.push(el);  
+
+                        arr.push(el);
                     }
                 }
             }
-         
+
             return arr;
         }
         return [];
     }
      function bSearch(list, index, low, high) {
         local idx = null;
-      
+
         while( low <= high) {
             local mid = (low+high)/2;
 
@@ -476,65 +476,65 @@ class UI  {
                 low = mid + 1;
             } else if (list[mid].metadata.index > index ){
                 high = mid - 1;
-            } else if (list[mid].metadata.index == index ) { 
-                idx = mid; 
-                break; 
-            } 
+            } else if (list[mid].metadata.index == index ) {
+                idx = mid;
+                break;
+            }
         }
         return idx;
-       
+
     }
 
     /*function removeChildren(parent){
-        if (parent.id != null && parent.id != ""){     
-            foreach(i,name in parent.childLists ) {   
+        if (parent.id != null && parent.id != ""){
+            foreach(i,name in parent.childLists ) {
                 local list = this.lists[this.names.find(name)];
-                   
+
                 local sizeBefore = list.len();
                local newList = list.filter(function(idx,e) {
-                   
-                   local UI = ::getroottable().UI; 
+
+                   local UI = ::getroottable().UI;
                    local t = typeof e;
                     if (t == "instance"){
-                        return true; 
+                        return true;
                     }
-                  
+
                     local isChildren =  e.parents.find(parent.id) != null;
-                   
-                    if (isChildren){ 
+
+                    if (isChildren){
                        e.removeChildren();
                        UI.addToDeleteQueue(e);
                        return false;
                     }
                     return true;
-                }); 
-                
+                });
+
                   local deleted = sizeBefore > newList.len();
-                  
+
                   if (deleted) {
                       this.lists[this.names.find(name)] =  newList;
                   }
             }
         }
-     
+
     }*/
 
     function removeChildren(parent, toBeRemoved){
-        if (parent.id != null && parent.id != ""){     
+        if (parent.id != null && parent.id != ""){
             foreach(i,name in parent.childLists ) {
                 local listIdx = this.names.find(name);
                 local list = this.lists[listIdx];
-                   
+
                 foreach(idx, e in list) {
-                    local UI = ::getroottable().UI; 
+                    local UI = ::getroottable().UI;
                     local t = typeof e;
 
                     if (t == "instance"){
                         continue;
                     }
-                    
+
                     local isChildren =  e.parents.find(parent.id) != null;
-                    
+
                     if (isChildren){
                         e.removeChildren(true, toBeRemoved);
                         UI.addToDeleteQueue(e);
@@ -548,35 +548,35 @@ class UI  {
     }
 
     function findByID(id, list)    {
-     
+
         if (id == null){
             return null;
-        } 
-        foreach(i,e in list ) { 
+        }
+        foreach(i,e in list ) {
            if (e.id == id){
                return e;
-           } 
+           }
         }
-        return null; 
+        return null;
     }
 
-   
-    function findById(id) { 
+
+    function findById(id) {
         local newid = this.cleanID(id);
-        try { 
-            local listName =this.idsMetadata[newid].list; 
-           
+        try {
+            local listName =this.idsMetadata[newid].list;
+
             local list = this.lists[names.find(listName)];
 
             local idx = this.bSearch(list, idsMetadata[newid].index, 0, list.len()-1);
-            
+
             if (idx == null){
                 return null;
             }
-            local e =  list[idx]; 
+            local e =  list[idx];
            return e;
-           
-          
+
+
         }catch (ex){
            // Console.Print(ex);
            //Console.Print("FAILED TO FIND "+newid);
@@ -584,19 +584,19 @@ class UI  {
         }
     }
 
-   
- 
-    function deleteByID(id,list, listName)    { 
-       
-        local sizeBefore = list.len(); 
-        local newList = list.filter(function(idx,el) { 
-            
+
+
+    function deleteByID(id,list, listName)    {
+
+        local sizeBefore = list.len();
+        local newList = list.filter(function(idx,el) {
+
             local foundGUIEl = id == el.id;
             local foundInstance = (typeof el == "instance"  && el.id == id);
             if (foundGUIEl || foundInstance){
 
                 if (foundGUIEl) {
-                    el.Detach(); 
+                    el.Detach();
                 }
                 ::getroottable().UI.addToDeleteQueue(el);
                 return false;
@@ -604,12 +604,12 @@ class UI  {
             return true;
         });
         local deleted = sizeBefore > newList.len();
-       
+
         if (deleted){
             return newList ;
-        } 
-        return null; 
-          
+        }
+        return null;
+
     }
 
 
@@ -619,7 +619,7 @@ class UI  {
                 o.kp = null;
                 return;
             }
-        }        
+        }
         kps.push(o);
     }
 
@@ -634,47 +634,47 @@ class UI  {
         }
         if (idx !=null){
             kps.remove(idx);
-        }        
+        }
     }
 
-   
- 
+
+
     function showTooltip(el){
         if (el.rawin("tooltip") && el.tooltip != null){
             if (el.tooltipVisible == null) {
                 el.tooltipVisible = false;
-            } 
+            }
             if (!el.tooltipVisible) {
-                local mousePos =GUI.GetMousePos(); 
+                local mousePos =GUI.GetMousePos();
                 local col = null;
-               
+
                 local x = el.Position.X;
                 local y = el.Position.Y;
                  local initialPos = VectorScreen(x,y);
 
                 if (el.hasParents()){
-                    
+
                       local parent = UI.Canvas(el.getFirstParent());
-                   
-                    el.Detach(); 
+
+                    el.Detach();
                     x = el.Position.X;
                     y = el.Position.Y;
-                  
+
                     if (parent == null){
                         parent = UI.Window(el.getFirstParent());
                     }
-                   
-                   
+
+
                     parent.AddChild(el);
-                    el.Position = initialPos; 
-                    
-             
+                    el.Position = initialPos;
+
+
                 }
 
                 if (mousePos != null) {
 
-                    local l = null ; 
-                    local pos =null; 
+                    local l = null ;
+                    local pos =null;
                     if (typeof el.tooltip == "string"){
                         col = Colour(0,0,0,150);
                         local exists = idExists(el.id+"::tooltip::label");
@@ -692,77 +692,77 @@ class UI  {
                                 local dir = el.tooltip.direction;
                                 if (dir == "up"){
                                     y -= el.Size.Y+10;
-                                
+
                                 } else if (dir == "down"){
                                     y +=el.Size.Y+10;
-                                
+
                                 }  else if (dir == "right"){
                                     x += el.Size.X+10;
-                                
+
                                 } else if (dir == "left"){
                                     x -= el.Size.X-10;
-                                
+
                                 }
                             }
                         }
-                    }  
-                      pos =  VectorScreen(x, y);   
+                    }
+                      pos =  VectorScreen(x, y);
                     local c = null;
                     if (idExists(el.id+"::tooltip")){
                        c = UI.Canvas(el.id+"::tooltip");
                     }else {
-                        c = UI.Canvas({ 
+                        c = UI.Canvas({
                             id = el.id+"::tooltip",
                             Size = el.tooltip.rawin("Size") ? el.tooltip.Size : VectorScreen(l.Size.X+8, l.Size.Y+8),
-                            Color= col  
+                            Color= col
                             Position = pos
                             autoResize = el.tooltip.rawin("Size") ? false: true
-                        }); 
+                        });
                     }
-                     
-                    
-                    if (l != null){ 
+
+
+                    if (l != null){
                         c.add(l, false);
                     }
                      el.tooltipVisible = true;
-                    
+
                     if (el.tooltip.rawin("extraLabels")){
                         local addY=0;
                         foreach(i,ce in el.tooltip.extraLabels ) {
                             local cid = Script.GetTicks()+""+i;
                             ce["id"] <- cid;
                             local exl =UI.Label(ce);
-                            c.add(exl, false);  
+                            c.add(exl, false);
                             addY += exl.TextSize.Y;
                         }
                         c.Size.Y += addY;
                     }
-                     
+
                     if (el.tooltip.rawin("border")){
                         c.addBorders(el.tooltip.border);
                     }
 
 
-                   
-                  
+
+
                 }
-            } 
-        }    
-    } 
- 
-  
+            }
+        }
+    }
+
+
     function findByPreset(name) {
         local els = [];
-       
-        foreach(i,list in lists ) { 
-           foreach(c,e in list ) { 
+
+        foreach(i,list in lists ) {
+           foreach(c,e in list ) {
                 if (e.presets != null && e.presets.find(name) !=null) {
                     els.push(e);
                 }
             }
         }
-        return els; 
-    } 
+        return els;
+    }
 
     function cleanID(id) {
         local newid = "";
@@ -773,48 +773,48 @@ class UI  {
             }
         }
         } catch(ex){
-         
-         
+
+
         }
         return newid;
     }
- 
+
     function removePercent(p){
         if (p.find("%") != null){
             return split(p, "%")[0];
         }
         return p;
-    } 
+    }
 
 
 
       function DeleteByID(id){
-        local e = this.findById(id); 
+        local e = this.findById(id);
         if (e != null ) {
                 e.removeChildren();
         }
         local newid = this.cleanID(id);
-        if (this.idsMetadata.rawin(newid)) { 
+        if (this.idsMetadata.rawin(newid)) {
 
             local listName =this.idsMetadata[newid].list;
-            local list = this.lists[names.find(listName)]; 
-                
-                local newList =  this.deleteByID(id, list, listName); 
+            local list = this.lists[names.find(listName)];
+
+                local newList =  this.deleteByID(id, list, listName);
                 if (newList != null){
                     this.lists[names.find(listName)] = newList;
-                }  
+                }
             }
-        } 
- 
- 
+        }
+
+
 
     function mergeArray(firstArray, newElement) {
         local arr = [];
         foreach (idx, e in firstArray) {
             if (e != null){
-                arr.push(e); 
+                arr.push(e);
             }
-        }   
+        }
         arr.push(newElement);
         return arr;
     }
@@ -823,117 +823,117 @@ class UI  {
        if (debug){
            Console.Print(msg);
        }
-       
+
    }
 
-  
+
     function idIsValid(obj){
         if (obj.rawin("id")){
-            if (obj.id == null){  
-               
-                return false; 
+            if (obj.id == null){
+
+                return false;
             }
             local exists = idExists(obj.id);
             if (exists){
                 Console.Print("[ERROR] ----> "+obj.id +" already exists!");
             }
             return !exists;
-           
+
         }
         return false;
     }
- 
-    function idExists(id){ 
+
+    function idExists(id){
         try {
             return this.idsMetadata.rawin(this.cleanID(id));
         } catch (e){
-           
+
         }
-        
+
     }
 
-    function applyElementProps(element, obj){   
-        
+    function applyElementProps(element, obj){
 
-        if (obj != null) { 
-            if (!obj.rawin("id") || obj.id == null){    
+
+        if (obj != null) {
+            if (!obj.rawin("id") || obj.id == null){
                 obj["id"] <- Script.GetTicks() + typeof element;
-            } 
+            }
 
-            element.UI = ::getroottable().UI; 
-            if (this.idIsValid(obj)){  
+            element.UI = ::getroottable().UI;
+            if (this.idIsValid(obj)){
                 foreach (prop in this.defaultTableProps) {
                     element[prop] =  {};
-                } 
+                }
                 foreach (prop in this.defaultBooleanProps) {
                     element[prop] =  false;
                 }
                 foreach (prop in this.defaultArrayProps) {
                     element[prop] =  [];
                 }
-              
+
                 //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
                 if (obj.rawin("flags")){
-                    element.AddFlags(obj.flags); 
+                    element.AddFlags(obj.flags);
                 }
                 //set text first to prevent mgui bug with .Text reseting font size
                  if (obj.rawin("Text")){
-                    element.Text = obj.Text; 
+                    element.Text = obj.Text;
                 }
                 foreach(i,e in obj ) {
-                    try {  
-                      
+                    try {
+
                         if (i != "flags" && i != "Flags" && i != "Text"){
                             if (i == "fontFlags"){
                                 element.FontFlags = obj[i];
                             } else {
-                                element[i] =obj[i]; 
+                                element[i] =obj[i];
                             }
-                           
-                        }  
+
+                        }
                     } catch (e){
-                     
-                     
+
+
                     }
                 }
                 if (element.rawin("contextMenu") || element.rawin("tooltip")) {
                     element.AddFlags(GUI_FLAG_MOUSECTRL);
                 }
-                 if (obj.rawin("RelativeSize")){ 
-                    this.applyRelativeSize(element); 
+                 if (obj.rawin("RelativeSize")){
+                    this.applyRelativeSize(element);
                 }
-                  element.metadata = { 
+                  element.metadata = {
                     ORIGINAL_POS = VectorScreen(element.Position.X, element.Position.Y)
                     list = ""
                     index = null
                     originalObject = null
-                }; 
-                
-                
-                this.align(element); 
+                };
+
+
+                this.align(element);
                 if (obj.rawin("children") ){
                     this.shift(element);
                 }
                 if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
-                    element.RemoveFlags(obj.RemoveFlags); 
+                    element.RemoveFlags(obj.RemoveFlags);
                 }
-                
+
             }else{
                 //Console.Print("ID NOT VALID "+ obj.id);
-          
-                
+
+
             }
         }
 
        return element;
-    }  
+    }
 
-    function Delete(e) { 
-        local t = typeof e; 
-        
+    function Delete(e) {
+        local t = typeof e;
+
         this.DeleteByID(e.id);
-      
-    } 
+
+    }
 
     function postConstruct(b){
         if (b.rawin("postConstruct")){
@@ -942,22 +942,22 @@ class UI  {
             }
         }
     }
-     
-    function Button(o){ 
+
+    function Button(o){
         if (typeof o == "string") {
             return this.fetch.button(o);
-        }        
-       
+        }
+
         local b = this.applyElementProps(GUIButton(), o);
         b.metadata.list = "buttons";
         b.metadata.index = this.listsNumeration.buttons;
 
-        if ( !o.rawin("Size") ){ 
-            
+        if ( !o.rawin("Size") ){
+
             b.Size = VectorScreen(50,25);
         }
-       
-        lists[names.find("buttons")].push(b); 
+
+        lists[names.find("buttons")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list , index = this.listsNumeration.buttons };
         this.listsNumeration.buttons++;
          if (o.rawin("bindTo")){
@@ -973,9 +973,10 @@ class UI  {
             this.applyBorder(o.border, b);
         }
         this.postConstruct(b);
+        this.apply3DProps(o,b);
         debug(b);
-        return b; 
-    } 
+        return b;
+    }
 
     function debug(b){
          if (showDebugInfo){
@@ -984,11 +985,11 @@ class UI  {
             }else if (b.id.find("decui:debug")==null){
                 UI.incData(b.metadata.list);
             }
-            
+
         }
     }
 
-    function Menu(o){  
+    function Menu(o){
         if (typeof o == "string") {
             local menu = this.fetch.canvas(o);
             if (menu != null) {
@@ -996,16 +997,17 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = OptionsMenu(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
         return c;
     }
 
-    function ComboBox(o){  
+    function ComboBox(o){
         if (typeof o == "string") {
             local combo = this.fetch.canvas(o);
             if (combo != null) {
@@ -1013,16 +1015,17 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = Combobox(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
         return c;
     }
 
-    function Pagination (o){  
+    function Pagination (o){
         if (typeof o == "string") {
             local pagination = this.fetch.canvas(o);
             if (slider != null) {
@@ -1030,15 +1033,16 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = Paginations (o);
         this.addToListAndIncNumeration(c);
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
         return c;
     }
 
-    function Slider (o){  
+    function Slider (o){
         if (typeof o == "string") {
             local slider = this.fetch.canvas(o);
             if (slider != null) {
@@ -1046,15 +1050,16 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = Sliders (o);
         this.addToListAndIncNumeration(c);
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
         return c;
     }
 
-     function Popup(o){   
+     function Popup(o){
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
             if (p != null) {
@@ -1062,16 +1067,17 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = PopUp(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
         return c;
     }
 
-    function Notification(o){   
+    function Notification(o){
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
             if (p != null) {
@@ -1079,15 +1085,16 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = UINotification(o);
         this.addToListAndIncNumeration(c);
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
 
         return c;
     }
 
-      function Circle(o){   
+      function Circle(o){
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
             if (p != null) {
@@ -1095,16 +1102,17 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = CanvasCircle(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
 
         return c;
     }
-     function DataTable(o){   
+     function DataTable(o){
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
             if (p != null) {
@@ -1112,19 +1120,20 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = Table(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
 
         return c;
-    } 
+    }
 
-     function Grid(o){   
-        if (typeof o == "string") { 
-               
+     function Grid(o){
+        if (typeof o == "string") {
+
             local p = this.fetch.canvas(o);
 
             if (p != null) {
@@ -1132,32 +1141,34 @@ class UI  {
             } else{
                 return null;
             }
-        }         
+        }
         local c = UIGrid(o);
         this.addToListAndIncNumeration(c);
+        this.apply3DProps(o,c.getCanvas());
+
         this.postConstruct(o);
         return c;
     }
 
     function addToListAndIncNumeration(c){
-        
+
         local list = c.metadata.list;
         c.metadata.index = this.listsNumeration[list];
         lists[names.find(list)].push(c);
-       
-        this.listsNumeration[list]++;  
+
+        this.listsNumeration[list]++;
          if (showDebugInfo){
              if (!excludeDebugIds){
                  UI.incData(list);
              }else if (c.id.find("decui:debug")==null) {
                   UI.incData(list);
-                 
+
              }
-            
+
         }
     }
 
-    function TabView(o){   
+    function TabView(o){
         if (typeof o == "string") {
             local p = this.fetch.canvas(o);
             if (p != null) {
@@ -1165,29 +1176,30 @@ class UI  {
             }else{
                 return null;
             }
-        }         
+        }
         local c = Tabview(o);
         this.addToListAndIncNumeration(c);
         c.resetMoves();
-        
+
         c.shiftPos();
+        this.apply3DProps(o,c.getCanvas());
         this.postConstruct(o);
 
-        return c; 
-    } 
- 
+        return c;
+    }
 
-    function Label(o){ 
-       
-        if (typeof o == "string") { 
-            return this.fetch.label(o); 
-        } 
+
+    function Label(o){
+
+        if (typeof o == "string") {
+            return this.fetch.label(o);
+        }
 
         if (!o.rawin("metadata")){
             o["metadata"] <-  { labelConstructor = "flags" } ;
         }else{
             o.metadata["labelConstructor"] <- "flags";
-        }           
+        }
         local l = o.metadata.labelConstructor == "flags" ? GUILabel(VectorScreen(0,0), Colour(0,0,0), "", 0): GUILabel();
         local b = this.applyElementProps(l,o );
         b.metadata.list = "labels";
@@ -1197,10 +1209,10 @@ class UI  {
         b.metadata["lines"] <- [];
         b.metadata["originalText"] <- o.Text;
 
-        lists[names.find("labels")].push(b); 
-        
- 
-        idsMetadata[this.cleanID(o.id)] <- { 
+        lists[names.find("labels")].push(b);
+
+
+        idsMetadata[this.cleanID(o.id)] <- {
             list = b.metadata.list,
             index = this.listsNumeration.labels
          };
@@ -1214,28 +1226,29 @@ class UI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+         this.apply3DProps(o,b);
         debug(b);
 
-        
-        return b; 
+
+        return b;
     }
      function Editbox(o){
         if (typeof o == "string") {
             return this.fetch.editbox(o);
-        }           
+        }
         local b = this.applyElementProps(GUIEditbox(VectorScreen(0,0), VectorScreen(0,0), Colour(255,255,255)), o);
         b.metadata.list = "editboxes";
         b.metadata.index = this.listsNumeration.editboxes;
 
         lists[names.find("editboxes")].push(b);
-        idsMetadata[this.cleanID(o.id)] <- { 
+        idsMetadata[this.cleanID(o.id)] <- {
             list = b.metadata.list,
             index = this.listsNumeration.editboxes
-        }; 
+        };
          this.listsNumeration.editboxes++;
 
-         
+
         this.postConstruct(b);
         if (o.rawin("bindTo")){
              this.store.attachIDAndType(o.bindTo,o.id, "GUIEditbox");
@@ -1244,10 +1257,11 @@ class UI  {
          if (b.getParent() == null){
              b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+         this.apply3DProps(o,b);
         debug(b);
         return b;
-    } 
+    }
 
     function pushData(key, value, dataUpdateOnly=false) {
         this.setData(key, value, "push", dataUpdateOnly);
@@ -1327,27 +1341,27 @@ class UI  {
 
      function Canvas(o){
         if (typeof o == "string") {
-            return this.fetch.canvas(o); 
+            return this.fetch.canvas(o);
         }
-       
+
 
         local b = this.applyElementProps(GUICanvas(), o);
-        
+
         b.metadata.list = "canvas";
         b.metadata.index = this.listsNumeration.canvas;
         lists[names.find("canvas")].push(b);
-        idsMetadata[this.cleanID(o.id)] <- { 
+        idsMetadata[this.cleanID(o.id)] <- {
             list = b.metadata.list,
             index = this.listsNumeration.canvas
         };
 
         this.listsNumeration.canvas++;
-        
-        if (o.rawin("children")  && o.children != null){ 
+
+        if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
                     local className = c.className;
- 
+
                     if (className == "InputGroup"){
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
@@ -1355,23 +1369,23 @@ class UI  {
                        b.add(c.build(b), false);
                     } else if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
-                    } else{ 
+                    } else{
                         local t= typeof c;
                         local el = t == "instance" ? UI.Canvas(c.id) : c ;
                           local comp =  ["TabView", "Grid", "DataTable"]
                          local processChildren = comp.find(className) == null;
-                        
-                        b.attachChild(el, processChildren); 
+
+                        b.attachChild(el, processChildren);
                     }
- 
+
                 }else {
-                    b.add(c, false); 
+                    b.add(c, false);
 
                 }
             }
-        } 
+        }
 
-              
+
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
@@ -1399,18 +1413,19 @@ class UI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
-        
-      
+        b.shiftPos();
+
+
          if (b.autoResize){
             b.realign();
             b.resetMoves();
             b.shiftPos();
-        }          
-        
+        }
+
         if (o.rawin("border") ){
             this.applyBorder(o.border, b);
         }
+         this.apply3DProps(o,b);
         this.postConstruct(b);
         debug(b);
         return b;
@@ -1418,14 +1433,14 @@ class UI  {
     function Checkbox(o){
         if (typeof o == "string") {
             return this.fetch.checkbox(o);
-        }          
+        }
         local b = this.applyElementProps(GUICheckbox(), o);
         b.metadata.list = "checkboxes";
         b.metadata.index = this.listsNumeration.checkboxes;
         lists[names.find("checkboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.checkboxes };
         this.listsNumeration.checkboxes++;
-        
+
          this.postConstruct(b);
 
           if (o.rawin("bindTo")){
@@ -1440,14 +1455,15 @@ class UI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+         this.apply3DProps(o,b);
         debug(b);
-        return b; 
+        return b;
     }
       function Listbox(o){
         if (typeof o == "string") {
             return this.fetch.listbox(o);
-        }           
+        }
         local b = this.applyElementProps(GUIListbox(), o);
         b.metadata.list = "listboxes";
         b.metadata.index = this.listsNumeration.listboxes;
@@ -1458,28 +1474,29 @@ class UI  {
             o["options"] <- val;
         }
         if (o.rawin("options") && o.options != null) {
-            
+
             foreach (i,item in o.options) {
                 b.AddItem(item);
             }
         }
-        
+
          lists[names.find("listboxes")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.listboxes };
         this.listsNumeration.listboxes++;
-        
+
         this.postConstruct(b);
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+         this.apply3DProps(o,b);
         debug(b);
         return b;
     }
       function Memobox(o){
         if (typeof o == "string") {
             return this.fetch.memobox(o);
-        }          
+        }
         local b = this.applyElementProps(GUIMemobox(), o);
         if (o.rawin("bindTo")){
             this.store.attachIDAndType(o.bindTo,o.id, "GUIMemobox");
@@ -1502,19 +1519,20 @@ class UI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+        this.apply3DProps(o,b);
         debug(b);
         return b;
     }
-       function ProgressBar(o){ 
+       function ProgressBar(o){
         if (typeof o == "string") {
             return this.fetch.progressBar(o);
-        }           
+        }
         local b = this.applyElementProps(GUIProgressBar(), o);
           b.metadata.list = "progbars";
         b.metadata.index = this.listsNumeration.progbars;
-       
-       
+
+
         lists[names.find("progbars")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list, index = this.listsNumeration.progbars };
         this.listsNumeration.progbars++;
@@ -1528,8 +1546,9 @@ class UI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
-         this.postConstruct(b);
+        b.shiftPos();
+        this.apply3DProps(o,b);
+        this.postConstruct(b);
         debug(b);
 
         return b;
@@ -1537,7 +1556,7 @@ class UI  {
        function Scrollbar(o){
         if (typeof o == "string") {
             return this.fetch.scrollbar(o);
-        } 
+        }
         local b = this.applyElementProps(GUIScrollbar(), o);
          b.metadata.list = "scrollbars";
         b.metadata.index = this.listsNumeration.scrollbars;
@@ -1548,12 +1567,13 @@ class UI  {
            if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos(); 
+        b.shiftPos();
+         this.apply3DProps(o,b);
         this.postConstruct(b);
 
        debug(b);
 
-        return b; 
+        return b;
     }
     function Sprite(o){
         if (typeof o == "string") {
@@ -1564,19 +1584,19 @@ class UI  {
 
            b.metadata.list = "sprites";
         b.metadata.index = this.listsNumeration.sprites;
-        if (o.rawin("file")){  
+        if (o.rawin("file")){
             b.SetTexture(o.file);
         }
-        
+
          lists[names.find("sprites")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.sprites  };
         this.listsNumeration.sprites++;
 
-        if (o.rawin("children")  && o.children != null){ 
+        if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
                     local className = c.className;
- 
+
                     if (className == "InputGroup"){
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
@@ -1584,14 +1604,14 @@ class UI  {
                        b.add(c.build(b), false);
                     } else if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
-                    } else{ 
+                    } else{
                         local t= typeof c;
-                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c ); 
+                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c );
                     }
 
                 }else {
                     b.add(c, false);
-                  
+
                 }
             }
         }
@@ -1623,9 +1643,9 @@ class UI  {
             if (b.getParent() == null){
                 b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
             }
-            b.shiftPos(); 
+            b.shiftPos();
         }
-     
+
          if (b.autoResize){
              b.realign();
               b.resetMoves();
@@ -1634,6 +1654,7 @@ class UI  {
         if (o.rawin("border") ){
             this.applyBorder(o.border, b);
         }
+        this.apply3DProps(o,b);
         this.postConstruct(b);
         debug(b);
 
@@ -1641,21 +1662,21 @@ class UI  {
     }
      function Window(o){
         if (typeof o == "string") {
-            return this.fetch.window(o); 
-        } 
+            return this.fetch.window(o);
+        }
         local b = this.applyElementProps(GUIWindow(), o);
-       
+
         b.metadata.list = "windows";
         b.metadata.index = this.listsNumeration.windows;
 
         lists[names.find("windows")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
          this.listsNumeration.windows++;
-          if (o.rawin("children")  && o.children != null){ 
+          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                 if (c.rawin("className")){
                     local className = c.className;
- 
+
                     if (className == "InputGroup"){
                       c.attachParent(b);
                     }else if (className == "GroupRow"){
@@ -1663,22 +1684,22 @@ class UI  {
                        b.add(c.build(b), false);
                     } else if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
-                    } else{ 
+                    } else{
                         local t= typeof c;
                         local el = t == "instance" ? UI.Canvas(c.id) : c ;
                          local comp =  ["TabView", "Grid", "DataTable"]
                          local processChildren = comp.find(className) == null;;
-                        b.attachChild(el, processChildren); 
+                        b.attachChild(el, processChildren);
                     }
 
                 }else {
                     b.add(c, false);
-                  
+
                 }
             }
         }
 
-              
+
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
                  if (!c.rawin("className")) {
@@ -1700,34 +1721,42 @@ class UI  {
                     }
                     ccanvas.realign();
                     ccanvas.shiftPos();
-                    
+
                 }
             }
         }else{
             if (b.getParent() == null){
                 b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
             }
-            b.shiftPos(); 
+            b.shiftPos();
         }
 
-        
+
          if (b.autoResize){
              b.realign();
               b.resetMoves();
              b.shiftPos();
         }
 
-       
-         if (o.rawin("Transform3D")){
-            local pos = o.Transform3D.rawin("Position3D") ? o.Transform3D.Position3D : Vector(0,0,0);
-            local rot = o.Transform3D.rawin("Rotation3D") ? o.Transform3D.Rotation3D : Vector(-1.6, 0.0, 0);
-            local size = o.Transform3D.rawin("Size3D") ? o.Transform3D.Size3D : Vector(2, 2, 0.0);
-            b.Set3DTransform(pos, rot, size);
-        }
+
+        this.apply3DProps(o,b);
 
         this.postConstruct(b);
         debug(b);
         return b;
     }
-   
+
+    function apply3DProps(o, element) {
+         if (o.rawin("Transform3D")){
+
+            element.AddFlags(GUI_FLAG_3D_ENTITY);
+
+            local pos = o.Transform3D.rawin("Position3D") ? o.Transform3D.Position3D : Vector(0,0,0);
+            local rot = o.Transform3D.rawin("Rotation3D") ? o.Transform3D.Rotation3D : Vector(-1.6, 0.0, 0);
+            local size = o.Transform3D.rawin("Size3D") ? o.Transform3D.Size3D : Vector(2, 2, 0.0);
+            element.Set3DTransform(pos, rot, size);
+        }
+
+    }
+
 }
