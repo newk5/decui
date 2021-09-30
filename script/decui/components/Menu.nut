@@ -1,5 +1,5 @@
 class OptionsMenu extends Component {
-    
+
     className="Menu";
     id = null;
     Size = null;
@@ -8,7 +8,7 @@ class OptionsMenu extends Component {
     align =null;
     move= null;
     padding = null;
-    
+
     layout = null;
     optionsSize = null;
 
@@ -66,8 +66,8 @@ class OptionsMenu extends Component {
             align ="center"
             move = {up =3}
         }
-        
-      
+
+
         this.RelativeSize =  this.layout == "vertical" ? ["25%","80%"] : ["100%","25%"] ;
         this.align = this.layout == "vertical" ? "bottom_left" : "center";
         this.options = [];
@@ -78,6 +78,7 @@ class OptionsMenu extends Component {
         this.multipleSelections = false;
 
         if (o.rawin("onClick")){
+            
             this.onClick= o.onClick;
         }
 
@@ -104,7 +105,7 @@ class OptionsMenu extends Component {
                 if (!opt.rawin(prop)) {
                     opt[prop] <- this.optionsStyle[prop];
                 }
-               
+
             }
             this.optionsStyle = opt;
         }
@@ -116,18 +117,18 @@ class OptionsMenu extends Component {
                 if (!opt.rawin(prop)) {
                     opt[prop] <- this.labelStyle[prop];
                 }
-               
+
             }
             this.labelStyle = opt;
         }
-      
+
          if (o.rawin("backgroundColour")){
             this.backgroundColour = o.backgroundColour;
-        } 
+        }
         if (o.rawin("options")){
             this.options = o.options;
         }
-       
+
         if (o.rawin("RelativeSize")){
             this.RelativeSize = o.RelativeSize;
         }
@@ -143,13 +144,13 @@ class OptionsMenu extends Component {
         if (o.rawin("optionsSize")){
             this.optionsSize = o.optionsSize;
         }
-        
-      
+
+
         this.build();
         base.constructor(this.id,o);
         this.metadata.list = "menus";
-        
-        
+
+
     }
 
     function applyStyle(canvas, label, style, defaults= false) {
@@ -158,16 +159,16 @@ class OptionsMenu extends Component {
         }
 
         if (defaults){
-           
+
              foreach (prop in this.labelProps) {
                 if (style.rawin(prop)) {
                      label[prop] =  style[prop];
                 }else{
-                    
+
                     local val =this.labelStyle[prop];
                     label[prop] = val;
-                    
-                   
+
+
                 }
             }
         } else if (style.rawin("label")){
@@ -179,19 +180,19 @@ class OptionsMenu extends Component {
                     label[prop] =    this.labelStyle[prop];
                 }
             }
-            
+
         }
         if (style.rawin("border") && style.border != null){
             if (this.isFullBorder(style.border)){
                 canvas.addBorders(style.border);
-            } 
+            }
             if (style.border.rawin("left")){
                 canvas.addLeftBorder(style.border.left);
-            } 
+            }
             if (style.border.rawin("bottom")){
                 canvas.addBottomBorder(style.border.bottom);
-            } 
-            if (style.border.rawin("top")){  
+            }
+            if (style.border.rawin("top")){
                 canvas.addTopBorder(style.border.top);
             }
             if (style.border.rawin("right")){
@@ -206,16 +207,16 @@ class OptionsMenu extends Component {
 
     function applyHoverOver(canvas, label, option) {
 
-        if (option.rawin("style") && option.style.rawin("onHover")){ 
-            
+        if (option.rawin("style") && option.style.rawin("onHover")){
+
             local style = option.style.onHover;
             this.applyStyle(canvas, label, style);
-          
+
         } else {
             this.applyStyle(canvas, label, this.optionsStyle.onHover);
             this.applyStyle(canvas, label, this.labelStyle.onHover, true);
-        }  
-       
+        }
+
     }
 
       function applyHoverOut(canvas, label, option) {
@@ -223,8 +224,8 @@ class OptionsMenu extends Component {
             return;
         }
         if (option.rawin("style")){
-            
-               this.applyStyle(canvas, label, option.style, true); 
+
+               this.applyStyle(canvas, label, option.style, true);
         }else{
             this.applyStyle(canvas, label, this.optionsStyle);
             this.applyStyle(canvas, label, this.labelStyle, true);
@@ -235,12 +236,12 @@ class OptionsMenu extends Component {
         if (!this.alwaysKeepBorders){
             canvas.removeBorders();
         }
-        
+
     }
 
     function getOptionStylePropOrDefault(prop,option){
         if (option.rawin("style") && option.style.rawin(prop)){
-            return option.style[prop]; 
+            return option.style[prop];
         }
         return this.optionsStyle[prop];
     }
@@ -252,7 +253,7 @@ class OptionsMenu extends Component {
         return this.labelStyle[prop];
     }
 
-    function onClick(canvas, label) {
+    function applyOnClick(canvas, label) {
         if (this.onClick != null){
             this.onClick(canvas,label);
         }
@@ -291,7 +292,7 @@ class OptionsMenu extends Component {
             if (o.rawin("clicked") && o.clicked && option == o.label){
                  this.removeClickedState(o.canvasID);
             }
-        }     
+        }
     }
 
     function clearSelectedOptions() {
@@ -302,27 +303,27 @@ class OptionsMenu extends Component {
         }
     }
 
- 
+
     function build() {
         local wrapper = UI.Canvas({
             id = this.id
             context = this
             move = this.move
-            align = this.align  
+            align = this.align
             RelativeSize = this.RelativeSize
             align =  this.align
             Colour = this.backgroundColour
         })
         local yPos = 0;
         local xPos = 0;
-        
-    
+
+
         foreach (idx,o in this.options) {
             local labelID = this.id+"::option"+idx+"::label";
             local canvasID =this.id+"::option"+idx;
             o["labelID"] <-labelID;
             o["canvasID"] <-canvasID ;
-            
+
             local labelObj = { id = labelID};
             labelObj["id"] <- labelID;
             labelObj["Text"] <- o.label;
@@ -330,16 +331,16 @@ class OptionsMenu extends Component {
             labelObj["context"] <- this;
             labelObj["onClick"] <- function(){
                 if(!context.multipleSelections) {
-                    context.removeClickedState(context.lastClickedOption); 
+                    context.removeClickedState(context.lastClickedOption);
                     context.lastClickedOption = this.elementData.canvasID;
                 }else{
                     if (context.selectedOptions.find(this.elementData.canvasID) == null){
                         context.selectedOptions.push(this.elementData.canvasID);
                     }
                 }
-                
+
                 local canvas =UI.Canvas(context.id+"::option"+this.elementData.index);
-                context.onClick(canvas,this);
+                context.applyOnClick(canvas,this);
                 this.elementData.option["clicked"] <- true;
             };
             labelObj["move"] <- this.getLabelStylePropOrDefault("move",o);
@@ -360,28 +361,28 @@ class OptionsMenu extends Component {
                     context.onHoverOut(canvas,this);
                 }
             };
-           
+
             local label = UI.Label(labelObj);
-            label.RemoveFlags(GUI_FLAG_INHERIT_ALPHA);  
-         
+            label.RemoveFlags(GUI_FLAG_INHERIT_ALPHA);
+
             local optCanvas = UI.Canvas({
-                id = this.id+"::option"+idx  
+                id = this.id+"::option"+idx
                 context =this
                 onClick = function () {
                     if(!context.multipleSelections) {
                         context.removeClickedState(context.lastClickedOption);
-                        context.lastClickedOption = this.id; 
+                        context.lastClickedOption = this.id;
                     }else{
                         if (context.selectedOptions.find(this.id) == null){
                             context.selectedOptions.push(this.id);
                         }
                     }
-                    context.onClick(this, label);
+                    context.applyOnClick(this, label);
                     this.elementData.option["clicked"] <- true;
                 }
                 elementData = { index = idx, labelID = labelID, option = o }
                 RelativeSize = this.getOptionStylePropOrDefault("RelativeSize",o)
-                Size = this.getOptionStylePropOrDefault("Size",o) 
+                Size = this.getOptionStylePropOrDefault("Size",o)
                 Colour = this.getOptionStylePropOrDefault("Colour",o)
                 border = this.getOptionStylePropOrDefault("border",o)
                 Position = VectorScreen(xPos, yPos)
@@ -396,18 +397,18 @@ class OptionsMenu extends Component {
                      if (context.onHoverOut != null){
                         context.onHoverOut(this,label);
                     }
-                }    
+                }
             })
             optCanvas.add(label);
             wrapper.add(optCanvas);
-            if (this.layout == "vertical"){            
+            if (this.layout == "vertical"){
                 yPos +=optCanvas.Size.Y+this.padding;
             }else{
                 xPos +=optCanvas.Size.X+this.padding;
             }
         }
-    
-        
+
+
     }
 
 }
