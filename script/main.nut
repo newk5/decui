@@ -28,7 +28,7 @@ function Script::ScriptLoad(){
     UI.Cursor("ON")
      showDebugUI();
      dofile("GridDemo.nut");
-  
-    
-   
-} 
+
+
+
+}
