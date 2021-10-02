@@ -56,7 +56,7 @@ class UI  {
             this.store= Store({});
 
         }
-        this.store.put(key,value);
+        this.store.newData(key,value);
     }
 
     function Data(data) {
