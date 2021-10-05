@@ -1,4 +1,4 @@
-   
+
     function stringArray(a) {
         local str  = a.reduce(function(previousValue, currentValue){
             return (previousValue +","+ currentValue);
@@ -8,16 +8,16 @@
     }
 
     function showDebugUI() {
-        
-         UI.showDebugInfo=true;
+
+        UI.showDebugInfo=true;
         UI.excludeDebugIds=true;
         foreach (name in UI.names) {
             UI.newData(name,0);
         }
 
-    
+
         local c = UI.Canvas({
-            id = "decui:debug:debugCanvas"   
+            id = "decui:debug:debugCanvas"
             align="bottom_right"
             Color= Colour(150,150,150,100)
             border = {}
@@ -26,16 +26,16 @@
                 this.Size.Y = GUI.GetScreenSize().Y-200;
                 this.realign();
                 this.updateBorders();
-            }   
-        }) 
+            }
+        })
         local y = 20;
         foreach (name in UI.names) {
 
-        
+
         local b= UI.Button({
-                id = "decui:debug:showBtn:"+name  
+                id = "decui:debug:showBtn:"+name
                 Text = "show"
-                Size = VectorScreen(30, 20) 
+                Size = VectorScreen(30, 20)
                 elementData = { list=name}
                 Position = VectorScreen(10, y+4)
                 onClick = function() {
@@ -44,7 +44,7 @@
                         tbl.destroy();
                     }
                     local opts = [];
-                
+
                     foreach (el in UI.getList(this.elementData.list)) {
                         local p = el.getParent();
                         if (!UI.excludeDebugIds){
@@ -54,7 +54,7 @@
                                 opts.push({id=el.id, parent=p == null ? "":p.id});
                             }
                         }
-                        
+
                     }
                     local w = UI.Window("decui:debug:window");
                     if (w !=null){
@@ -63,7 +63,7 @@
                     local canvas = UI.Canvas("decui:debug:debugCanvas");
                     local listName = this.elementData.list;
                     UI.Window({
-                        id = "decui:debug:window"  
+                        id = "decui:debug:window"
                         Size = VectorScreen(750,400)
                         align="center"
                         elementData= {list = listName}
@@ -71,15 +71,15 @@
                         move={right="18%"}
                         Text="W"
                         postConstruct = function(){
-                            UI.DataTable("decui:debug:DebugTable").realign();  
-                            this.Text = this.elementData.list +" ID's"; 
+                            UI.DataTable("decui:debug:DebugTable").realign();
+                            this.Text = this.elementData.list +" ID's";
                         }
                         children = [
                             UI.DataTable({
-                                id = "decui:debug:DebugTable"  
+                                id = "decui:debug:DebugTable"
                                 align="center"
                                 rows = 10
-                                columns = [ 
+                                columns = [
                                     { header = "ID", field = "id"},
                                     { header = "Parent", field = "parent"}
                                 ]
@@ -87,33 +87,33 @@
                             })
                         ]
                     })
-    
-                
-                    
-                
+
+
+
+
                 }
             })
             c.add(b);
         local lName=  UI.Label({
-            id = "decui:debug:label:"+name+":name"   
+            id = "decui:debug:label:"+name+":name"
             FontSize= 16
             Text = name+": "
             Position = VectorScreen(35, y)
         });
         c.add(lName);
         local l=  UI.Label({
-            id = "decui:debug:label:"+name  
+            id = "decui:debug:label:"+name
             Text = "0"
             FontSize= 16
-            bindTo=name 
+            bindTo=name
             Position = VectorScreen(150, y)
         });
         c.add(l);
             y +=25;
 
-        
 
-        }    
+
+        }
     }
 
     function stringArrayWithIds(a) {
@@ -121,7 +121,7 @@
         local str  = a.reduce(function(previousValue, currentValue){
             return (previousValue.id +","+ currentValue.id);
         });
-        
+
         if (str == null) return "[ ]";
         return "[ "+str+" ]";
         } catch( ex){
@@ -130,7 +130,7 @@
     }
 
     function printTable(t){
-         
+
         foreach (i,k in t){
            //Console.Print(t[k]);
             Console.Print("{ "+i+"="+k+" }");
@@ -138,7 +138,7 @@
     }
 
     function stringIDS(a){
-      
+
         local str = "";
         foreach (s in a) {
             str = str+s.id+", ";
@@ -151,7 +151,7 @@
 
          foreach (i, s in UI.names) {
             Console.Print(s +" --> "+UI.lists[i].len());
-        } 
+        }
     }
 
     function showCreatedElements(){
@@ -160,21 +160,21 @@
          foreach (i, s in UI.names) {
             if (UI.lists[i].len()>0)
                 Console.Print(s +" --> "+UI.lists[i].len());
-        } 
+        }
     }
 
     function printList(l){
        Console.Print("----------------------CANVAS START-------------------------------------------")
 
          foreach (i, s in UI.lists[UI.names.find(l)] ) {
-            
+
             Console.Print(s.id);
-        } 
+        }
           Console.Print("----------------------CANVAS END-------------------------------------------")
     }
-    
-    
-    
+
+
+
 
     function printElementData(e) {
         if (e ==null) return;
@@ -185,10 +185,10 @@
             UI.Label("elementParents").Text = "Parents: "+stringArray(e.parents);
             UI.Button("elementBtn").Text = "Highlight";
             UI.Canvas(e.id).updateBorders();
-        }else{ 
+        }else{
              local el = UI.Canvas({
             id="element",
-            Colour = Colour(100,100,100), 
+            Colour = Colour(100,100,100),
             align="bottom_right",
             Size= VectorScreen(260, 160),
             children= [
@@ -221,11 +221,11 @@
                     }
                 })
             ]
-            
+
         });
         }
-       
-        
+
+
     }
 
 
@@ -254,7 +254,7 @@ function errorHandling(err) {
         errorMsg += locals;
 
         Console.Print(errorMsg);
-    }    
-}   
+    }
+}
 
 seterrorhandler(errorHandling);

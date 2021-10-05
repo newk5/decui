@@ -1,81 +1,92 @@
     class Events {
 
 
-            UI = null;
+        UI = null;
 
-            constructor(ui) {
-                this.UI = ui;
+        constructor(ui) {
+            this.UI = ui;
 
-            }
+        }
 
-        function alignChildren(e){
+        function alignChildren(e, parentSizeChanged) {
             local hasAlign = e.rawin("align") && e.align != null;
             local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
-            local ignoresEvent = e.ignoreGameResizeAutoAdjust;
+            local doesNotIgnoreEvent = !e.ignoresAutoAdjust();
+           
+            if (doesNotIgnoreEvent) {
 
-            if (ignoresEvent){
-                return;
-            }
+                if (hasRelativeSize) {
+                    ::UI.applyRelativeSize(e);
+                }
+                //only realign children if the parent size was changed
+                if (hasAlign && parentSizeChanged) {
+                    e.resetPosition();
+                    e.realign();
+                }
 
-            if ( hasRelativeSize ){
-                ::UI.applyRelativeSize(e);
+                if (e.rawin("shiftPos") && e.shiftPos != null && parentSizeChanged) {
+                    if (!hasAlign && e.metadata.rawin("previousPosition") && e.metadata.previousPosition != null){
+                        e.Position = e.metadata.previousPosition;
+                    }
+                    e.resetMoves();
+                    e.shiftPos();
+                }
+                if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null) {
+                    e.updateBorders();
+                }
             }
-            if (hasAlign){
-                e.resetPosition();
-                e.realign();
-            }
-
-            if (e.rawin("shiftPos") && e.shiftPos != null){
-                e.resetMoves();
-                e.shiftPos();
-            }
-            if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null ){
-                e.updateBorders();
-            }
-            if (e.rawin("onGameResize") && e.onGameResize != null){
+            if (e.rawin("onGameResize") && e.onGameResize != null) {
                 e.onGameResize();
             }
 
-            foreach (idx, child in e.getChildren() ){
-                 this.alignChildren(child);
+            foreach(idx, child in e.getChildren()) {
+
+                this.alignChildren(child, hasRelativeSize);
+
+
             }
         }
 
-        function onGameResize(){
-
-            foreach(i,list in this.UI.lists ) {
-               foreach(c,e in list ) {
-                   if (e.rawin("parents") && e.parents.len() == 0){
-
+        function onGameResize() {
+            foreach(i, list in this.UI.lists) {
+                foreach(c, e in list) {
+                    if (e.rawin("parents") && e.parents.len() == 0) {
                         local hasAlign = e.rawin("align") && e.align != null;
                         local hasRelativeSize = e.rawin("RelativeSize") && e.RelativeSize != null && e.RelativeSize.len() > 0;
-                        local doesNotIgnoreEvent = !e.ignoreGameResizeAutoAdjust;
-                        if (doesNotIgnoreEvent){
-                            if ( hasRelativeSize ){
+                        local doesNotIgnoreEvent = !e.ignoresAutoAdjust();
+
+                        if (doesNotIgnoreEvent) {
+
+                            if (hasRelativeSize) {
                                 ::UI.applyRelativeSize(e);
                             }
-                            if (hasAlign){
+
+                            if (hasAlign) {
                                 e.resetPosition();
                                 e.realign();
+
                             }
 
 
-                            if (e.rawin("shiftPos") && e.shiftPos != null){
+                            if (e.rawin("shiftPos") && e.shiftPos != null) {
+                                if (!hasAlign && e.metadata.rawin("previousPosition") && e.metadata.previousPosition != null ){
+                                    e.Position = e.metadata.previousPosition;
+                                }
                                 e.resetMoves();
                                 e.shiftPos();
                             }
-                            if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null ){
+                            if (hasAlign || hasRelativeSize || e.rawin("shiftPos") && e.shiftPos != null) {
                                 e.updateBorders();
                             }
-                            if (hasRelativeSize){ //only realign children if the parent size was changed
-                                this.alignChildren(e);
-                            }
+                            
+                            this.alignChildren(e, hasRelativeSize);
+
 
                         }
 
 
 
-                        if (e.rawin("onGameResize") && e.onGameResize != null){
+                        if (e.rawin("onGameResize") && e.onGameResize != null) {
                             e.onGameResize();
                         }
 
@@ -86,16 +97,16 @@
             }
         }
 
-        function onWindowResize(window, width, height){
-            if (window.onWindowResize != null){
+        function onWindowResize(window, width, height) {
+            if (window.onWindowResize != null) {
                 window.onWindowResize(width, height);
             }
         }
 
         function onKeyUp(keybind) {
-            foreach (i, kp in this.UI.kps ) {
-                if (kp.kp == keybind){
-                    if (kp.rawin("onKeyUp") && kp.onKeyUp != null){
+            foreach(i, kp in this.UI.kps) {
+                if (kp.kp == keybind) {
+                    if (kp.rawin("onKeyUp") && kp.onKeyUp != null) {
                         kp.onKeyUp();
                         return;
                     }
@@ -104,9 +115,9 @@
         }
 
         function onKeyDown(keybind) {
-            foreach (i, kp in this.UI.kps ) {
-                if (kp.kp == keybind){
-                    if (kp.rawin("onKeyDown") && kp.onKeyDown != null){
+            foreach(i, kp in this.UI.kps) {
+                if (kp.kp == keybind) {
+                    if (kp.rawin("onKeyDown") && kp.onKeyDown != null) {
                         kp.onKeyDown();
                         return;
                     }
@@ -114,31 +125,34 @@
             }
         }
 
-         function onListboxSelect(listbox, text){
-            if (listbox.onOptionSelect!=null){
-               listbox.onOptionSelect(text);
+        function onListboxSelect(listbox, text) {
+            if (listbox.onOptionSelect != null) {
+                listbox.onOptionSelect(text);
             }
         }
 
         function onInputReturn(editbox) {
-            if (editbox.onInputReturn!=null){
-               editbox.onInputReturn();
+            if (editbox.onInputReturn != null) {
+                editbox.onInputReturn();
             }
         }
 
-        function onScrollbarScroll(scrollbar, position,change){
+        function onScrollbarScroll(scrollbar, position, change) {
             if (scrollbar.onScroll != null) {
-                scrollbar.onScroll(position,change);
+                scrollbar.onScroll(position, change);
             }
         }
 
-        function onClick(el, mouseX, mouseY){
-            if(el.onClick!=null && el != null){
-               UI.lastClickedEl = { id = el.id, list = el.metadata.list };
-                if ( (!el.rawin("context") || el.context == null) &&  UI.openCombo != null){
+        function onClick(el, mouseX, mouseY) {
+            if (el.onClick != null && el != null) {
+                UI.lastClickedEl = {
+                    id = el.id,
+                    list = el.metadata.list
+                };
+                if ((!el.rawin("context") || el.context == null) && UI.openCombo != null) {
 
                     local c = UI.Canvas(UI.openCombo.id);
-                    if (c !=null) {
+                    if (c != null) {
                         c.context.hidePanel();
                     }
                 }
@@ -146,62 +160,65 @@
             }
         }
 
-        function onFocus(el){
+        function onFocus(el) {
             try {
-                if (el.tooltip.rawin("event") && el.tooltip.event == "focus"){
-                   el.showTooltip();
+                if (el.tooltip.rawin("event") && el.tooltip.event == "focus") {
+                    el.showTooltip();
                 }
-            } catch(e){
+            } catch (e) {
 
             }
-            if(el.onFocus!=null){
+            if (el.onFocus != null) {
                 el.onFocus();
             }
         }
 
-        function onBlur(el){
+        function onBlur(el) {
             try {
-                if (el.tooltip.rawin("event") && el.tooltip.event == "focus"){
+                if (el.tooltip.rawin("event") && el.tooltip.event == "focus") {
                     el.clearTooltip();
                 }
-            } catch(e){
+            } catch (e) {
 
             }
             local t = typeof el;
-            if (t =="GUIEditbox" && el.rawin("bindTo") && el.bindTo != null){
+            if (t == "GUIEditbox" && el.rawin("bindTo") && el.bindTo != null) {
                 UI.setData(el.bindTo, el.Text);
             }
-            if(el.onBlur!=null){
+            if (el.onBlur != null) {
                 el.onBlur();
             }
         }
 
-        function onCheckboxToggle(checkbox, checked){
-            if(checkbox.onCheckboxToggle!=null){
+        function onCheckboxToggle(checkbox, checked) {
+            if (checkbox.onCheckboxToggle != null) {
                 checkbox.onCheckboxToggle(checked);
             }
         }
 
-         function onWindowClose(w){
-            if(w.onWindowClose!=null){
+        function onWindowClose(w) {
+            if (w.onWindowClose != null) {
                 w.onWindowClose();
             }
         }
 
-        function onDrag(el,  mouseX, mouseY){
-            if(el.onDrag!=null){
+        function onDrag(el, mouseX, mouseY) {
+            if (el.onDrag != null) {
                 el.onDrag(mouseX, mouseY);
             }
         }
 
-         function onHoverOver(el){
-            if (el.rawin("metadata") && el.metadata != null && el.metadata.rawin("list")){
+        function onHoverOver(el) {
+            if (el.rawin("metadata") && el.metadata != null && el.metadata.rawin("list")) {
 
 
-                this.UI.hoveredEl= { id =el.id, list = el.metadata.list };
+                this.UI.hoveredEl = {
+                    id = el.id,
+                    list = el.metadata.list
+                };
                 try {
-                    if (el.tooltip != null){
-                        local isString = (typeof el.tooltip ) == "string";
+                    if (el.tooltip != null) {
+                        local isString = (typeof el.tooltip) == "string";
                         local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
                         local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
 
@@ -209,56 +226,56 @@
                             el.showTooltip();
                         }
                     }
-                } catch(e){
+                } catch (e) {
 
                 }
-                if(el.onHoverOver!=null){
+                if (el.onHoverOver != null) {
                     el.onHoverOver();
                 }
             }
 
         }
 
-        function onRelease(el,  mouseX, mouseY){
-            if(el.onRelease!=null){
+        function onRelease(el, mouseX, mouseY) {
+            if (el.onRelease != null) {
                 el.onRelease(mouseX, mouseY);
             }
         }
 
-        function onHoverOut(el){
+        function onHoverOut(el) {
 
             try {
-                 this.UI.hoveredEl=null;
-                if (el.tooltip != null){
-                    local isString = (typeof el.tooltip ) == "string";
+                this.UI.hoveredEl = null;
+                if (el.tooltip != null) {
+                    local isString = (typeof el.tooltip) == "string";
                     local doesNotSpecifyEvent = isString ? true : !el.tooltip.rawin("event");
                     local eventIsNotFocus = !doesNotSpecifyEvent ? el.tooltip.event != "focus" : true;
                     if (isString || doesNotSpecifyEvent || eventIsNotFocus) {
                         el.clearTooltip();
                     }
                 }
-            } catch(e){
+            } catch (e) {
                 //Console.Print(e);
             }
 
-            if(el.onHoverOut!=null){
+            if (el.onHoverOut != null) {
                 el.onHoverOut();
             }
         }
 
-        function scriptProcess(){
+        function scriptProcess() {
 
             Timer.Process();
-            if (this.UI.toDelete != null && this.UI.toDelete.len() > 0 ) {
-                this.UI.toDelete= this.UI.toDelete.filter(function(idx,e) {
-                    if(this.UI.hoveredEl != null && this.UI.hoveredEl.id == e.id) {
+            if (this.UI.toDelete != null && this.UI.toDelete.len() > 0) {
+                this.UI.toDelete = this.UI.toDelete.filter(function(idx, e) {
+                    if (this.UI.hoveredEl != null && this.UI.hoveredEl.id == e.id) {
                         this.UI.hoveredEl = null;
                     }
-                    if (UI.showDebugInfo){
-                        if (!UI.excludeDebugIds){
+                    if (UI.showDebugInfo) {
+                        if (!UI.excludeDebugIds) {
                             UI.decData(e.metadata.list);
-                        }else{
-                            if (e.id.find("decui:debug")==null){
+                        } else {
+                            if (e.id.find("decui:debug") == null) {
                                 UI.decData(e.metadata.list);
                             }
                         }
@@ -267,5 +284,5 @@
                     return false;
                 });
             }
+        }
     }
-}

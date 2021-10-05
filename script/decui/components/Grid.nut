@@ -1,15 +1,14 @@
-class UIGrid extends Component {
-   
-    className =  "Grid"; 
-   
+class UIGrid extends DecUIComponent {
+
+    className =  "Grid";
+
     columns = null;
     rows = null;
     cellWidth = null;
     cellHeight = null;
     data = null;
     Position = null;
-    move = null;
-    align = null;
+
     background = null;
     borderStyle = null;
     margin = null;
@@ -22,10 +21,11 @@ class UIGrid extends Component {
     onCellClick = null;
 
     constructor(o) {
-       
-        this.id = o.id; 
+        base.constructor(o);
+
         this.margin = 0;
         this.cellIDs = [];
+        this.ignoreGameResizeAutoAdjust=true;
 
         if (o.rawin("rows") && o.rows != null){
             this.rows =o.rows;
@@ -54,9 +54,7 @@ class UIGrid extends Component {
              this.data = [];
         }
 
-        if (o.rawin("align")){
-            this.align = o.align;
-        }
+
          if (o.rawin("onHoverOverCell")){
             this.onHoverOverCell = o.onHoverOverCell;
         }
@@ -69,11 +67,7 @@ class UIGrid extends Component {
          if (o.rawin("margin")){
             this.margin = o.margin;
         }
-         if (o.rawin("move")){
-            this.move = o.move;
-        }else{
-            this.move = {};
-        }
+
 
          if (o.rawin("background")){
             this.background = o.background;
@@ -84,26 +78,22 @@ class UIGrid extends Component {
         if (o.rawin("borderStyle")){
             this.borderStyle = o.borderStyle;
         }
-        
-        if (o.rawin("Position") && o.Position != null){
-            this.Position = o.Position;
-        }else{
-            this.Position = VectorScreen(0,0);
-        }
+
+
         this.totalSlots = this.rows*this.columns;
         this.filledSlots = this.data.len();
 
-        base.constructor(this.id,o);
-        this.metadata.list = "grids";
-        this.build();
-        
-    } 
 
-   
- 
+
+        this.build();
+
+    }
+
+
+
     function build(){
 
-        local wrapper = UI.Canvas({ 
+        local wrapper = UI.Canvas({
             id = this.id,
             align = this.align,
             context = this,
@@ -120,9 +110,9 @@ class UIGrid extends Component {
         for (local rowIdx = 0; rowIdx < this.rows; rowIdx++) {
 
             for (local colIdx = 0; colIdx < this.columns; colIdx++) {
-               
+
                 local cellCanvas = UI.Canvas({
-                    id = this.id+"::"+rowIdx+"_"+colIdx 
+                    id = this.id+"::"+rowIdx+"_"+colIdx
                     context = this
                      ignoreGameResizeAutoAdjust =true
                     Size = VectorScreen(this.cellWidth, this.cellHeight)
@@ -159,15 +149,15 @@ class UIGrid extends Component {
                     maxX = drawX;
                 }
                 globalIt++;
-               
+
             }
             drawX = 0;
-           
+
             drawY +=this.cellHeight+this.margin;
             if (maxY < drawY) {
                 maxY = drawY;
             }
-            
+
         }
         wrapper.Size.X = maxX-this.margin;
         wrapper.Size.Y = maxY-this.margin;
@@ -175,7 +165,7 @@ class UIGrid extends Component {
         wrapper.move = this.move;
         wrapper.resetMoves();
         wrapper.shiftPos();
-        
+
     }
 
     function add(component) {
@@ -195,13 +185,13 @@ class UIGrid extends Component {
             cellCanvas.add(component, false);
             this.filledSlots++;
         }
-         
+
     }
 
      function removeLast() {
-        
+
         local cellCanvas = UI.Canvas(this.cellIDs[this.nextEmptySlot]);
-        
+
         if (cellCanvas != null) {
             this.nextEmptySlot--;
             filledSlots--;
@@ -209,6 +199,16 @@ class UIGrid extends Component {
               cellCanvas.addBorders(this.borderStyle == null ? {} : this.borderStyle);
         }
     }
-  
+
 
 }
+
+UI.registerComponent("Grid", {
+    create = function(o) {
+        local c = UIGrid(o);
+        return c;
+
+    }
+});
+
+

@@ -1,21 +1,21 @@
-class PopUp extends Component {
-   
-    className =  "Popup"; 
-    id = null;
+class PopUp extends DecUIComponent {
+
+    className =  "Popup";
+
     text = null;
-    size = null; 
-    Position = null;
+    size = null;
+
     onYes = null;
     onNo = null;
     onClose = null;
     yesText =  null;
     noText = null;
-  
+
 
     constructor(o) {
-       
-        this.id = o.id; 
- 
+        base.constructor(o);
+
+
 
         if (o.rawin("text") && o.text != null){
             this.text =o.text;
@@ -32,32 +32,27 @@ class PopUp extends Component {
         }else{
              this.noText = "NO";
         }
-        if (o.rawin("size") && o.size != null){ 
+        if (o.rawin("size") && o.size != null){
             this.size =o.size;
         }
-        if (o.rawin("onYes") && o.onYes != null){ 
+        if (o.rawin("onYes") && o.onYes != null){
             this.onYes =o.onYes;
         }
-         if (o.rawin("onClose") && o.onClose != null){ 
+         if (o.rawin("onClose") && o.onClose != null){
             this.onClose =o.onClose;
         }
-         if (o.rawin("onNo") && o.onNo != null){ 
+         if (o.rawin("onNo") && o.onNo != null){
             this.onNo =o.onNo;
         }
-        
-        if (o.rawin("Position") && o.Position != null){
-            this.Position = o.Position;
-        }else{
-            this.Position = VectorScreen(0,0);
-        }
-         base.constructor(this.id,o);
-         this.metadata.list = "popups";
+
+
+
         this.build();
-        
-    } 
+
+    }
 
 
- 
+
     function build(){
 
         local c = UI.Canvas({
@@ -65,7 +60,7 @@ class PopUp extends Component {
             Size = this.size == null ? VectorScreen(250, 120) : this.size,
             align = "center",
             context = this,
-            Color = Colour(0,0,0,200),         
+            Color = Colour(0,0,0,200),
             children = [
                 UI.Sprite({
                     id= this.id+"::closeSprite",
@@ -78,9 +73,9 @@ class PopUp extends Component {
                         if (this.context.onClose != null){
                             this.context.onClose();
                         }
-                        UI.DeleteByID(this.parents[this.parents.len()-1]); 
+                        UI.DeleteByID(this.parents[this.parents.len()-1]);
                     }
-                }), 
+                }),
                 UI.Button({
                     id= this.id+"::popup::window::yesBtn",
                     Text =this.yesText,
@@ -98,14 +93,14 @@ class PopUp extends Component {
                          if (this.context.onClose != null){
                             this.context.onClose();
                         }
-                       UI.DeleteByID(this.parents[this.parents.len()-1]); 
-                    }     
+                       UI.DeleteByID(this.parents[this.parents.len()-1]);
+                    }
                 }),
                  UI.Button({
                     id= this.id+"::popup::window::noBtn",
                     Text = this.noText,
                     context = this,
-                    align = "bottom_right", 
+                    align = "bottom_right",
                     move = { left = 80, up = 10},
                     Colour = Colour(160,0,0),
                     FontSize = 13,
@@ -118,8 +113,8 @@ class PopUp extends Component {
                          if (this.context.onClose != null){
                             this.context.onClose();
                         }
-                        UI.DeleteByID(this.parents[this.parents.len()-1]); 
-                    }                
+                        UI.DeleteByID(this.parents[this.parents.len()-1]);
+                    }
                 }),
                 UI.Label({
                     id = this.id+"::popup::window::label",
@@ -133,8 +128,16 @@ class PopUp extends Component {
             ]
         });
         c.SendToTop();
-        
+
     }
-  
+
 
 }
+
+UI.registerComponent("Popup", {
+    create = function(o) {
+        local c = PopUp(o);
+        return c;
+
+    }
+});

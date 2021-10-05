@@ -18,27 +18,7 @@ class Store {
         }
 
     }
-    //Receives a table and the full field name in "dotted notation"
-    // For example given the table : { level1 =  { level2 = { level3 =  10 }  }  }
-    // passing "level1.level2.level3" as "fullField" will return 10
-    function getNestedData(table, fullField) {
-        local fields = split(fullField, ".");
-        local v = table;
-        foreach(idx, field in fields) {
-
-            if (idx + 1 <= fields.len()) {
-                local nextField = idx == 0 ? fields[0] : fields[idx];
-                if (v != null && typeof v == "table" && v.rawin(nextField)){
-                    v = v[nextField];
-                }else{
-                    return v;
-                }
-
-            }
-        }
-        return v;
-    }
-
+   
     /*
     This will flatten a table to a key-value HashMap with the key being in dotted notation
     A table with multiple nested tables and fields will be converted to have a 1 level only

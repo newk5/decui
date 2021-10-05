@@ -1,12 +1,11 @@
-class OptionsMenu extends Component {
+class OptionsMenu extends DecUIComponent {
 
     className="Menu";
-    id = null;
+
     Size = null;
     RelativeSize = null;
     options = null;
-    align =null;
-    move= null;
+
     padding = null;
 
     layout = null;
@@ -36,7 +35,8 @@ class OptionsMenu extends Component {
     selectedOptions = null;
 
     constructor(o) {
-        this.id = o.id;
+        base.constructor(o);
+
         //init defaults
         local rs = null;
 
@@ -78,7 +78,7 @@ class OptionsMenu extends Component {
         this.multipleSelections = false;
 
         if (o.rawin("onClick")){
-            
+
             this.onClick= o.onClick;
         }
 
@@ -132,23 +132,18 @@ class OptionsMenu extends Component {
         if (o.rawin("RelativeSize")){
             this.RelativeSize = o.RelativeSize;
         }
-        if (o.rawin("align")){
-            this.align = o.align;
-        }
-        if (o.rawin("move")){
-            this.move = o.move;
-        }
+
         if (o.rawin("padding")){
             this.padding = o.padding;
         }
         if (o.rawin("optionsSize")){
             this.optionsSize = o.optionsSize;
         }
-
+        
 
         this.build();
-        base.constructor(this.id,o);
-        this.metadata.list = "menus";
+
+
 
 
     }
@@ -407,8 +402,17 @@ class OptionsMenu extends Component {
                 xPos +=optCanvas.Size.X+this.padding;
             }
         }
-
-
+        
+        
+        this.Size = VectorScreen(wrapper.Size.X, wrapper.Size.Y);
     }
 
 }
+
+UI.registerComponent("Menu", {
+    create = function(o) {
+        local c = OptionsMenu(o);
+        return c;
+
+    }
+});

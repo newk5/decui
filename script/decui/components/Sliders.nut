@@ -1,14 +1,11 @@
-class Sliders extends Component {
+class Sliders extends DecUIComponent {
     className = null;
-    id = null;
     squareID = null;
     crossID = null;
     parentSize = null;
     Position = null;
     colour = null;
-    move = null;
     border =null;
-    align = null;
     direction = null;
     buttonAlign = null;
     buttonColour = null;
@@ -22,25 +19,24 @@ class Sliders extends Component {
     mouseTimer = null;
 
 constructor(o) {
-        this.className = "Slider"; 
-        this.id = o.id; 
+        base.constructor(o);
 
         if (o.rawin ("buttonWidth")) this.buttonWidth = o.buttonWidth;
         if (o.rawin ("buttonColour")) this.buttonColour = o.buttonColour;
         else this.buttonColour = Colour (0,0,0);
-        
+
         if (o.rawin("direction")) this.direction = o.direction;
         else this.direction = "horizontal"
 
         if (o.rawin ("buttonAlign")){
             local a = this.direction == "vertical";
-            if (o.buttonAlign == "left") a ? this.buttonAlign = "bottom" : this.buttonAlign = "mid_left"; 
-            else if (o.buttonAlign == "right") a ? this.buttonAlign = "top_center" : this.buttonAlign = "mid_right"; 
+            if (o.buttonAlign == "left") a ? this.buttonAlign = "bottom" : this.buttonAlign = "mid_left";
+            else if (o.buttonAlign == "right") a ? this.buttonAlign = "top_center" : this.buttonAlign = "mid_right";
 
             else this.buttonAlign = "left";
         }
         else this.buttonAlign = "left";
-        
+
         if (o.rawin("onValue")) this.onValue = o.onValue;
         if (o.rawin("Size")) this.Size = o.Size;
         if (o.rawin("Colour")) this.colour = o.Colour;
@@ -50,35 +46,28 @@ constructor(o) {
             this.align = o.align;
         }
         else this.align = "center";
-        
+
         if (o.rawin ("setshadow")) this.setshadow = o.setshadow;
         if (o.rawin("border")){
             this.border = o.border;
         }
 
-        if (o.rawin("move")) this.move = o.move; 
-        else move = {};
-
-        if (o.rawin("Position") && o.Position != null){
-            this.Position = o.Position;
-        }
-        else this.Position = VectorScreen(0,0);
 
         this.squareID = this.id + "::Slider::square";
         this.crossID = this.id + "::Slider::cross";
         this.shadowID = this.id + "::Slider::shadowID";
-        
-        base.constructor(this.id,o);
-        this.metadata.list = "sliders";
-        this.build();
-    }     
 
-    
+
+
+        this.build();
+    }
+
+
     function build(){
         local b = UI.Canvas({
             id= this.squareID,
             context = this,
-            Color = this.buttonColour,   
+            Color = this.buttonColour,
             align = this.buttonAlign
             flags = GUI_FLAG_MOUSECTRL,
             onClick = function () {
@@ -93,8 +82,8 @@ constructor(o) {
         local c = UI.Canvas({
             id=this.id,
             context = this,
-            Color = this.colour, 
-            Position = this.Position,  
+            Color = this.colour,
+            Position = this.Position,
             align = this.align,
             move = this.move,
             flags = GUI_FLAG_MOUSECTRL,
@@ -106,30 +95,30 @@ constructor(o) {
         local s = UI.Canvas({
             id=this.shadowID,
             context = this,
-            Color = this.buttonColour,   
+            Color = this.buttonColour,
             align = this.buttonAlign
             flags = GUI_FLAG_MOUSECTRL,
             onClick = function(){
                 context.attachShadow ();
             }
-        });      
+        });
 
         local a = this.Size != null;
         if (this.direction == "horizontal") {
             a ? c.Size = this.Size : c.Size = VectorScreen (200,5);
-            a ? b.Size = VectorScreen (c.Size.X/100*6,c.Size.Y+this.buttonWidth) : b.Size = VectorScreen (20,20); 
-            s.Size = VectorScreen(0,this.Size.Y); 
-           
+            a ? b.Size = VectorScreen (c.Size.X/100*6,c.Size.Y+this.buttonWidth) : b.Size = VectorScreen (20,20);
+            s.Size = VectorScreen(0,this.Size.Y);
+
             b.addBorders ({
                 offset = 1
                 color = this.buttonColour
             })
-        } 
+        }
         else {
             a ? c.Size = VectorScreen (this.Size.Y,this.Size.X) : c.Size = VectorScreen (200,5);
-            a ? b.Size = VectorScreen (this.Size.Y+this.buttonWidth,c.Size.Y/100*6) : b.Size = VectorScreen (20,20); 
-            s.Size = VectorScreen(this.Size.Y,0); 
-             
+            a ? b.Size = VectorScreen (this.Size.Y+this.buttonWidth,c.Size.Y/100*6) : b.Size = VectorScreen (20,20);
+            s.Size = VectorScreen(this.Size.Y,0);
+
             b.addBorders ({
                 offset = 1
                 color = this.buttonColour
@@ -137,7 +126,7 @@ constructor(o) {
         }
 
         if (this.border != null) {
-            c.addBorders(this.border) 
+            c.addBorders(this.border)
         }
 
         c.shiftPos ();
@@ -146,7 +135,7 @@ constructor(o) {
         c.add(s, false);
         c.realign();
 
-        return c; 
+        return c;
     }
 
     attachShadow = function (w=null,h=null,debug=null) {
@@ -159,7 +148,7 @@ constructor(o) {
             local percent;
             if (context.buttonAlign == "mid_left") {
                 if (GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X;
-                if (context.setshadow != null) { 
+                if (context.setshadow != null) {
                     if(w == null) s.Size.X = GUI.GetMousePos ().X - c.Pos.X;
                     else s.Size.X = w;
 
@@ -169,7 +158,7 @@ constructor(o) {
             }
             else {
                 if (GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X;
-                if (context.setshadow != null) { 
+                if (context.setshadow != null) {
                     if(w == null) s.Size.X = context.Size.X-b.Pos.X;
                     else if (debug) s.Size.X = w;
                     else s.Size.X = context.Size.X-w;
@@ -179,17 +168,17 @@ constructor(o) {
                 percent = 100-(b.Pos.X.tofloat ()/c.Size.X.tofloat ()) * 100;
             }
             if (context.onValue != null && w == null) context.onValue (percent.tointeger ());
-        } 
+        }
         else {
             local percent;
             if (context.buttonAlign == "bottom") {
                 if (GUI.GetMousePos () != null) b.Pos.Y = GUI.GetMousePos ().Y - c.Pos.Y;
-                if (context.setshadow != null) {   
+                if (context.setshadow != null) {
                     if(h == null) s.Size.Y = context.Size.X-b.Pos.Y;
                     else if (debug) s.Size.Y = h;
-                    else s.Size.Y = context.Size.X-h; 
+                    else s.Size.Y = context.Size.X-h;
 
-                    s.Pos.Y = c.Size.Y - s.Size.Y;     
+                    s.Pos.Y = c.Size.Y - s.Size.Y;
                 }
                 percent = (b.Pos.Y.tofloat ()/c.Size.Y.tofloat ()) * 100;
             }
@@ -197,7 +186,7 @@ constructor(o) {
                 if (GUI.GetMousePos () != null) b.Pos.Y = GUI.GetMousePos ().Y - c.Pos.Y;
                 if (context.setshadow != null) {
                     if(h == null) s.Size.Y = GUI.GetMousePos ().Y - c.Pos.Y;
-                    else s.Size.Y = h; 
+                    else s.Size.Y = h;
 
                     s.Pos.Y = 0;
                 }
@@ -213,38 +202,38 @@ constructor(o) {
         if (value != null) {
             local c = ::UI.Canvas(this.id);
             local b = ::UI.Canvas(this.squareID);
-             
-            if (this.direction == "horizontal") { 
+
+            if (this.direction == "horizontal") {
                 local percent = c.Size.X.tofloat () / 100 * value;
                 if (this.buttonAlign == "mid_left") {
                     if (b.Pos.X <= c.Size.X - b.Size.X) b.Pos.X = percent;
                     w = b.Pos.X;
-                } 
+                }
                 else {
                     if (b.Pos.X >= 0) b.Pos.X = c.Size.X.tofloat ()-percent.tofloat()
                     w = b.Pos.X;
                 }
-                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);                
+                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);
             }
-            else { 
+            else {
                 local percent = c.Size.Y.tofloat () / 100 * value;
                 if (this.buttonAlign == "bottom") {
                     if (b.Pos.Y >= 0) b.Pos.Y = c.Size.Y.tofloat ()-percent.tofloat()
                     h = b.Pos.Y;
-                } 
+                }
                 else {
-                    if (b.Pos.Y <= c.Size.Y - b.Size.Y) b.Pos.Y = percent;   
+                    if (b.Pos.Y <= c.Size.Y - b.Size.Y) b.Pos.Y = percent;
                     h = b.Pos.Y;
                 }
-                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);              
-            } 
+                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);
+            }
         }
-        this.attachShadow (w,h,debug); 
+        this.attachShadow (w,h,debug);
         return this;
     }
 
     attachToShadow = function () {
-        this.setshadow = true; 
+        this.setshadow = true;
         return this;
     }
 
@@ -257,7 +246,7 @@ constructor(o) {
                 local context = ::UI.Slider(Id)
 
                 if (context.onSliderClicked == true) {
-                    if (context.direction == "horizontal") { 
+                    if (context.direction == "horizontal") {
                         local percent = (b.Pos.X.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
                         if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
                         if (GUI.GetMousePos () != null) {
@@ -265,9 +254,9 @@ constructor(o) {
                             if (b.Pos.X <= 0) b.Pos.X = 0;
                             if (b.Pos.X >= c.Size.X - b.Size.X) b.Pos.X = c.Size.X - b.Size.X;
                         }
-                        if (context.onValue != null) context.onValue (percent);                   
+                        if (context.onValue != null) context.onValue (percent);
                     }
-                    else { 
+                    else {
                         local percent = (b.Pos.Y.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
                         if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
                         if (GUI.GetMousePos () != null) {
@@ -275,9 +264,9 @@ constructor(o) {
                             if (b.Pos.Y <= 0) b.Pos.Y = 0;
                             if (b.Pos.Y >= c.Size.Y - b.Size.Y) b.Pos.Y = c.Size.Y - b.Size.Y;
                         }
-                        if (context.onValue != null) context.onValue (percent);              
-                    }    
-                }             
+                        if (context.onValue != null) context.onValue (percent);
+                    }
+                }
             }, 1, 0, this.squareID, this.id, this.shadowID)
         }
     }
@@ -285,5 +274,13 @@ constructor(o) {
     function detachFromMouse(){
         if (Timer.Exists (this.mouseTimer)) Timer.Destroy(this.mouseTimer);
         this.mouseTimer = null;
-    }    
-} 
+    }
+}
+
+UI.registerComponent("Slider", {
+    create = function(o) {
+        local c = Sliders(o);
+        return c;
+
+    }
+});

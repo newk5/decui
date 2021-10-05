@@ -1,7 +1,7 @@
 // client side timers by ysc (https://forum.vc-mp.org/?topic=2748.0) slightly edited to append the 2nd argument to the timer hash
 Timer <- {
 	Timers = {}
-
+	COUNTER = 0
 	function Create(environment, listener, interval, repeat, ...)
 	{
 		// Prepare the arguments pack
@@ -19,8 +19,9 @@ Timer <- {
 		};
 		
 		local hash = split(TimerInfo.tostring(), ":")[1].slice(3, -1).tointeger(16);
-		hash = hash+TimerInfo.Args[1].tostring();
+		hash = hash+"TimerCounter::"+Timer.COUNTER;
 		// Store the timer information
+		Timer.COUNTER++;
 		Timers.rawset(hash, TimerInfo);
 
 		// Return the hash that identifies this timer

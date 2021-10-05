@@ -4,13 +4,13 @@ elements <- [
     ];
 
     function attachProps(props) {
-        foreach(p,prop in props ) { 
-            foreach(i,e in elements ) { 
+        foreach(p,prop in props ) {
+            foreach(i,e in elements ) {
                 e[prop] <- null;
             }
         }
     }
- 
+
 attachProps([ "UI","wrapOptions", "bindTo", "file","remove","autoResize", "RelativeSize", "ignoreGameResizeAutoAdjust"
     "id", "presets", "presetsList" "onClick", "onFocus", "onBlur", "onHoverOver","fadeOutTimer", "wrap", "delayWrap"
     "onHoverOut", "onRelease", "onDrag", "onCheckboxToggle", "onWindowClose", "align", "fadeInTimer", "fadeHigh"
@@ -18,10 +18,10 @@ attachProps([ "UI","wrapOptions", "bindTo", "file","remove","autoResize", "Relat
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists","border"
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
        ]);
- 
+
 //attach new functions
-foreach(i,e in elements ) { 
-     
+foreach(i,e in elements ) {
+
      //removeBorders()
     e.rawnewmember("removeBorders", function() {
         local t = typeof this;
@@ -29,7 +29,7 @@ foreach(i,e in elements ) {
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.removeBorders(this);
         }
-       
+
     }, null, false);
 
       //updateBorders()
@@ -39,7 +39,7 @@ foreach(i,e in elements ) {
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.updateBorders(this);
         }
-       
+
     }, null, false);
 
 
@@ -50,14 +50,14 @@ foreach(i,e in elements ) {
        this.addRightBorder(b);
        this.addTopBorder(b);
        this.addBottomBorder(b);
-       
+
     }, null, false);
 
       //isBorder()
     e.rawnewmember("isBorder", function() {
 
         return this.rawin("data") && this.data.rawin("isBorder") && this.data.isBorder;
-       
+
     }, null, false);
 
     //addLeftBorder(borderObj)
@@ -67,7 +67,7 @@ foreach(i,e in elements ) {
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "top_left");
         }
-       
+
     }, null, false);
 
     //setBorderColor(border,colour)
@@ -76,20 +76,20 @@ foreach(i,e in elements ) {
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
             if (this.rawin("data") && this.data != null){
-                
-                if (this.data.rawin("borderIDs") && this.data.borderIDs != null){ 
+
+                if (this.data.rawin("borderIDs") && this.data.borderIDs != null){
                     foreach (idx, borderPos in this.data.borderIDs) {
-                       
+
                         local b = ui.Canvas(borderPos);
                         if (b != null && b.data.borderPos == border){
-                            b.Colour = colour;  
+                            b.Colour = colour;
                             break;
                         }
-                    } 
+                    }
                 }
             }
         }
-       
+
     }, null, false);
 
      //setBorderSize(border,size)
@@ -113,7 +113,7 @@ foreach(i,e in elements ) {
                 }
             }
         }
-        
+
     }, null, false);
 
      //addRightBorder(borderObj)
@@ -121,10 +121,10 @@ foreach(i,e in elements ) {
         local t = typeof this;
         local ui = this.UI;
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton" ){
-         
+
            ui.addBorder(this, b, "top_right");
         }
-       
+
     }, null, false);
 
      //addTopBorder(borderObj)
@@ -134,7 +134,7 @@ foreach(i,e in elements ) {
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "top_center");
         }
-       
+
     }, null, false);
 
       //resetMoves()
@@ -142,27 +142,27 @@ foreach(i,e in elements ) {
        if (this.metadata.rawin("movedPos")){
            this.metadata.movedPos.clear();
        }
-       
+
     }, null, false);
 
      //addBottomBorder(borderObj)
     e.rawnewmember("addBottomBorder", function(b= {}) {
         local t = typeof this;
         local ui = this.UI;
-      
+
         if (t == "GUICanvas" || t == "GUISprite" || t == "GUIButton"){
            ui.addBorder(this, b, "bottom_left");
         }
-       
+
     }, null, false);
 
       //resize()
     e.rawnewmember("resize", function() {
         local t = typeof this;
-        local ui = this.UI;  
-      
+        local ui = this.UI;
+
         if (t == "GUICanvas" || t == "GUIWindow"){
-            
+
                  local maxY = 0;
                 local maxX = 0;
                 foreach (i, c in this.getChildren()) {
@@ -186,21 +186,21 @@ foreach(i,e in elements ) {
                             }
 
                         }
-                        
+
                         c.realign();
                         c.resetMoves();
                         c.shiftPos();
                     }
                 }
-             
+
             if (this.autoResize){
                 this.realign();
                 this.resetMoves();
                 this.shiftPos();
             }
-          
+
         }
-       
+
     }, null, false);
 
     //destroy()
@@ -212,7 +212,7 @@ foreach(i,e in elements ) {
             if (this.rawin("bindTo") && this.bindTo != null){
                 ::UI.store.remove(this.bindTo, this.id);
             }
-          
+
             if (this.isWrapped()){
                 foreach (line in this.metadata.lines) {
                     UI.Label(line).destroy();
@@ -223,10 +223,10 @@ foreach(i,e in elements ) {
         this.UI.Delete(this);
     }, null, false);
 
-     
+
       //showTooltip()
     e.rawnewmember("showTooltip", function() {
-     
+
         this.UI.showTooltip(this);
     }, null, false);
      //focus()
@@ -242,13 +242,13 @@ foreach(i,e in elements ) {
                 this.tooltipVisible = false;
             }
         }
-       
+
     }, null, false);
 
     //fadeIn()
     e.rawnewmember("fadeIn", function(callback = {}) {
-    
-        local e = this; 
+
+        local e = this;
         local id = e.id;
         local alpha = e.metadata.rawin("oldAlpha") ? e.metadata.oldAlpha : e.Alpha;
         e.show(false);
@@ -258,34 +258,34 @@ foreach(i,e in elements ) {
         if (e.fadeHigh == null){
             e.fadeHigh = alpha;
         }
-       
-        
-        this.fadeInTimer = Timer.Create(::getroottable(), function(text) {
-            if (e.Alpha < e.fadeHigh){ 
-                e.Alpha+=e.fadeStep; 
+
+
+        this.fadeInTimer = Timer.Create(::getroottable(), function() {
+            if (e.Alpha < e.fadeHigh){
+                e.Alpha+=e.fadeStep;
             }else {
                 Timer.Destroy(e.fadeInTimer);
                 if (callback.rawin("onFinish")){
                     callback.onFinish();
                 }
             }
-        }, 1, 0, id+"fadeInTimer"+Script.GetTicks());  
+        }, 1, 0);
     }, null, false);
 
-      //fadeOut() 
-    e.rawnewmember("fadeOut", function(callback = {}) { 
-        local e = this;  
-        local id = e.id; 
+      //fadeOut()
+    e.rawnewmember("fadeOut", function(callback = {}) {
+        local e = this;
+        local id = e.id;
         e.metadata["oldAlpha"] <- e.Alpha;
-       
+
         if (e.fadeStep == null){
             e.fadeStep = 15;
         }
         if (e.fadeLow == null){
             e.fadeLow = 0;
         }
-      
-        this.fadeOutTimer = Timer.Create(::getroottable(), function(text) {
+
+        this.fadeOutTimer = Timer.Create(::getroottable(), function() {
             if (e.Alpha > e.fadeLow){
                 e.Alpha-=e.fadeStep;
             }else {
@@ -295,29 +295,29 @@ foreach(i,e in elements ) {
                     callback.onFinish();
                 }
             }
-        }, 1,0, id+"fadeOutTimer"+Script.GetTicks());
+        }, 1,0);
     }, null, false);
 
-    //hide() 
+    //hide()
      e.rawnewmember("hide", function() {
          if (this.Position != null && (this.hidden == null || this.hidden == false) ){
-         
+
              this.hidden = true;
              this.RemoveFlags(GUI_FLAG_VISIBLE);
              if (this.isWrapped()){
-                foreach (line in this.metadata.lines) { 
+                foreach (line in this.metadata.lines) {
                     UI.Label(line).hide();
                 }
-               
+
             }
          }
     }, null, false);
 
     //show()
      e.rawnewmember("show", function(restoreAlpha = true) {
-         
+
         this.hidden = false;
-       
+
         this.AddFlags(GUI_FLAG_VISIBLE);
         if (this.Alpha == 0  && restoreAlpha){
             local alpha = this.metadata.rawin("oldAlpha") ? this.metadata.oldAlpha : 255;
@@ -327,9 +327,9 @@ foreach(i,e in elements ) {
             foreach (line in this.metadata.lines) {
                 UI.Label(line).show();
             }
-           
+
         }
-         
+
     }, null, false);
 
     //realign()
@@ -339,12 +339,12 @@ foreach(i,e in elements ) {
             foreach (line in this.metadata.lines) {
                  this.UI.align(UI.Label(line));
             }
-               
+
         }
     }, null, false);
 
 
-   
+
     //click()
      e.rawnewmember("click", function() {
         if (this.onClick != null){
@@ -383,8 +383,19 @@ foreach(i,e in elements ) {
                 this =  this.UI.applyElementProps(this,p);
             }
         }
-    }, null, false); 
-       
+    }, null, false);
+
+        //ignoresAutoAdjust
+        e.rawnewmember("ignoresAutoAdjust", function() {
+            if(this.rawin(ignoreGameResizeAutoAdjust)){
+                if (this.ignoreGameResizeAutoAdjust == null || this.ignoreGameResizeAutoAdjust == false){
+                    return false;
+                }
+                return this.ignoreGameResizeAutoAdjust;
+            }else{
+                return false;
+            }
+       })
 
         //resetPosition()
        e.rawnewmember("resetPosition", function() {
@@ -396,12 +407,12 @@ foreach(i,e in elements ) {
 
        //getWrapper()
        e.rawnewmember("getWrapper", function() {
-            local wrapper = null; 
-            if (this.parents.len() == 0){ 
-                wrapper = ::GUI.GetScreenSize(); 
-            }else{ 
+            local wrapper = null;
+            if (this.parents.len() == 0){
+                wrapper = ::GUI.GetScreenSize();
+            }else{
                 local lastID = this.parents[this.parents.len()-1];
-            
+
                 local parent = ::UI.findById(lastID);
                 wrapper =  parent == null ? ::GUI.GetScreenSize() : parent.Size;
             }
@@ -410,17 +421,17 @@ foreach(i,e in elements ) {
 
         //getParent
         e.rawnewmember("getParent", function() {
-            if (this.parents.len() == 0){ 
+            if (this.parents.len() == 0){
                return null;
-            }else{ 
+            }else{
                 local lastID = this.parents[this.parents.len()-1];
-            
+
                 local parent = ::UI.findById(lastID);
                return parent;
             }
-            
+
        })
-      
+
          //hasWrapOptions()
        e.rawnewmember("hasWrapOptions", function() {
             return this.rawin("wrapOptions") && this.wrapOptions != null;
@@ -436,7 +447,7 @@ foreach(i,e in elements ) {
        e.rawnewmember("isWrapped", function() {
            return (this.rawin("metadata") && this.metadata != null && this.metadata.rawin("lines") && this.metadata.lines != null &&  this.metadata.lines.len()> 0 && (this.hasWrap() )  );
        })
- 
+
          //set(fieldName, value)
        e.rawnewmember("set", function(fieldName, value, ignoreWrap = false) {
             local firstText = this.Text;
@@ -449,23 +460,23 @@ foreach(i,e in elements ) {
              if (this.metadata.originalObject.rawin(fieldName)){
                     this.metadata.originalObject[fieldName] = value;
                 }else {
-                    this.metadata.originalObject[fieldName] <- value; 
+                    this.metadata.originalObject[fieldName] <- value;
             }
 
-            
+
             // ignoring wrap when inside `wrapText` to avoid heavy recursion followed by stack overflow
            if (!ignoreWrap && (this.isWrapped() || this.hasWrap())){
-               
+
                 if (fieldName == "Text" || fieldName == "FontSize" || fieldName == "FontName"){
                     local text = firstText;
                     foreach (line in this.metadata.lines) {
                         local l = UI.Label(line);
                         text += l.Text;
                         l.destroy();
-                       
+
                     }
-                   
-                    if (fieldName == "FontSize" || fieldName == "FontName"){ 
+
+                    if (fieldName == "FontSize" || fieldName == "FontName"){
                        this.Text = text;
                     }
                     this.metadata.lines.clear();
@@ -483,17 +494,17 @@ foreach(i,e in elements ) {
                             this.wrapText(parent, this, parent.Size.X-10)
                         }
                     }
-                }else{   
+                }else{
                      foreach (line in this.metadata.lines) {
                         try {
                             UI.Label(line)[fieldName] = value;
                         } catch(e){}
-                        
+
                     }
                 }
 
-              
-               
+
+
            }
        });
 
@@ -506,7 +517,7 @@ foreach(i,e in elements ) {
        e.rawnewmember("enable", function() {
           this.RemoveFlags(GUI_FLAG_DISABLED);
        });
-       
+
      //disable()
        e.rawnewmember("disable", function() {
           this.AddFlags(GUI_FLAG_DISABLED);
@@ -515,17 +526,17 @@ foreach(i,e in elements ) {
        //forceWrap()
        e.rawnewmember("forceWrap", function() {
              local lastID = this.parents[this.parents.len()-1];
-          
+
             if (lastID != null){
                 local parent = ::UI.findById(lastID);
                 this.wrapText(parent, this, parent.Size.X-10)
             }
        });
-    
+
 
       //wrapText(parent, firstLabel, size)
-       e.rawnewmember("wrapText",function (parent, firstlabel,  size){ 
-       
+       e.rawnewmember("wrapText",function (parent, firstlabel,  size){
+
         local width = size;
         local wordWrap = false;
         if (this.hasWrapOptions()){
@@ -536,7 +547,7 @@ foreach(i,e in elements ) {
             if (this.wrapOptions.rawin("wordWrap")){
                 wordWrap = this.wrapOptions.wordWrap;
             }
-        }  
+        }
         local rem = [];
         local resized = false;
 
@@ -545,7 +556,7 @@ foreach(i,e in elements ) {
                 local lastLetter =  this.Text.slice( this.Text.len()-1, this.Text.len());
                 local remaining = this.Text.slice(0,this.Text.len()-1)
                 this.set("Text", remaining, true);
-            
+
                 rem.push(lastLetter);
                 resized = true;
             }
@@ -565,7 +576,7 @@ foreach(i,e in elements ) {
         }
 
         if (resized){
-           
+
             rem.reverse();
             local obj = this.metadata.originalObject;
             obj.id = obj.id+"::line"+ (firstlabel.metadata.lines.len()+1);
@@ -577,7 +588,7 @@ foreach(i,e in elements ) {
             }
 
             local line = UI.Label(obj);
-            
+
             line.set("Text", obj.Text, true);
             local lineSpacing = 0;
             if (firstlabel.hasWrapOptions()){
@@ -585,7 +596,7 @@ foreach(i,e in elements ) {
                     lineSpacing = firstlabel.wrapOptions.lineSpacing;
                 }
             }
-          
+
             line.Position.Y = this.Position.Y;
             line.Position.Y += this.TextSize.Y+5 + lineSpacing;
             firstlabel.metadata.lines.push(line.id);
@@ -606,31 +617,32 @@ foreach(i,e in elements ) {
         local ct = typeof p;
 
          if (this.id != null && p.id != this.id ) {
-                 
-                
-            local list =  this.UI.mergeArray(this.parents, this.id);  
+
+
+            local list =  this.UI.mergeArray(this.parents, this.id);
             if (this.childLists.find(p.metadata.list) == null) {
-                this.childLists.push(p.metadata.list); 
+                this.childLists.push(p.metadata.list);
             }
-            if (p.metadata == null){ 
+            if (p.metadata == null){
                 p.metadata <- { parentPos = this.Position };
-            }else{ 
+            }else{
                 p.metadata["parentPos"] <- this.Position;
-            } 
-            p.metadata["parentID"] <- this.id; 
-            p.parents = list;
-          
-            this.AddChild(p);
-            if (p.rawin("RelativeSize") && p.RelativeSize != null) { 
-                 ::UI.applyRelativeSize(p);   
             }
-            if (p.rawin("align") && p.align != null && !p.isBorder()){
+            p.metadata["parentID"] <- this.id;
+
+            p.parents = list;
+
+            this.AddChild(ct =="instance" ? p.getCanvas(): p);
+            if (p.rawin("RelativeSize") && p.RelativeSize != null) {
+                 ::UI.applyRelativeSize(p);
+            }
+            if (p.rawin("align") && p.align != null &&  (!p.rawin("isBorder") ||  !p.isBorder() )) {
                 p.realign();
             }
-           
-            if ( this.autoResize  &&  !p.hasWrap() && !p.isBorder() ){ 
+
+            if ( this.autoResize  &&  !p.hasWrap() &&  (!p.rawin("isBorder") || !p.isBorder() ) ){
                 local adjusted = false;
-              
+
                 if ( p.Position.X+p.Size.X > this.Size.X){
                     this.Size.X = p.Position.X+p.Size.X;
                     adjusted = true;
@@ -638,11 +650,11 @@ foreach(i,e in elements ) {
                 if ( p.Position.Y+p.Size.Y > this.Size.Y){
                     this.Size.Y = p.Position.Y+p.Size.Y;
                     adjusted = true;
-                } 
+                }
                if (adjusted){
-                    this.realign(); 
+                    this.realign();
                     this.resetMoves();
-                    this.shiftPos(); 
+                    this.shiftPos();
 
                      foreach (i, c in this.getChildren()) {
                         if (!c.rawin("className")) {
@@ -653,7 +665,7 @@ foreach(i,e in elements ) {
                         }
                     }
                 }
-           
+
             }
             if (processChildren){
                  foreach (i, c in p.getChildren()) {
@@ -665,53 +677,46 @@ foreach(i,e in elements ) {
                     }
                 }
             }
-            
+
             if (p.rawin("shiftPos") && p.shiftPos != null && p.rawin("move") && p.move != null){
                 p.resetMoves();
-                p.shiftPos(); 
+                p.shiftPos();
             }
-            if (p.hasWrap() && !p.delayWrap){
+            if (p.rawin("hasWrap") && p.hasWrap() && !p.delayWrap){
                p.wrapText(this,p,this.Size.X-10)
             }
-           
+
         }
     }, null, false);
- 
+
 
     //add(e)
      e.rawnewmember("add", function(p, processChildren = true) {
-        
-        if ( p.rawin("className")){ 
-            if (p.className == "InputGroup"){ 
-                p.attachParent(this,0); 
-            } else if (p.className == "GroupRow"){   
-               p.parentID = this.id;
-               p.calculatePositions(); 
-            } else { 
-               
-                p = ::UI.Canvas(p.id); 
-                local comp =  ["TabView", "Grid", "DataTable"]
-                if (p.rawin("context") && p.context != null){
-                    processChildren = comp.find(p.context.className) == null;
-                }
-                this.attachChild(p, processChildren);
-            }
-           
 
-        }else{ 
+        if ( p.rawin("className")){
            
+            p = ::UI.Canvas(p.id);
             local comp =  ["TabView", "Grid", "DataTable"]
             if (p.rawin("context") && p.context != null){
                 processChildren = comp.find(p.context.className) == null;
             }
-           p.parentSize = this.Size;
+            this.attachChild(p, processChildren);
+            
+
+        }else{
+
+            local comp =  ["TabView", "Grid", "DataTable"]
+            if (p.rawin("context") && p.context != null){
+                processChildren = comp.find(p.context.className) == null;
+            }
+           //p.parentSize = this.Size;
            this.attachChild(p, processChildren);
 
         }
-        
+
     }, null, false);
 
-  
+
      //shift()
      e.rawnewmember("shiftPos", function() {
        this.UI.shift(this);
@@ -719,13 +724,13 @@ foreach(i,e in elements ) {
             foreach (line in this.metadata.lines) {
                  this.UI.shift(UI.Label(line));
            }
-               
+
         }
     }, null, false);
 
      //getNestedIndexes()
     e.rawnewmember("getNestedIndexes", function() {
-       
+
         local list = this.getChildrenIndexes();
         local map = {};
 
@@ -745,7 +750,7 @@ foreach(i,e in elements ) {
         return map;
 
     }, null, false);
-    
+
 
      //getChildrenIndexes()
     e.rawnewmember("getChildrenIndexes", function() {
@@ -764,7 +769,7 @@ foreach(i,e in elements ) {
 
         return arr;
     }, null, false);
-   
+
 
 
     //getIndex()
@@ -824,7 +829,7 @@ foreach(i,e in elements ) {
                             break;
                         }
                     }
-                    
+
                     if (index != null) {
                         this.presetsList.remove(index);
                         this.applyPresets();
@@ -841,7 +846,7 @@ foreach(i,e in elements ) {
         }
     }, null, false);
 
-     //hasParents() 
+     //hasParents()
      e.rawnewmember("hasParents", function() {
        return this.parents.len() > 0;
     }, null, false);

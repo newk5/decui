@@ -1,4 +1,4 @@
-class UI  {
+class DecUI  {
 
     toDelete=null;
 
@@ -28,6 +28,7 @@ class UI  {
     defaultArrayProps = [ "parents" ,"childLists"];
     showDebugInfo = false;
     excludeDebugIds =false;
+    GLOBAL_COUNTER = 0;
 
     constructor() {
 
@@ -36,16 +37,41 @@ class UI  {
         idsMetadata = {};
         listsNumeration = {};
 
-        lists = [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ];
-        names = [ "labels", "buttons", "sprites", "windows", "progbars", "canvas", "scrollbars", "memoboxes", "editboxes", "listboxes" , "checkboxes", "popups", "datatables", "comboboxes", "tabviews", "circles", "notifications", "grids", "menus", "sliders", "paginations" ];
+        lists = [ ];
+        names = [ "labels", "buttons", "sprites", "windows", "progbars", "canvas", "scrollbars", "memoboxes", "editboxes", "listboxes" , "checkboxes"];
         foreach (idx, name in names) {
            listsNumeration[name] <- 0;
+           lists.push([]);
         }
 
         this.fetch = Fetch(this);
         this.events = Events(this);
 
     }
+
+    function registerComponent(name, obj) {
+        this.lists.push([]);
+        this.names.push(name);
+        listsNumeration[name] <- 0;
+        DecUI.rawset(name, function (o) {
+            local isString = typeof o == "string";
+            if (isString){
+                return UI.findByID(o, UI.lists[UI.names.find(name)]);
+            }
+
+            local c = obj.create.call(::getroottable(),o);
+            c.metadata.list =name;
+            UI.addToListAndIncNumeration(c);
+            c.resetMoves();
+
+            c.shiftPos();
+            UI.apply3DProps(o, c.getCanvas());
+            UI.postConstruct(o);
+            return c;
+        });
+
+    }
+
 
     function getList(name){
         return lists[names.find(name)];
@@ -221,7 +247,6 @@ class UI  {
             wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
         }
 
-
         e.Size.X = (w*wrapper.X);
         e.Size.Y = (h*wrapper.Y);
         e.updateBorders();
@@ -317,7 +342,8 @@ class UI  {
     function shift(e){
         if (e.move != null){
             local s = e.move;
-
+            local previousPosition = VectorScreen(e.Position.X, e.Position.Y);
+            e.metadata["previousPosition"] <- previousPosition;
             if(typeof s  != "function"){
                 if (s != null && s.rawin("left")){
                     local isString = typeof s.left == "string";
@@ -484,40 +510,6 @@ class UI  {
         return idx;
 
     }
-
-    /*function removeChildren(parent){
-        if (parent.id != null && parent.id != ""){
-            foreach(i,name in parent.childLists ) {
-                local list = this.lists[this.names.find(name)];
-
-                local sizeBefore = list.len();
-               local newList = list.filter(function(idx,e) {
-
-                   local UI = ::getroottable().UI;
-                   local t = typeof e;
-                    if (t == "instance"){
-                        return true;
-                    }
-
-                    local isChildren =  e.parents.find(parent.id) != null;
-
-                    if (isChildren){
-                       e.removeChildren();
-                       UI.addToDeleteQueue(e);
-                       return false;
-                    }
-                    return true;
-                });
-
-                  local deleted = sizeBefore > newList.len();
-
-                  if (deleted) {
-                      this.lists[this.names.find(name)] =  newList;
-                  }
-            }
-        }
-
-    }*/
 
     function removeChildren(parent, toBeRemoved){
         if (parent.id != null && parent.id != ""){
@@ -857,9 +849,10 @@ class UI  {
 
         if (obj != null) {
             if (!obj.rawin("id") || obj.id == null){
-                obj["id"] <- Script.GetTicks() + typeof element;
+                obj["id"] <- Script.GetTicks() + typeof element+":"+ UI.GLOBAL_COUNTER;
+                UI.GLOBAL_COUNTER++;
             }
-
+            
             element.UI = ::getroottable().UI;
             if (this.idIsValid(obj)){
                 foreach (prop in this.defaultTableProps) {
@@ -989,167 +982,6 @@ class UI  {
         }
     }
 
-    function Menu(o){
-        if (typeof o == "string") {
-            local menu = this.fetch.canvas(o);
-            if (menu != null) {
-                return menu.context;
-            } else{
-                return null;
-            }
-        }
-        local c = OptionsMenu(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-        return c;
-    }
-
-    function ComboBox(o){
-        if (typeof o == "string") {
-            local combo = this.fetch.canvas(o);
-            if (combo != null) {
-                return combo.context;
-            } else{
-                return null;
-            }
-        }
-        local c = Combobox(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-        return c;
-    }
-
-    function Pagination (o){
-        if (typeof o == "string") {
-            local pagination = this.fetch.canvas(o);
-            if (slider != null) {
-                return pagination.context;
-            } else{
-                return null;
-            }
-        }
-        local c = Paginations (o);
-        this.addToListAndIncNumeration(c);
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-        return c;
-    }
-
-    function Slider (o){
-        if (typeof o == "string") {
-            local slider = this.fetch.canvas(o);
-            if (slider != null) {
-                return slider.context;
-            } else{
-                return null;
-            }
-        }
-        local c = Sliders (o);
-        this.addToListAndIncNumeration(c);
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-        return c;
-    }
-
-     function Popup(o){
-        if (typeof o == "string") {
-            local p = this.fetch.canvas(o);
-            if (p != null) {
-                return p.context;
-            } else{
-                return null;
-            }
-        }
-        local c = PopUp(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-        return c;
-    }
-
-    function Notification(o){
-        if (typeof o == "string") {
-            local p = this.fetch.canvas(o);
-            if (p != null) {
-                return p.context;
-            } else{
-                return null;
-            }
-        }
-        local c = UINotification(o);
-        this.addToListAndIncNumeration(c);
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-
-        return c;
-    }
-
-      function Circle(o){
-        if (typeof o == "string") {
-            local p = this.fetch.canvas(o);
-            if (p != null) {
-                return p.context;
-            } else{
-                return null;
-            }
-        }
-        local c = CanvasCircle(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-
-        return c;
-    }
-     function DataTable(o){
-        if (typeof o == "string") {
-            local p = this.fetch.canvas(o);
-            if (p != null) {
-                return p.context;
-            } else{
-                return null;
-            }
-        }
-        local c = Table(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-
-        return c;
-    }
-
-     function Grid(o){
-        if (typeof o == "string") {
-
-            local p = this.fetch.canvas(o);
-
-            if (p != null) {
-                return p.context;
-            } else{
-                return null;
-            }
-        }
-        local c = UIGrid(o);
-        this.addToListAndIncNumeration(c);
-        this.apply3DProps(o,c.getCanvas());
-
-        this.postConstruct(o);
-        return c;
-    }
-
     function addToListAndIncNumeration(c){
 
         local list = c.metadata.list;
@@ -1167,27 +999,6 @@ class UI  {
 
         }
     }
-
-    function TabView(o){
-        if (typeof o == "string") {
-            local p = this.fetch.canvas(o);
-            if (p != null) {
-                return p.context;
-            }else{
-                return null;
-            }
-        }
-        local c = Tabview(o);
-        this.addToListAndIncNumeration(c);
-        c.resetMoves();
-
-        c.shiftPos();
-        this.apply3DProps(o,c.getCanvas());
-        this.postConstruct(o);
-
-        return c;
-    }
-
 
     function Label(o){
 
@@ -1362,12 +1173,7 @@ class UI  {
                 if (c.rawin("className")){
                     local className = c.className;
 
-                    if (className == "InputGroup"){
-                      c.attachParent(b);
-                    }else if (className == "GroupRow"){
-                       c.index = i;
-                       b.add(c.build(b), false);
-                    } else if (className == "Combobox"){
+                    if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
                     } else{
                         local t= typeof c;
@@ -1397,7 +1203,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                }else if (c.className != "InputGroup" && c.className != "GroupRow"){
+                }else {
                     local ccanvas = c.getCanvas();
                      if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;
@@ -1597,12 +1403,7 @@ class UI  {
                 if (c.rawin("className")){
                     local className = c.className;
 
-                    if (className == "InputGroup"){
-                      c.attachParent(b);
-                    }else if (className == "GroupRow"){
-                       c.index = i;
-                       b.add(c.build(b), false);
-                    } else if (className == "Combobox"){
+                    if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
                     } else{
                         local t= typeof c;
@@ -1627,7 +1428,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                }else if (c.className != "InputGroup" && c.className != "GroupRow"){
+                }else {
                     local ccanvas = c.getCanvas();
                     if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;
@@ -1677,12 +1478,7 @@ class UI  {
                 if (c.rawin("className")){
                     local className = c.className;
 
-                    if (className == "InputGroup"){
-                      c.attachParent(b);
-                    }else if (className == "GroupRow"){
-                       c.index = i;
-                       b.add(c.build(b), false);
-                    } else if (className == "Combobox"){
+                    if (className == "Combobox"){
                         b.add(UI.Canvas(c.id), false);
                     } else{
                         local t= typeof c;
@@ -1711,7 +1507,7 @@ class UI  {
                     }
                     c.realign();
                     c.shiftPos();
-                } else if (c.className != "InputGroup" && c.className != "GroupRow"){
+                } else {
                     local ccanvas = c.getCanvas();
                     if (ccanvas.metadata.rawin("posBeforeMove")){
                         ccanvas.Position = ccanvas.metadata.posBeforeMove;
