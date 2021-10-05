@@ -12,6 +12,7 @@ class DecUIComponent {
     Position = null;
     move = null;
     ignoreGameResizeAutoAdjust=null;
+  
 
 
     constructor(o) {
@@ -107,7 +108,9 @@ class DecUIComponent {
     }
 
     function realign() {
-        UI.Canvas(this.id).realign();
+        local canvas =  UI.Canvas(this.id);
+        canvas.parents = this.parents;
+        canvas.realign();
     }
 
     function shiftPos() {

@@ -612,50 +612,53 @@ foreach(i,e in elements ) {
        });
 
      //attachChild(p)
-     e.rawnewmember("attachChild", function(p, processChildren = true) {
+     e.rawnewmember("attachChild", function(childElement, processChildren = true) {
         local t = typeof this;
-        local ct = typeof p;
-
-         if (this.id != null && p.id != this.id ) {
-
-
+        local ct = typeof childElement; 
+       
+    
+         if (this.id != null && childElement.id != this.id ) {
+   
             local list =  this.UI.mergeArray(this.parents, this.id);
-            if (this.childLists.find(p.metadata.list) == null) {
-                this.childLists.push(p.metadata.list);
+            if (this.childLists.find(childElement.metadata.list) == null) {
+                this.childLists.push(childElement.metadata.list);
             }
-            if (p.metadata == null){
-                p.metadata <- { parentPos = this.Position };
+            if (childElement.metadata == null){
+                childElement.metadata <- { parentPos = this.Position };
             }else{
-                p.metadata["parentPos"] <- this.Position;
+                childElement.metadata["parentPos"] <- this.Position;
             }
-            p.metadata["parentID"] <- this.id;
-
-            p.parents = list;
-
-            this.AddChild(ct =="instance" ? p.getCanvas(): p);
-            if (p.rawin("RelativeSize") && p.RelativeSize != null) {
-                 ::UI.applyRelativeSize(p);
+            childElement.metadata["parentID"] <- this.id;
+    
+            childElement.parents = list;
+           
+           
+    
+            this.AddChild(ct =="instance" ? childElement.getCanvas(): childElement);
+            if (childElement.rawin("RelativeSize") && childElement.RelativeSize != null) {
+                 ::UI.applyRelativeSize(childElement);
             }
-            if (p.rawin("align") && p.align != null &&  (!p.rawin("isBorder") ||  !p.isBorder() )) {
-                p.realign();
+            if (childElement.rawin("align") && childElement.align != null &&  (!childElement.rawin("isBorder") ||  !childElement.isBorder() )) {
+                childElement.realign();
             }
-
-            if ( this.autoResize  &&  !p.hasWrap() &&  (!p.rawin("isBorder") || !p.isBorder() ) ){
+            
+    
+            if ( this.autoResize  &&  !childElement.hasWrap() &&  (!childElement.rawin("isBorder") || !childElement.isBorder() ) ){
                 local adjusted = false;
-
-                if ( p.Position.X+p.Size.X > this.Size.X){
-                    this.Size.X = p.Position.X+p.Size.X;
+                
+                if ( childElement.Position.X+childElement.Size.X > this.Size.X){
+                    this.Size.X = childElement.Position.X+childElement.Size.X;
                     adjusted = true;
                 }
-                if ( p.Position.Y+p.Size.Y > this.Size.Y){
-                    this.Size.Y = p.Position.Y+p.Size.Y;
+                if ( childElement.Position.Y+childElement.Size.Y > this.Size.Y){
+                    this.Size.Y = childElement.Position.Y+childElement.Size.Y;
                     adjusted = true;
                 }
                if (adjusted){
                     this.realign();
                     this.resetMoves();
                     this.shiftPos();
-
+    
                      foreach (i, c in this.getChildren()) {
                         if (!c.rawin("className")) {
                             c.resetPosition();
@@ -665,10 +668,11 @@ foreach(i,e in elements ) {
                         }
                     }
                 }
-
+     
             }
             if (processChildren){
-                 foreach (i, c in p.getChildren()) {
+               
+                 foreach (i, c in childElement.getChildren()) {
                     if (!c.rawin("className")) {
                         c.resetPosition();
                         c.realign();
@@ -677,40 +681,40 @@ foreach(i,e in elements ) {
                     }
                 }
             }
-
-            if (p.rawin("shiftPos") && p.shiftPos != null && p.rawin("move") && p.move != null){
-                p.resetMoves();
-                p.shiftPos();
+    
+            if (childElement.rawin("shiftPos") && childElement.shiftPos != null && childElement.rawin("move") && childElement.move != null){
+                childElement.resetMoves();
+                childElement.shiftPos();
             }
-            if (p.rawin("hasWrap") && p.hasWrap() && !p.delayWrap){
-               p.wrapText(this,p,this.Size.X-10)
+            if (childElement.rawin("hasWrap") && childElement.hasWrap() && !childElement.delayWrap){
+                childElement.wrapText(this,childElement,this.Size.X-10)
             }
-
+    
         }
     }, null, false);
 
 
     //add(e)
-     e.rawnewmember("add", function(p, processChildren = true) {
+     e.rawnewmember("add", function(child, processChildren = true) {
 
-        if ( p.rawin("className")){
+        if (child.rawin("className")){
            
-            p = ::UI.Canvas(p.id);
+            child = ::UI.Canvas(child.id);
             local comp =  ["TabView", "Grid", "DataTable"]
-            if (p.rawin("context") && p.context != null){
-                processChildren = comp.find(p.context.className) == null;
+            if (child.rawin("context") && child.context != null){
+                processChildren = comp.find(child.context.className) == null;
             }
-            this.attachChild(p, processChildren);
+            this.attachChild(child, processChildren);
             
 
-        }else{
+        }else{ 
 
             local comp =  ["TabView", "Grid", "DataTable"]
-            if (p.rawin("context") && p.context != null){
-                processChildren = comp.find(p.context.className) == null;
+            if (child.rawin("context") && child.context != null){
+                processChildren = comp.find(child.context.className) == null;
             }
            //p.parentSize = this.Size;
-           this.attachChild(p, processChildren);
+           this.attachChild(child, processChildren);
 
         }
 
