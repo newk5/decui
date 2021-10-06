@@ -100,11 +100,11 @@ class DecUIComponent {
     }
 
     function fadeIn(callback = {}) {
-        UI.Canvas(this.id).fadeIn();
+        UI.Canvas(this.id).fadeIn(callback);
     }
 
     function fadeOut(callback = {}) {
-        UI.Canvas(this.id).fadeOut();
+        UI.Canvas(this.id).fadeOut(callback);
     }
 
     function realign() {
