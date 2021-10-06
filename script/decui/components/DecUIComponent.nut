@@ -99,11 +99,11 @@ class DecUIComponent {
         UI.Canvas(this.id).hide();
     }
 
-    function fadeIn() {
+    function fadeIn(callback = {}) {
         UI.Canvas(this.id).fadeIn();
     }
 
-    function fadeOut() {
+    function fadeOut(callback = {}) {
         UI.Canvas(this.id).fadeOut();
     }
 
