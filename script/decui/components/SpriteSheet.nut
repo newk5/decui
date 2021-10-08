@@ -88,7 +88,8 @@ class SpriteSheet extends DecUIComponent {
       
         UI.Canvas({
             id = this.id
-            border = null
+            border = this.border
+            move = this.move
             align = this.align
             Size = this.imageSize
             children = [
