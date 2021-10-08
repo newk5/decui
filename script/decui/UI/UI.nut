@@ -1,5 +1,5 @@
 class DecUI  {
-    static version = "v1.0.0";
+    static version = "v1.1.0";
     toDelete=null;
 
     kps = null;
