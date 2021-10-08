@@ -26,6 +26,7 @@ dofile("decui/components/Circle.nut");
 dofile("decui/components/Notification.nut");
 dofile("decui/components/Grid.nut");
 dofile("decui/components/Menu.nut");
+dofile("decui/components/SpriteSheet.nut");
 
 
 function Script::ScriptProcess(){
