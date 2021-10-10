@@ -95,6 +95,10 @@ class DecUIComponent {
         UI.Canvas(this.id).show(restoreAlpha);
     }
 
+    function rePosition() {
+        getCanvas().rePosition();
+    }
+
     function hide() {
         UI.Canvas(this.id).hide();
     }

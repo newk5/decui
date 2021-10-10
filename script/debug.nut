@@ -7,6 +7,10 @@
         return "[ "+str+" ]";
     }
 
+    function printVectorScreen(v, pref="") {
+        Console.Print(pref+"VectorScreen{ X="+v.X+", Y="+v.Y+" }");
+    }
+
     function showDebugUI() {
 
         UI.showDebugInfo=true;

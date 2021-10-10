@@ -449,8 +449,9 @@ class DecUI  {
                         e.Position.Y =  e.Position.Y + s.down;
                     }
                 }
-            }
+            } 
         }
+       
     }
 
     function Cursor(status) {
@@ -1028,6 +1029,7 @@ class DecUI  {
             index = this.listsNumeration.labels
          };
         this.listsNumeration.labels++;
+        b.shiftPos();
         this.postConstruct(b);
 
         if (o.rawin("bindTo")){
@@ -1037,7 +1039,7 @@ class DecUI  {
         if (b.getParent() == null){
             b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
         }
-        b.shiftPos();
+       
          this.apply3DProps(o,b);
         debug(b);
 
@@ -1169,69 +1171,30 @@ class DecUI  {
         this.listsNumeration.canvas++;
 
         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                if (c.rawin("className")){
-                    local className = c.className;
-
-                    if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id), false);
-                    } else{
-                        local t= typeof c;
-                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
-                          local comp =  ["TabView", "Grid", "DataTable"]
-                         local processChildren = comp.find(className) == null;
-
-                        b.attachChild(el, processChildren);
-                    }
-
-                }else {
-                    b.add(c, false);
-
-                }
+            foreach (i, child in o.children) {
+                b.add(child, false);
+                /*
+                .add() already postions, aligns and moves the child, however,
+                at that point the child has already gone through those stages
+                once when it was created, and at that point the parent didn't exist yet
+                which means all of those stages were done with values relative to the player resolution
+                so we must reset the position and go through these same stages once again
+                */
+                child.rePosition();
             }
         }
 
 
-         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                 if (!c.rawin("className")) {
-                    if (c.metadata.rawin("posBeforeMove")){
-                        c.Position = c.metadata.posBeforeMove;
-                        if (c.metadata.rawin("movedPos")){
-                            c.metadata.movedPos.clear();
-                        }
-                    }
-                    c.realign();
-                    c.shiftPos();
-                }else {
-                    local ccanvas = c.getCanvas();
-                     if (ccanvas.metadata.rawin("posBeforeMove")){
-                        ccanvas.Position = ccanvas.metadata.posBeforeMove;
-                        if (ccanvas.metadata.rawin("movedPos")){
-                            ccanvas.metadata.movedPos.clear();
-                        }
-                    }
-                    ccanvas.realign();
-                    ccanvas.shiftPos();
-                }
-            }
-        }
-        if (b.getParent() == null){
-            b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
-        }
-        b.shiftPos();
-
-
-         if (b.autoResize){
+        if (b.autoResize){
             b.realign();
             b.resetMoves();
             b.shiftPos();
         }
-
+      
         if (o.rawin("border") ){
             this.applyBorder(o.border, b);
         }
-         this.apply3DProps(o,b);
+        this.apply3DProps(o,b);
         this.postConstruct(b);
         debug(b);
         return b;
@@ -1388,7 +1351,7 @@ class DecUI  {
         local s = o.rawin("file") ? GUISprite(o.file, o.rawin("Position") ? o.Position : VectorScreen(0,0 )) : GUISprite();
         local b = this.applyElementProps(s, o);
 
-           b.metadata.list = "sprites";
+        b.metadata.list = "sprites";
         b.metadata.index = this.listsNumeration.sprites;
         if (o.rawin("file")){
             b.SetTexture(o.file);
@@ -1399,58 +1362,16 @@ class DecUI  {
         this.listsNumeration.sprites++;
 
         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                if (c.rawin("className")){
-                    local className = c.className;
-
-                    if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id), false);
-                    } else{
-                        local t= typeof c;
-                        b.attachChild(t == "instance" ? UI.Canvas(c.id) : c );
-                    }
-
-                }else {
-                    b.add(c, false);
-
-                }
+            foreach (i, child in o.children) {
+                 b.add(child, false);
+                 child.rePosition();
             }
-        }
-
-         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                 if (!c.rawin("className")) {
-                    if (c.metadata.rawin("posBeforeMove")){
-                        c.Position = c.metadata.posBeforeMove;
-                        if (c.metadata.rawin("movedPos")){
-                            c.metadata.movedPos.clear();
-                        }
-                    }
-                    c.realign();
-                    c.shiftPos();
-                }else {
-                    local ccanvas = c.getCanvas();
-                    if (ccanvas.metadata.rawin("posBeforeMove")){
-                        ccanvas.Position = ccanvas.metadata.posBeforeMove;
-                        if (ccanvas.metadata.rawin("movedPos")){
-                            ccanvas.metadata.movedPos.clear();
-                        }
-                    }
-                    ccanvas.realign();
-                    ccanvas.shiftPos();
-                }
-            }
-        }else{
-            if (b.getParent() == null){
-                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
-            }
-            b.shiftPos();
         }
 
          if (b.autoResize){
-             b.realign();
-              b.resetMoves();
-             b.shiftPos();
+            b.realign();
+            b.resetMoves();
+            b.shiftPos();
         }
         if (o.rawin("border") ){
             this.applyBorder(o.border, b);
@@ -1472,51 +1393,19 @@ class DecUI  {
 
         lists[names.find("windows")].push(b);
         idsMetadata[this.cleanID(o.id)] <- { list = b.metadata.list,  index = this.listsNumeration.windows };
-         this.listsNumeration.windows++;
+        this.listsNumeration.windows++;
           if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-             
-                b.add(c, false);
-
-                
+            foreach (i, child in o.children) {
+                b.add(child, false);
+                child.rePosition();
             }
         }
 
-         if (o.rawin("children")  && o.children != null){
-            foreach (i, c in o.children) {
-                 if (!c.rawin("className")) {
-                    if (c.metadata.rawin("posBeforeMove")){
-                        c.Position = c.metadata.posBeforeMove;
-                        if (c.metadata.rawin("movedPos")){
-                            c.metadata.movedPos.clear();
-                        }
-                    }
-                    c.realign();
-                    c.shiftPos();
-                } else {
-                    local ccanvas = c.getCanvas();
-                    if (ccanvas.metadata.rawin("posBeforeMove")){
-                        ccanvas.Position = ccanvas.metadata.posBeforeMove;
-                        if (ccanvas.metadata.rawin("movedPos")){
-                            ccanvas.metadata.movedPos.clear();
-                        }
-                    }
-                    ccanvas.realign();
-                    ccanvas.shiftPos();
-
-                }
-            }
-        }else{
-            if (b.getParent() == null){
-                b.metadata["posBeforeMove"] <- VectorScreen(b.Position.X,b.Position.Y);
-            }
-            b.shiftPos();
-        }
 
          if (b.autoResize){
-             b.realign();
-              b.resetMoves();
-             b.shiftPos();
+            b.realign();
+            b.resetMoves();
+            b.shiftPos();
         }
 
 

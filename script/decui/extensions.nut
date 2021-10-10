@@ -631,6 +631,9 @@ foreach(i,e in elements ) {
             childElement.metadata["parentID"] <- this.id;
            
             childElement.parents = list;
+            if (ct == "instance"){ //attach the parents list to the instance canvas aswell
+                childElement.getCanvas().parents = list;
+            }
            
     
             this.AddChild(ct =="instance" ? childElement.getCanvas(): childElement);
@@ -695,13 +698,22 @@ foreach(i,e in elements ) {
 
     //add(e)
      e.rawnewmember("add", function(child, processChildren = true) {
-       
            this.attachChild(child, processChildren);
-
-        
-
     }, null, false);
 
+
+    //rePosition()   
+    e.rawnewmember("rePosition", function() {
+        local hasMove = this.rawin("move") && this.move != null;
+        local hasAlign =  this.rawin("align") && this.align != null;
+        if (hasAlign || hasMove){
+            this.resetPosition();
+            this.realign();
+            this.resetMoves();
+            this.shiftPos();
+        }
+       
+    }, null, false);     
 
      //shift()
      e.rawnewmember("shiftPos", function() {
