@@ -1475,26 +1475,12 @@ class DecUI  {
          this.listsNumeration.windows++;
           if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
-                if (c.rawin("className")){
-                    local className = c.className;
+             
+                b.add(c, false);
 
-                    if (className == "Combobox"){
-                        b.add(UI.Canvas(c.id), false);
-                    } else{
-                        local t= typeof c;
-                        local el = t == "instance" ? UI.Canvas(c.id) : c ;
-                         local comp =  ["TabView", "Grid", "DataTable"]
-                         local processChildren = comp.find(className) == null;;
-                        b.attachChild(el, processChildren);
-                    }
-
-                }else {
-                    b.add(c, false);
-
-                }
+                
             }
         }
-
 
          if (o.rawin("children")  && o.children != null){
             foreach (i, c in o.children) {
@@ -1526,7 +1512,6 @@ class DecUI  {
             }
             b.shiftPos();
         }
-
 
          if (b.autoResize){
              b.realign();

@@ -629,9 +629,8 @@ foreach(i,e in elements ) {
                 childElement.metadata["parentPos"] <- this.Position;
             }
             childElement.metadata["parentID"] <- this.id;
-    
-            childElement.parents = list;
            
+            childElement.parents = list;
            
     
             this.AddChild(ct =="instance" ? childElement.getCanvas(): childElement);
@@ -696,27 +695,10 @@ foreach(i,e in elements ) {
 
     //add(e)
      e.rawnewmember("add", function(child, processChildren = true) {
-
-        if (child.rawin("className")){
-           
-            child = ::UI.Canvas(child.id);
-            local comp =  ["TabView", "Grid", "DataTable"]
-            if (child.rawin("context") && child.context != null){
-                processChildren = comp.find(child.context.className) == null;
-            }
-            this.attachChild(child, processChildren);
-            
-
-        }else{ 
-
-            local comp =  ["TabView", "Grid", "DataTable"]
-            if (child.rawin("context") && child.context != null){
-                processChildren = comp.find(child.context.className) == null;
-            }
-           //p.parentSize = this.Size;
+       
            this.attachChild(child, processChildren);
 
-        }
+        
 
     }, null, false);
 

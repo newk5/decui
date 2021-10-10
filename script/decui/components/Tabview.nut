@@ -2,8 +2,6 @@ class Tabview  extends DecUIComponent {
 
     tabs = null;
     className = "TabView";
-
-
     style = null;
     Size = null;
     onTabChangeEvent = null;
@@ -23,7 +21,6 @@ class Tabview  extends DecUIComponent {
          base.constructor(o);
 
         this.tabs = [];
-        this.move = {};
         this.x = 0;
         this.currentTabIdx = -1;
         this.maxContentSize =  VectorScreen(0,0);
