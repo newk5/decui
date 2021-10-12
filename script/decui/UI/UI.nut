@@ -1,5 +1,5 @@
 class DecUI  {
-    static version = "v1.1.0";
+    static version = "v1.2.0";
     toDelete=null;
 
     kps = null;
@@ -29,6 +29,7 @@ class DecUI  {
     showDebugInfo = false;
     excludeDebugIds =false;
     GLOBAL_COUNTER = 0;
+    presets = {};
 
     constructor() {
 
@@ -744,17 +745,21 @@ class DecUI  {
     }
 
 
-    function findByPreset(name) {
-        local els = [];
-
-        foreach(i,list in lists ) {
-           foreach(c,e in list ) {
-                if (e.presets != null && e.presets.find(name) !=null) {
-                    els.push(e);
-                }
-            }
+    function getPreset(name) {
+        if (this.presets.rawin(name)){
+            return this.presets[name];
         }
-        return els;
+        return null;
+    }
+
+    function Preset(name, preset) {
+        this.presets[name] <- preset;
+    }
+
+    function Presets(table) {
+        foreach(key, value in table){
+             this.Preset(key,value);
+        }
     }
 
     function cleanID(id) {
@@ -844,6 +849,44 @@ class DecUI  {
         }
 
     }
+    function applyPreset(element, obj) {
+         //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
+         if (obj.rawin("flags")){
+            element.AddFlags(obj.flags);
+        }
+        //set text first to prevent mgui bug with .Text reseting font size
+         if (obj.rawin("Text")){
+            element.Text = obj.Text;
+        }
+        foreach(i,e in obj ) {
+            try {
+
+                if (i != "flags" && i != "Flags" && i != "Text"){
+                    if (i == "fontFlags"){
+                        element.FontFlags = obj[i];
+                    } else {
+                        element[i] =obj[i];
+                    }
+
+                }
+            } catch (e){
+
+
+            }
+        }
+        if (element.rawin("contextMenu") || element.rawin("tooltip")) {
+            element.AddFlags(GUI_FLAG_MOUSECTRL);
+        }
+         if (obj.rawin("RelativeSize")){
+            this.applyRelativeSize(element);
+        }
+        
+      
+        if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
+            element.RemoveFlags(obj.RemoveFlags);
+        }
+
+    }
 
     function applyElementProps(element, obj){
 
@@ -864,6 +907,16 @@ class DecUI  {
                 }
                 foreach (prop in this.defaultArrayProps) {
                     element[prop] =  [];
+                }
+
+                if (obj.rawin("presets") && obj.presets != null){
+                    foreach(preset in obj.presets){
+                        local presetTable = this.getPreset(preset);
+                        if (presetTable != null){
+                            this.applyPreset(element, presetTable);
+                        }
+                       
+                    }
                 }
 
                 //add flags first to prevent crash with  GUI_FLAG_TEXT_TAGS
