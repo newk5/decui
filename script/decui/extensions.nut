@@ -17,6 +17,7 @@ attachProps([ "UI","wrapOptions", "bindTo", "file","remove","autoResize", "Relat
     "onInputReturn", "onOptionSelect", "onScroll", "onWindowResize", "flags", "fadeStep", "fadeLow", "elementData"
     "onGameResize", "addPreset", "removePreset", "add", "parents"," children", "hidden", "context", "childLists","border"
     "contextMenu", "move", "parentSize", "tooltip", "tooltipVisible", "options",  "postConstruct", "preDestroy", "data", "metadata"
+    "onPresetAdded", "onPresetRemoved"
        ]);
 
 //attach new functions
@@ -370,18 +371,11 @@ foreach(i,e in elements ) {
 
     //addPreset(preset)
      e.rawnewmember("addPreset", function(p) {
-        if (!p.rawin("id") ||  p.id == null  && p.rawin("name") ){
-
-            if (this.presetsList == null){
-                this.presetsList = [];
-                this.presets =[];
-            }
-
-            if (this.presets.find(p.name) == null) {
-                this.presetsList.push(p);
-                this.presets.push(p.name);
-                this =  this.UI.applyElementProps(this,p);
-            }
+        this.presets.push(p);
+        local preset = UI.getPreset(p);
+        UI.applyPreset(this,preset);
+        if (this.rawin("onPresetAdded") && this.onPresetAdded != null){
+            this.onPresetAdded(p);
         }
     }, null, false);
 
@@ -605,17 +599,32 @@ foreach(i,e in elements ) {
         }
         return resized;
     });
-
+ 
       //applyRelativeSize()
        e.rawnewmember("applyRelativeSize", function() {
            ::UI.applyRelativeSize(this);
        });
 
+
+      //getMaxPosition()
+    e.rawnewmember("getMaxPosition", function() {
+       return VectorScreen(this.Position.X+this.getRealSize().X, this.Position.Y+this.getRealSize().Y)
+    });
+
+    //getRealSize() (when the element is a GUILabel return .TextSize instead of .Size )
+    e.rawnewmember("getRealSize", function() {
+        if (typeof this == "GUILabel"){
+            return this.TextSize;
+        }
+       return this.Size;
+    });
+
+
      //attachChild(p)
-     e.rawnewmember("attachChild", function(childElement, processChildren = true) {
+     e.rawnewmember("attachChild", function(childElement, repos = true) {
         local t = typeof this;
         local ct = typeof childElement; 
-       
+        
     
          if (this.id != null && childElement.id != this.id ) {
    
@@ -647,58 +656,55 @@ foreach(i,e in elements ) {
     
             if ( this.autoResize  &&  !childElement.hasWrap() &&  (!childElement.rawin("isBorder") || !childElement.isBorder() ) ){
                 local adjusted = false;
-                
-                if ( childElement.Position.X+childElement.Size.X > this.Size.X){
-                    this.Size.X = childElement.Position.X+childElement.Size.X;
+                local Max = childElement.getMaxPosition();
+                local xPadding = 11;
+                if ( Max.X > this.Size.X){
+                    this.Size.X = Max.X +xPadding; 
                     adjusted = true;
                 }
-                if ( childElement.Position.Y+childElement.Size.Y > this.Size.Y){
-                    this.Size.Y = childElement.Position.Y+childElement.Size.Y;
+                if ( Max.Y > this.Size.Y){
+                    this.Size.Y = Max.Y;
                     adjusted = true;
                 }
                if (adjusted){
-                    this.realign();
-                    this.resetMoves();
-                    this.shiftPos();
+                    this.rePosition();
     
                      foreach (i, c in this.getChildren()) {
-                        if (!c.rawin("className")) {
-                            c.resetPosition();
-                            c.realign();
-                            c.resetMoves();
-                            c.shiftPos();
-                        }
+                       
+                        c.rePosition();
                     }
                 }
+
+                this.metadata["wasResized"] <- adjusted;
      
+            }else{
+                this.metadata["wasResized"] <- false;
             }
-            if (processChildren){
-               
-                 foreach (i, c in childElement.getChildren()) {
-                    if (!c.rawin("className")) {
-                        c.resetPosition();
-                        c.realign();
-                        c.resetMoves();
-                        c.shiftPos();
-                    }
-                }
-            }
+            
     
             if (childElement.rawin("shiftPos") && childElement.shiftPos != null && childElement.rawin("move") && childElement.move != null){
                 childElement.resetMoves();
                 childElement.shiftPos();
+               
             }
+            
             if (childElement.rawin("hasWrap") && childElement.hasWrap() && !childElement.delayWrap){
                 childElement.wrapText(this,childElement,this.Size.X-10)
             }
+            if (repos){
+                childElement.rePosition();
+            }
+            
+
+            childElement.getMaxPosition();
     
         }
     }, null, false);
 
 
     //add(e)
-     e.rawnewmember("add", function(child, processChildren = true) {
-           this.attachChild(child, processChildren);
+     e.rawnewmember("add", function(child, repos = true) {
+           this.attachChild(child, repos);
     }, null, false);
 
 
@@ -812,29 +818,16 @@ foreach(i,e in elements ) {
 
     //removePreset(preset)
      e.rawnewmember("removePreset", function(name) {
-        if (id!=null){
-            if (presets !=null) {
-                local idx = this.presets.find(name);
-                if (idx != null){
-                    this.presets.remove(idx);
-                }
-                if  (this.presetsList != null) {
-                     local index = null;
-
-                    foreach (i, p in this.presetsList) {
-                        if (p.name ==name){
-                            index = i;
-                            break;
-                        }
-                    }
-
-                    if (index != null) {
-                        this.presetsList.remove(index);
-                        this.applyPresets();
-                    }
-                }
-            }
+        local idx = this.presets.find(name);
+        if (idx != null){
+            this.presets.remove(idx);
+            
+        if (this.rawin("onPresetRemoved") && this.onPresetRemoved != null){
+            this.onPresetRemoved(name);
         }
+        }
+       
+       
     }, null, false);
 
      //applyPresets()

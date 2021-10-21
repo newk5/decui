@@ -57,6 +57,7 @@ class PopUp extends DecUIComponent {
 
         local c = UI.Canvas({
             id = this.id,
+            presets = this.presets
             Size = this.size == null ? VectorScreen(250, 120) : this.size,
             align = "center",
             context = this,

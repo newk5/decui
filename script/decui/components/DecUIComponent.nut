@@ -12,10 +12,16 @@ class DecUIComponent {
     Position = null;
     move = null;
     ignoreGameResizeAutoAdjust=null;
-  
+    presets = null;
+    border = null;
 
 
     constructor(o) {
+        foreach(key,value in o){
+            if (this.rawin(key)){
+                this[key] = value;
+            }
+       }
         this.id = o.rawin("id") ? o.id: "DecUI::RandomID"+::UI.GLOBAL_COUNTER;
         ::UI.GLOBAL_COUNTER++;
         this.metadata = {
@@ -23,6 +29,7 @@ class DecUIComponent {
             index = null
         };
         this.parents = [];
+        this.presets = [];
         this.childLists = [];
         this.autoResize = false;
         this.delayWrap = false;
@@ -64,7 +71,9 @@ class DecUIComponent {
         return v == null ? defaultValue: v;
     }
 
-
+    function getMaxPosition() {
+        return getCanvas().getMaxPosition();
+    }
 
     function destroy() {
         if (this.preDestroy != null) {

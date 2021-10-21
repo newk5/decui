@@ -290,6 +290,7 @@ class Combobox extends DecUIComponent {
         childParents.push(this.id);
         local c = UI.Canvas({
             id=this.id,
+            presets = this.presets
             context = this,
             align = this.align
             Size = this.canvasSize ,

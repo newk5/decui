@@ -799,6 +799,7 @@ class Table extends DecUIComponent {
         if (!rebuild) {
             canv = UI.Canvas({
                 id= this.id,
+                presets = this.presets
                 data = {},
                 context = this,
                 Position = this.Position,

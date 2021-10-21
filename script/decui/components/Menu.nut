@@ -304,6 +304,7 @@ class OptionsMenu extends DecUIComponent {
             id = this.id
             context = this
             move = this.move
+            presets = this.presets
             align = this.align
             RelativeSize = this.RelativeSize
             align =  this.align

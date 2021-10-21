@@ -85,6 +85,7 @@ constructor(o) {
 
         local c = UI.Canvas({
             id=this.id,
+            presets = this.presets
             context = this,
             Color = Colour (255,255,255),
             Position = this.Position,

@@ -57,7 +57,7 @@ class CanvasCircle extends DecUIComponent {
         this.id = o.rawin("id") ? o.id : Script.GetTicks()+"_circle"
         local c = UI.Canvas({
          id = this.id
-
+            presets = this.presets
             Size = VectorScreen((radius*2)+border,radius*2+border)
             Position =VectorScreen(xcenter-radius,ycenter-radius),
             context = this

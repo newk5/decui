@@ -81,6 +81,7 @@ class UINotification extends DecUIComponent {
         mup = mup+"%";
         local c =  UI.Canvas({
             id = this.id
+            presets = this.presets
             Size = this.Size
             autoResize = true
             Colour = this.Colour

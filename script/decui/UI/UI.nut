@@ -25,7 +25,7 @@ class DecUI  {
     data = null;
     defaultTableProps = [ "data" ,"elementData", "metadata"];
     defaultBooleanProps = [ "autoResize" ,"delayWrap"];
-    defaultArrayProps = [ "parents" ,"childLists"];
+    defaultArrayProps = [ "parents" ,"childLists", "presets"];
     showDebugInfo = false;
     excludeDebugIds =false;
     GLOBAL_COUNTER = 0;
@@ -257,12 +257,15 @@ class DecUI  {
     function align(e) {
         if (e.align != null){
             local a = e.align.tolower();
-            local t = typeof this;
+            local t = typeof e;
             local isLabel = t == "GUILabel";
-            local sizeX = isLabel ? e.TextSize.X : e.Size.X;
-            local sizeY = isLabel ? e.TextSize.Y : e.Size.Y;
+            local paddingX =11;
+            local paddingY =5;
+            local sizeX = isLabel ? e.TextSize.X+paddingX : e.Size.X;
+            local sizeY = isLabel ? e.TextSize.Y+paddingY : e.Size.Y;
             local wrapper = null;
             local offset = 0;
+            local parent = null;
 
              if (e.rawin("data") && e.data.rawin("offset")){
                 offset = e.data.offset;
@@ -272,11 +275,12 @@ class DecUI  {
             }else{
 
                 local lastID = e.parents[e.parents.len()-1];
-                local parent = findById(lastID);
-
+                parent = findById(lastID);
+               
                 wrapper =  parent == null ? GUI.GetScreenSize() : parent.Size;
             }
-
+           
+            
 
             if (a == "top_right"){
 
@@ -335,6 +339,13 @@ class DecUI  {
                 e.Position.X = wrapper.X - (wrapper.X /20);
             }
 
+            //avoid positioning off bounds
+            if (e.Position.Y < 0){
+                e.Position.Y = 0;
+            }
+            if (e.Position.X < 0){
+                e.Position.X = 0;
+            }
 
         }
 
@@ -885,6 +896,7 @@ class DecUI  {
         if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
             element.RemoveFlags(obj.RemoveFlags);
         }
+        element.rePosition();
 
     }
 
@@ -909,11 +921,15 @@ class DecUI  {
                     element[prop] =  [];
                 }
 
+
                 if (obj.rawin("presets") && obj.presets != null){
                     foreach(preset in obj.presets){
                         local presetTable = this.getPreset(preset);
                         if (presetTable != null){
                             this.applyPreset(element, presetTable);
+                            if (obj.rawin("onPresetAdded") && obj.onPresetAdded != null){
+                                obj.onPresetAdded(preset);
+                            }
                         }
                        
                     }
@@ -958,9 +974,9 @@ class DecUI  {
 
 
                 this.align(element);
-                if (obj.rawin("children") ){
-                    this.shift(element);
-                }
+                
+                this.shift(element);
+                
                 if (obj.rawin("RemoveFlags") && obj.RemoveFlags != null){
                     element.RemoveFlags(obj.RemoveFlags);
                 }

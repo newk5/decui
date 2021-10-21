@@ -351,6 +351,7 @@ class Tabview  extends DecUIComponent {
         this.wasResizedDuringBuild= false;
         local wrapper = UI.Canvas({
             id= this.id
+            presets = this.presets
             Position =this.Position == null ? VectorScreen(0,0) : this.Position,
             move = this.move,
             context = this

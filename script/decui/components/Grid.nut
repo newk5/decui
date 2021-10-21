@@ -95,6 +95,7 @@ class UIGrid extends DecUIComponent {
 
         local wrapper = UI.Canvas({
             id = this.id,
+            presets = this.presets
             align = this.align,
             context = this,
             move = this.move
