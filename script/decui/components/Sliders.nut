@@ -1,357 +1,278 @@
 class Sliders extends DecUIComponent {
-    buttonId        = null;
-    crossID         = null;
-    Position        = null;
-    colour          = null;
-    border          = null;
-    layout          = null;
- 
-    Size                     = null;
-    TrackId                 = null;
-    trackStatus             = null;
-    trackColor              = null;
-    tapToSeek               = null;
+    className = null;
+    squareID = null;
+    crossID = null;
+    parentSize = null;
+    Position = null;
+    colour = null;
+    border =null;
+    direction = null;
+    buttonAlign = null;
+    buttonColour = null;
+    Size = null;
+    shadowID = null;
+    setshadow = null;
 
-    onValueChange           = null;
-    onSliderClicked         = null;
-    mouseTimer              = null;
-    getValue                = null;
-    thumbStyle              = null;
-    maximunValue            = null;
-    onSlidingEnd            = null;
-    onSlidingStart          = null;
-    onSlideEvent            = null;
-    stopTracks              = null;
-    defaultValue            = null;
+    buttonWidth = 20;
+    onValue = null;
+    onSliderClicked = null;
+    mouseTimer = null;
 
-    constructor(o) {
+constructor(o) {
         base.constructor(o);
-        if (!this.maximunValue) this.maximunValue = 100;
-        if (!this.defaultValue) this.defaultValue = 0;
 
-        local orientation = this.layout == "vertical";
-        if (this.thumbStyle.origin == "left") this.thumbStyle.origin = (orientation ? "bottom" : "mid_left");
-        else this.thumbStyle.origin = (orientation ? "top_center" : "mid_right");
- 
+        if (o.rawin ("buttonWidth")) this.buttonWidth = o.buttonWidth;
+        if (o.rawin ("buttonColour")) this.buttonColour = o.buttonColour;
+        else this.buttonColour = Colour (0,0,0);
+
+        if (o.rawin("direction")) this.direction = o.direction;
+        else this.direction = "horizontal"
+
+        if (o.rawin ("buttonAlign")){
+            local a = this.direction == "vertical";
+            if (o.buttonAlign == "left") a ? this.buttonAlign = "bottom" : this.buttonAlign = "mid_left";
+            else if (o.buttonAlign == "right") a ? this.buttonAlign = "top_center" : this.buttonAlign = "mid_right";
+
+            else this.buttonAlign = "left";
+        }
+        else this.buttonAlign = "left";
+
+        if (o.rawin("onValue")) this.onValue = o.onValue;
+        if (o.rawin("Size")) this.Size = o.Size;
         if (o.rawin("Colour")) this.colour = o.Colour;
         else this.colour = ::Colour(255,255,255);
 
-        this.buttonId = this.id + "::Slider::square";
+        if (o.rawin("align")){
+            this.align = o.align;
+        }
+        else this.align = "center";
+
+        if (o.rawin ("setshadow")) this.setshadow = o.setshadow;
+        if (o.rawin("border")){
+            this.border = o.border;
+        }
+
+
+        this.squareID = this.id + "::Slider::square";
         this.crossID = this.id + "::Slider::cross";
-        this.TrackId = this.id + "::Slider::trackId";
+        this.shadowID = this.id + "::Slider::shadowID";
+
+
 
         this.build();
     }
 
+
     function build(){
-        local c         = UI.Canvas({
-            id          = this.id,
-            context     = this,
-            Color       = this.colour,
-            Position    = this.Position,
-            Size        = this.Size,
-            align       = this.align,
-            move        = this.move,
-            flags       = GUI_FLAG_MOUSECTRL,
-            onClick     = function() { if (context.tapToSeek) context.assignTrackToParent (null, null, true); }
-        });
-
-        local b         = UI.Canvas({
-            id          = this.buttonId,
-            context     = this,
-            Color       = this.thumbStyle.color,
-            align       = this.thumbStyle.origin
-            flags       = GUI_FLAG_MOUSECTRL,  
-            onClick     = function () { 
-                context.onSliderClicked = true; 
- 
-            }
-            onRelease   = function (x,y) { 
-                context.onSliderClicked = false; 
-                if (context.onSlidingEnd && context.onSlideEvent) context.onSlidingEnd ();
-                context.onSlideEvent = null;
-            }
-        });
-
-        local s     = UI.Canvas({
-            id      = this.TrackId,
+        local b = UI.Canvas({
+            id= this.squareID,
             context = this,
-            Color   = this.trackColor ? this.trackColor : Colour (255,0,0), 
-            align   = this.thumbStyle.origin
-            flags   = this.tapToSeek ? GUI_FLAG_NONE : GUI_FLAG_DISABLED,
-            onClick = function() {
-                if (context.tapToSeek) context.assignTrackToParent (null, null, true);
+            Color = this.buttonColour,
+            align = this.buttonAlign
+            flags = GUI_FLAG_MOUSECTRL,
+            onClick = function () {
                 context.onSliderClicked = true;
             }
 
-            onRelease = function (x,y) { context.onSliderClicked = false;
-                if (context.onSlidingEnd && context.onSlideEvent) context.onSlidingEnd ();
-                context.onSlideEvent = null;
+            onRelease = function (x,y) {
+                context.onSliderClicked = false;
             }
-        }); 
+        });
 
-            // assigning properties to childs
-        if (this.layout == "horizontal") {
-                // button
-            b.Size = VectorScreen (this.thumbStyle.height + (c.Size.X / 100) * 6, c.Size.Y + this.thumbStyle.width);
-            s.Size.Y = this.Size.Y;
+        local c = UI.Canvas({
+            id=this.id,
+            presets = this.presets
+            context = this,
+            Color = this.colour,
+            Position = this.Position,
+            align = this.align,
+            move = this.move,
+            flags = GUI_FLAG_MOUSECTRL,
+            onClick = function(){
+                context.attachShadow ();
+            }
+        });
+
+        local s = UI.Canvas({
+            id=this.shadowID,
+            context = this,
+            Color = this.buttonColour,
+            align = this.buttonAlign
+            flags = GUI_FLAG_MOUSECTRL,
+            onClick = function(){
+                context.attachShadow ();
+            }
+        });
+
+        local a = this.Size != null;
+        if (this.direction == "horizontal") {
+            a ? c.Size = this.Size : c.Size = VectorScreen (200,5);
+            a ? b.Size = VectorScreen (c.Size.X/100*6,c.Size.Y+this.buttonWidth) : b.Size = VectorScreen (20,20);
+            s.Size = VectorScreen(0,this.Size.Y);
+
+            b.addBorders ({
+                offset = 1
+                color = this.buttonColour
+            })
         }
         else {
-                // assigning layout if is vertical
-            c.Size = VectorScreen (this.Size.Y, this.Size.X);
-            b.Size = VectorScreen (this.Size.Y + this.thumbStyle.width, this.thumbStyle.height + (c.Size.Y / 100) * 5);
-                
-                // track width
-            s.Size.X = this.Size.Y
+            a ? c.Size = VectorScreen (this.Size.Y,this.Size.X) : c.Size = VectorScreen (200,5);
+            a ? b.Size = VectorScreen (this.Size.Y+this.buttonWidth,c.Size.Y/100*6) : b.Size = VectorScreen (20,20);
+            s.Size = VectorScreen(this.Size.Y,0);
+
+            b.addBorders ({
+                offset = 1
+                color = this.buttonColour
+            })
         }
 
-        if (this.border != null) c.addBorders(this.border);
-
+        if (this.border != null) {
+            c.addBorders(this.border)
+        }
 
         c.shiftPos ();
 
         c.add(b, false);
         c.add(s, false);
+        c.realign();
 
-        c.realign(); 
+        return c;
+    }
 
-            // aligning button  
-       if (this.layout == "horizontal") b.Pos.Y = -(this.thumbStyle.width/2);
-       else {
-           b.Pos.X = -(this.thumbStyle.width/2);
-            this.setValue (this.defaultValue)   
-        }
-    }   
- 
-    assignTrackToParent = function (w=null, h=null, pressed = null) {
+    attachShadow = function (w=null,h=null,debug=null) {
         local context = this;
-        local s = ::UI.Canvas(context.TrackId); 
+        local s = ::UI.Canvas(context.shadowID);
         local c = ::UI.Canvas(this.id);
-        local b = ::UI.Canvas(this.buttonId);
-        
-        if (context.layout == "horizontal") {
-                // horizontal
-            local percent;
-            if (this.thumbStyle.origin == "mid_left") {
-                    // assigning position depending on where the click was.
-                if (pressed && GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X;
+        local b = ::UI.Canvas(this.squareID);
 
-                    // trackstatus
-                if (context.trackStatus) {
-                    if (!w && GUI.GetMousePos ()) s.Size.X = (GUI.GetMousePos ().X - c.Pos.X);
+        if (context.direction == "horizontal") {
+            local percent;
+            if (context.buttonAlign == "mid_left") {
+                if (GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X;
+                if (context.setshadow != null) {
+                    if(w == null) s.Size.X = GUI.GetMousePos ().X - c.Pos.X;
                     else s.Size.X = w;
- 
+
                     s.Pos.X = 0;
                 }
-                percent = (b.Pos.X.tofloat ()/c.Size.X.tofloat ()) * context.maximunValue;
+                percent = (b.Pos.X.tofloat ()/c.Size.X.tofloat ()) * 100;
             }
             else {
-                    // assigning position depending on where the click was.
-                if (pressed && GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X; 
-
-                    // trackstatus
-                if (context.trackStatus) {
-                        // depending on canvas click position
-                    if(!w) s.Size.X = (context.Size.X-b.Pos.X) - b.Size.X;
-                    
-                        // adapting position by value
+                if (GUI.GetMousePos () != null) b.Pos.X = GUI.GetMousePos ().X - c.Pos.X;
+                if (context.setshadow != null) {
+                    if(w == null) s.Size.X = context.Size.X-b.Pos.X;
+                    else if (debug) s.Size.X = w;
                     else s.Size.X = context.Size.X-w;
 
-                        //  positioning
                     s.Pos.X = c.Size.X - s.Size.X;
                 }
-                percent = context.maximunValue - (b.Pos.X.tofloat ()/c.Size.X.tofloat ()) * context.maximunValue;
+                percent = 100-(b.Pos.X.tofloat ()/c.Size.X.tofloat ()) * 100;
             }
-            context.percentProvider (floor (percent));
+            if (context.onValue != null && w == null) context.onValue (percent.tointeger ());
         }
         else {
-                // vertical
             local percent;
-            if (this.thumbStyle.origin == "bottom") {
-                    // assigning position depending on where the click was.
-                if (pressed && GUI.GetMousePos () != null) b.Pos.Y = (GUI.GetMousePos ().Y - c.Pos.Y);
-
-                    // trackstatus
-                if (context.trackStatus) {
-                    if(!h) s.Size.Y = (context.Size.X-b.Pos.Y) - b.Size.Y;
-                    else s.Size.Y = (context.Size.X-h);
+            if (context.buttonAlign == "bottom") {
+                if (GUI.GetMousePos () != null) b.Pos.Y = GUI.GetMousePos ().Y - c.Pos.Y;
+                if (context.setshadow != null) {
+                    if(h == null) s.Size.Y = context.Size.X-b.Pos.Y;
+                    else if (debug) s.Size.Y = h;
+                    else s.Size.Y = context.Size.X-h;
 
                     s.Pos.Y = c.Size.Y - s.Size.Y;
                 }
-                percent = context.maximunValue-(b.Pos.Y.tofloat ()/c.Size.Y.tofloat ()) * context.maximunValue;
+                percent = (b.Pos.Y.tofloat ()/c.Size.Y.tofloat ()) * 100;
             }
             else {
-                    // assigning position depending on where the click was.
-                if (pressed && GUI.GetMousePos () != null) b.Pos.Y = GUI.GetMousePos ().Y - c.Pos.Y;
-               
-                    // trackstatus
-                if (context.trackStatus) {
-                    if(!h && GUI.GetMousePos ()) s.Size.Y = GUI.GetMousePos ().Y - c.Pos.Y;
+                if (GUI.GetMousePos () != null) b.Pos.Y = GUI.GetMousePos ().Y - c.Pos.Y;
+                if (context.setshadow != null) {
+                    if(h == null) s.Size.Y = GUI.GetMousePos ().Y - c.Pos.Y;
                     else s.Size.Y = h;
 
                     s.Pos.Y = 0;
                 }
-                percent = (b.Pos.Y.tofloat ()/c.Size.Y.tofloat ()) * context.maximunValue;
+                percent = 100-(b.Pos.Y.tofloat ()/c.Size.Y.tofloat ()) * 100;
             }
-            context.percentProvider (floor (percent));
+            if (context.onValue != null && h == null) context.onValue (percent.tointeger ());
         }
         return this;
     }
 
-    percentProvider = function (percent) {
-        if (this.onValueChange != null) this.onValueChange (percent);
-        this.getValue = (percent);
-    }
-
-    setValue = function (value) {
-        if (value >= this.maximunValue) value = this.maximunValue;
-        if (value < 0) value = 0;
-
-        value = value-1;
-
-        local w, h;
+    setValue = function (value,debug=null) {
+        local w,h;
         if (value != null) {
             local c = ::UI.Canvas(this.id);
-            local b = ::UI.Canvas(this.buttonId);
-  
-            if (this.layout == "horizontal") {  
-                    // horizontal layout
-                local percent = floor (c.Size.X.tofloat () / this.maximunValue * value);
+            local b = ::UI.Canvas(this.squareID);
 
-                if (this.thumbStyle.origin == "mid_left") {
-                    b.Pos.X = percent;
+            if (this.direction == "horizontal") {
+                local percent = c.Size.X.tofloat () / 100 * value;
+                if (this.buttonAlign == "mid_left") {
+                    if (b.Pos.X <= c.Size.X - b.Size.X) b.Pos.X = percent;
                     w = b.Pos.X;
-
-                   
                 }
                 else {
-                    b.Pos.X = (c.Size.X-percent) - b.Size.X;
-                    w = b.Pos.X + b.Size.X;
+                    if (b.Pos.X >= 0) b.Pos.X = c.Size.X.tofloat ()-percent.tofloat()
+                    w = b.Pos.X;
                 }
+                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);
             }
             else {
-                    // vertizal loyout
-                local percent = floor (c.Size.Y.tofloat () / this.maximunValue * value); 
-                if (this.thumbStyle.origin == "bottom") {
-                    b.Pos.Y = (c.Size.Y-percent) - b.Size.Y;
-                    h = b.Pos.Y + b.Size.Y;
-                }
-                else {
-                    b.Pos.Y = percent;
+                local percent = c.Size.Y.tofloat () / 100 * value;
+                if (this.buttonAlign == "bottom") {
+                    if (b.Pos.Y >= 0) b.Pos.Y = c.Size.Y.tofloat ()-percent.tofloat()
                     h = b.Pos.Y;
                 }
+                else {
+                    if (b.Pos.Y <= c.Size.Y - b.Size.Y) b.Pos.Y = percent;
+                    h = b.Pos.Y;
+                }
+                if (this.onValue != null) this.onValue (value > 100 ? 100 : value);
             }
- 
-            this.percentProvider (value);
         }
+        this.attachShadow (w,h,debug);
+        return this;
+    }
 
-        this.assignTrackToParent (w, h);
+    attachToShadow = function () {
+        this.setshadow = true;
         return this;
     }
 
     attachToMouse = function () {
-        local context = this;
-        if (this.mouseTimer == null ) { 
-            local checkIfSliding = 0;
-            this.mouseTimer = Timer.Create (::UI, function (buttonId,Id,TrackId) {
-                local b = ::UI.Canvas(buttonId);
+        if (this.mouseTimer == null ) {
+            this.mouseTimer = Timer.Create (::UI, function (squareId,Id,shadowId) {
+                local b = ::UI.Canvas(squareId);
                 local c = ::UI.Canvas(Id);
-                local s = ::UI.Canvas(TrackId);
- 
+                local s = ::UI.Canvas(shadowId);
+                local context = ::UI.Slider(Id)
+
                 if (context.onSliderClicked == true) {
-                    checkIfSliding++;
-                    if (context.layout == "horizontal") {
-                        local percent = (b.Pos.X.tofloat () / context.Size.X.tofloat () * context.maximunValue).tointeger ();
+                    if (context.direction == "horizontal") {
+                        local percent = (b.Pos.X.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
+                        if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
                         if (GUI.GetMousePos () != null) {
-                                // position button
-                            if (context.tapToSeek || context.onSlideEvent) b.Pos.X = GUI.GetMousePos ().X-c.Pos.X;
+                            b.Pos.X = GUI.GetMousePos ().X-c.Pos.X;
                             if (b.Pos.X <= 0) b.Pos.X = 0;
                             if (b.Pos.X >= c.Size.X - b.Size.X) b.Pos.X = c.Size.X - b.Size.X;
-                                
-                                // tracks
-                            if (context.trackStatus && context.tapToSeek || context.onSlideEvent && context.trackStatus) {
-                                    
-                                    // position track
-                                if (context.thumbStyle.origin == "mid_right") {
-                                    s.Pos.X     = (b.Pos.X-c.Size.X) + c.Size.X + b.Size.X;
-                                    s.Size.X    = (c.Size.X-b.Pos.X) - b.Size.X;
-                                    
-                                    percent = context.maximunValue-percent;
-                               
-                                }
-                                else {
-                                        // position track
-                                    s.Size.X = (GUI.GetMousePos ().X-c.Pos.X);
-
-                                    if (s.Size.X <= 0) s.Size.X = 0;
-                       
-                                        // x axis
-                                    if (s.Pos.X >= c.Size.X - s.Size.X - b.Size.X) {
-                                        s.Size.X = c.Size.X - b.Size.X;
-                                        percent = context.maximunValue;
-                                    }
-                                }
-                                context.percentProvider (percent); 
-                            } 
-                            else {
-                                if (context.thumbStyle.origin == "mid_right") context.percentProvider (context.maximunValue-percent);
-                                else context.percentProvider (percent);
-                            }   
                         }
+                        if (context.onValue != null) context.onValue (percent);
                     }
-                    else {  
-                        local percent = floor (b.Pos.Y.tofloat () / c.Size.Y.tofloat () * context.maximunValue.tofloat ());
-
-                            // fix percent giving wrong values
+                    else {
+                        local percent = (b.Pos.Y.tofloat () / context.Size.X.tofloat () * 100).tointeger ();
+                        if (context.setshadow != null) context.setValue(percent,true); //adding shadow if activate
                         if (GUI.GetMousePos () != null) {
-                                // positioning button
-                                // button will only move if the onslideevent is declared as true or if tapToseek is true
-                            if (context.tapToSeek || context.onSlideEvent) b.Pos.Y = (GUI.GetMousePos ().Y-c.Pos.Y);
+                            b.Pos.Y = GUI.GetMousePos ().Y-c.Pos.Y;
                             if (b.Pos.Y <= 0) b.Pos.Y = 0;
                             if (b.Pos.Y >= c.Size.Y - b.Size.Y) b.Pos.Y = c.Size.Y - b.Size.Y;
-                            
-                                // tracks
-                            if (context.trackStatus && context.tapToSeek || context.onSlideEvent && context.trackStatus) {
-                                    
-                                    // position track
-                                if (context.thumbStyle.origin == "bottom") {
-                                    s.Pos.Y     = (b.Pos.Y-c.Size.Y) + c.Size.Y + b.Size.Y;
-                                    s.Size.Y    = (c.Size.Y-b.Pos.Y) - b.Size.Y;
- 
-                                    percent =  (context.maximunValue-percent);
-                                    if (b.Pos.Y >= c.Size.Y- b.Size.Y) percent = 0;
-                                }
-                                else { 
-                                        // position track
-                                    s.Size.Y = (GUI.GetMousePos ().Y-c.Pos.Y) ;
-
-                                    percent = 0
-                                    if (b.Pos.Y >= c.Size.Y- b.Size.Y) percent = context.maximunValue;
-                                }
-                                context.percentProvider (percent); 
-                            } 
-                            else {
-                                if (context.thumbStyle.origin == "bottom") context.percentProvider (context.maximunValue-percent);
-                                else context.percentProvider (percent);
-                            }
                         }
+                        if (context.onValue != null) context.onValue (percent);
                     }
                 }
-                else checkIfSliding = 0;
-
-                    // after 5 ms the user is sliding so let's start onsliding event.
-                if (checkIfSliding > 5 && context.onSlidingStart != null) {
-                    context.onSlidingStart (b.Pos.X, b.Pos.Y);
-                    context.onSlideEvent = true;
-                }
-  
-            }, 1, 0, this.buttonId, this.id, this.TrackId);
+            }, 1, 0, this.squareID, this.id, this.shadowID)
         }
-
-        return this;
     }
 
-    detachFromMouse = function (){
+    function detachFromMouse(){
         if (Timer.Exists (this.mouseTimer)) Timer.Destroy(this.mouseTimer);
         this.mouseTimer = null;
     }
@@ -361,5 +282,6 @@ UI.registerComponent("Slider", {
     create = function(o) {
         local c = Sliders(o);
         return c;
+
     }
 });
