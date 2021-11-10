@@ -116,11 +116,10 @@ class Sliders extends DecUIComponent {
         c.realign(); 
 
             // aligning button  
-       if (this.layout == "horizontal") b.Pos.Y = -(this.thumbStyle.width/2);
-       else {
-           b.Pos.X = -(this.thumbStyle.width/2);
-            this.setValue (this.defaultValue)   
-        }
+        if (this.layout == "horizontal") b.Pos.Y = -(this.thumbStyle.width/2);
+        else b.Pos.X = -(this.thumbStyle.width/2);
+
+        this.setValue (this.defaultValue)  
     }   
  
     assignTrackToParent = function (w=null, h=null, pressed = null) {
